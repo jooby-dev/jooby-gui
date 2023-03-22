@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SCRIPT_NAME="lint:fix"
+SCRIPT_NAME="lint"
 
 npm run $SCRIPT_NAME
 

@@ -38,7 +38,7 @@ module.exports = {
             jsx: true
         },
         tsconfigRootDir: __dirname,
-        project: ['./tsconfig.json']
+        project: ['./tsconfig.json', './tsconfig.node.json']
     },
 
     plugins: [
@@ -46,7 +46,7 @@ module.exports = {
         '@typescript-eslint'
     ],
 
-    ignorePatterns: ['.eslintrc.cjs', 'vite.config.ts'],
+    ignorePatterns: ['/dist', '/node_modules', '/.eslintrc.cjs'],
 
     rules: {
         '@typescript-eslint/indent': ['error', 4],
