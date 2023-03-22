@@ -22,5 +22,7 @@
         "jsx": "react-jsx"
     },
 
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "references": [
+        {"path": "./tsconfig.node.json"}
+    ]
 }

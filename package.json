@@ -7,9 +7,9 @@
         "dev": "vite --host",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "lint": "tsc --noEmit && eslint src/**/*.{ts,tsx} *.{ts,tsx} --max-warnings=0",
-        "lint-cached": "tsc --noEmit && eslint src/**/*.{ts,tsx} *.{ts,tsx} --cache --max-warnings=0",
-        "lint:fix": "eslint src/**/*.{ts,tsx} *.{ts,tsx} --fix --max-warnings=0",
+        "lint": "tsc --noEmit && eslint ./src/**/*.{ts,tsx} ./*.{ts,tsx} --max-warnings=0",
+        "lint-cached": "tsc --noEmit && eslint ./src/**/*.{ts,tsx} ./*.{ts,tsx} --cache --max-warnings=0",
+        "lint:fix": "eslint ./src/**/*.{ts,tsx} ./*.{ts,tsx} --fix --max-warnings=0",
         "preinstall": "git config core.hooksPath .githooks"
     },
     "dependencies": {
