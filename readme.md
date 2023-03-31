@@ -1,2 +1,2 @@
-Device Protocol Collection GUI
-==============================
+Jooby message encoders/decoders GUI
+===================================

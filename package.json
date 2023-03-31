@@ -1,7 +1,8 @@
 {
-    "name": "dpc-gui",
+    "name": "jooby-gui",
     "private": true,
     "version": "1.0.0",
+    "description": "Jooby message encoders/decoders GUI",
     "type": "module",
     "scripts": {
         "dev": "vite --host",
