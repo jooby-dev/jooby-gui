@@ -2,8 +2,16 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import CssBaseline from '@mui/material/CssBaseline';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
+
+import {SnackbarProvider} from './contexts/SnackbarContext';
 import App from './components/App';
 import '../sass/main.scss';
+
+declare module '@mui/material/styles' {
+    interface TypeBackground {
+        filled?: string;
+    }
+}
 
 
 const theme = createTheme({
@@ -19,6 +27,9 @@ const theme = createTheme({
         error: {
             light: '#faeaea',
             main: '#d32f2f'
+        },
+        background: {
+            filled: 'rgba(0, 0, 0, 0.06)'
         }
     }
 });
@@ -28,7 +39,9 @@ createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <App />
+            <SnackbarProvider>
+                <App />
+            </SnackbarProvider>
         </ThemeProvider>
     </React.StrictMode>
 );

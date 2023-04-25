@@ -1,0 +1,1 @@
+export {createCommandDocLink} from './createCommandDocLink';
