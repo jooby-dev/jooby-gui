@@ -22,7 +22,8 @@ import {createCommandDocLink} from '../../utils';
 import {SetLogs, Log} from '../../types';
 
 import {
-    hardwareTypeList, parseButtonNameMap, DIRECTION_TYPE_AUTO, LOG_TYPE_ERROR, LOG_TYPE_MESSAGE
+    hardwareTypeList, parseButtonNameMap, DIRECTION_TYPE_AUTO, LOG_TYPE_ERROR, LOG_TYPE_MESSAGE,
+    SEVERITY_TYPE_WARNING
 } from '../../constants';
 
 import {
@@ -459,7 +460,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                             value={parameters}
                             helperText={
                                 <>
-                                        JSON/object with command parameters
+                                    JSON/object with command parameters
                                     {command && (
                                         <>
                                             {' (see '}
@@ -511,7 +512,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                         disableElevation
                         onClick={handleAddToMessageClick}
                     >
-                                Add command
+                        Add command
                     </Button>
                 </Box>
 
@@ -522,35 +523,33 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                         <Box>
                             <List dense sx={{maxHeight: '200px', overflow: 'auto', p: 0, backgroundColor: 'background.filled'}}>
                                 {preparedCommands.map((preparedCommand, index) => (
-                                    <>
-                                        <ListItem
-                                            key={preparedCommand.id}
-                                            secondaryAction={
-                                                <IconButton edge="end" aria-label="delete command from message" onClick={() => handleDeletePreparedCommandClick(index)}>
-                                                    <DeleteIcon />
-                                                </IconButton>
+                                    <ListItem
+                                        key={preparedCommand.id}
+                                        sx={{'&:not(:last-child)': {borderBottomWidth: '1px', borderBottomStyle: 'solid', borderBottomColor: 'divider'}}}
+                                        secondaryAction={
+                                            <IconButton edge="end" aria-label="delete command from message" onClick={() => handleDeletePreparedCommandClick(index)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        }
+                                    >
+                                        <ListItemText
+                                            primary={
+                                                <>
+                                                    <HighlightedText>{preparedCommand.command.value.name}</HighlightedText>
+                                                    {` (${preparedCommand.command.direction})`}
+                                                </>
                                             }
-                                        >
-                                            <ListItemText
-                                                primary={
-                                                    <>
-                                                        <HighlightedText>{preparedCommand.command.value.name}</HighlightedText>
-                                                        {` (${preparedCommand.command.direction})`}
-                                                    </>
-                                                }
-                                                secondary={
-                                                    <HighlightedText
-                                                        isMonospacedFont={true}
-                                                        fontWeight="fontWeightRegular"
-                                                        fontSize="0.75rem"
-                                                    >
-                                                        {preparedCommand.parameters}
-                                                    </HighlightedText>
-                                                }
-                                            />
-                                        </ListItem>
-                                        {index !== preparedCommands.length - 1 && <Divider component="li" />}
-                                    </>
+                                            secondary={
+                                                <HighlightedText
+                                                    isMonospacedFont={true}
+                                                    fontWeight="fontWeightRegular"
+                                                    fontSize="0.75rem"
+                                                >
+                                                    {preparedCommand.parameters}
+                                                </HighlightedText>
+                                            }
+                                        />
+                                    </ListItem>
                                 ))}
                             </List>
                         </Box>

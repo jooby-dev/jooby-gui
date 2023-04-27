@@ -61,6 +61,7 @@ const LogItem = ({
                 onChange={() => handleLogClick(id)}
             >
                 <AccordionSummary
+                    content="div"
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls={`panel${id}bh-content`}
                     sx={{
@@ -153,6 +154,7 @@ const LogItem = ({
             onChange={() => handleLogClick(id)}
         >
             <AccordionSummary
+                content="div"
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls={`panel${id}bh-content`}
                 sx={{
@@ -231,6 +233,7 @@ const LogItem = ({
                                 onChange={() => handleLogClick(commandData.id)}
                             >
                                 <AccordionSummary
+                                    content="div"
                                     expandIcon={<ExpandMoreIcon />}
                                     aria-controls={`panel${commandData.id}bh-content`}
                                     sx={{
@@ -240,7 +243,7 @@ const LogItem = ({
                                         '& .MuiAccordionSummary-expandIconWrapper': {flex: '0 0 auto'}
                                     }}
                                 >
-                                    <Typography sx={{
+                                    <Box sx={{
                                         flexShrink: 1,
                                         display: 'flex',
                                         alignItems: 'center',
@@ -249,7 +252,7 @@ const LogItem = ({
                                         '& > *': {minWidth: 0}
                                     }}>
                                         {createSubLogTitle(commandData, expandedLogs)}
-                                    </Typography>
+                                    </Box>
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     <Typography variant="h6" gutterBottom>

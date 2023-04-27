@@ -1,4 +1,5 @@
-import {ReactElement} from 'react';
+import {Fragment, ReactElement} from 'react';
+import {constants} from 'jooby-codec';
 import {Box, Collapse, Tooltip} from '@mui/material';
 import {Close as CloseIcon, QuestionMark as QuestionMarkIcon, SyncAlt as SyncAltIcon} from '@mui/icons-material';
 import HighlightedText from '../../../components/HighlightedText';
@@ -89,12 +90,12 @@ export const createLogTitle = (log: Log, expandedLogs: ExpandedLogs): ReactEleme
                                 in={!expandedLogs.includes(log.id)}
                             >
                                 {
-                                    log.data.commands.map(commandData => (
-                                        <>
+                                    log.data.commands.map((commandData, index) => (
+                                        <Fragment key={index}>
                                             <Box component="span" sx={{color: 'grey.700'}}>{commandData.command.name}</Box>
                                             {commandData.command.id && commandData.command.hasParameters ? `: ${JSON.stringify(commandData.command.parameters)}` : ''}
                                             {'; '}
-                                        </>
+                                        </Fragment>
                                     ))
                                 }
                             </Collapse>
