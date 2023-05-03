@@ -9,7 +9,8 @@ import '../sass/main.scss';
 
 declare module '@mui/material/styles' {
     interface TypeBackground {
-        filled?: string;
+        filled: string;
+        filledHover: string;
     }
 }
 
@@ -29,19 +30,20 @@ const theme = createTheme({
             main: '#d32f2f'
         },
         background: {
-            filled: 'rgba(0, 0, 0, 0.06)'
+            filled: 'rgba(0, 0, 0, 0.06)',
+            filledHover: 'rgba(0, 0, 0, 0.12)'
         }
     }
 });
 
 
 createRoot(document.getElementById('root') as HTMLElement).render(
-    <React.StrictMode>
+    // <React.StrictMode>
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <SnackbarProvider>
                 <App />
             </SnackbarProvider>
         </ThemeProvider>
-    </React.StrictMode>
+    // </React.StrictMode>
 );

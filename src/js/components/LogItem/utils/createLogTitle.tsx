@@ -2,15 +2,19 @@ import {Fragment, ReactElement} from 'react';
 import {constants} from 'jooby-codec';
 import {Box, Collapse, Tooltip} from '@mui/material';
 import {Close as CloseIcon, QuestionMark as QuestionMarkIcon, SyncAlt as SyncAltIcon} from '@mui/icons-material';
+
+import {createCommandDirectionIcon} from '../../../utils/createCommandDirectionIcon';
+
 import HighlightedText from '../../../components/HighlightedText';
+
 import {Log, ExpandedLogs, LogCommands} from '../../../types';
+
 import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR} from '../../../constants';
-import {
-    decimalToHex, isAllCommandsUnknown, isAllCommandsHaveSameDirection, createSubLogArrowIcon
-} from './';
+
+import {decimalToHex, isAllCommandsUnknown, isAllCommandsHaveSameDirection} from './';
 
 
-const createLogArrowIcon = (logCommands: LogCommands) => {
+const createMessageDirectionIcon = (logCommands: LogCommands) => {
     if (isAllCommandsUnknown(logCommands)) {
         return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}} />;
     }
@@ -20,7 +24,7 @@ const createLogArrowIcon = (logCommands: LogCommands) => {
         return <SyncAltIcon color="error" sx={{mr: 2, transform: 'rotate(90deg)'}} />;
     }
 
-    return createSubLogArrowIcon(logCommands.find(logCommand => logCommand.command.directionType !== undefined).command.directionType);
+    return createCommandDirectionIcon(logCommands.find(logCommand => logCommand.command.directionType !== undefined).command.directionType);
 };
 
 export const renderHardwareType = (hardwareType: Log['hardwareType']) => {
@@ -48,7 +52,7 @@ export const createLogTitle = (log: Log, expandedLogs: ExpandedLogs): ReactEleme
         case LOG_TYPE_MESSAGE:
             return (
                 <>
-                    {createLogArrowIcon(log.data.commands)}
+                    {createMessageDirectionIcon(log.data.commands)}
                     <Box>
                         <Box sx={{minWidth: 0}}>
                             {'commands: '}

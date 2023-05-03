@@ -1,9 +1,9 @@
 import {ArrowDownward as ArrowDownwardIcon, QuestionMark as QuestionMarkIcon} from '@mui/icons-material';
 import {yellow} from '@mui/material/colors';
-import {DIRECTION_TYPE_DOWNLINK, DIRECTION_TYPE_UPLINK} from '../../../constants';
+import {DIRECTION_TYPE_DOWNLINK, DIRECTION_TYPE_UPLINK} from '../constants';
 
 
-export const createSubLogArrowIcon = (directionType: typeof DIRECTION_TYPE_DOWNLINK | typeof DIRECTION_TYPE_UPLINK | undefined) => {
+export const createCommandDirectionIcon = (directionType: typeof DIRECTION_TYPE_DOWNLINK | typeof DIRECTION_TYPE_UPLINK | undefined) => {
     switch (directionType) {
         case undefined:
             return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}} />;

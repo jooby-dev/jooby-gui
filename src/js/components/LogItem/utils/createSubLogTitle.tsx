@@ -1,13 +1,17 @@
 import {Box, Collapse, Link} from '@mui/material';
-import {createCommandDocLink} from '../../../utils';
+
+import {createCommandDocLink, createCommandDirectionIcon} from '../../../utils';
+
 import HighlightedText from '../../../components/HighlightedText';
+
 import {LogCommand, ExpandedLogs} from '../../../types';
-import {createSubLogArrowIcon, decimalToHex} from './';
+
+import {decimalToHex} from './';
 
 
 export const createSubLogTitle = (logCommand: LogCommand, expandedLogs: ExpandedLogs) => (
     <>
-        {createSubLogArrowIcon(logCommand.command.directionType)}
+        {createCommandDirectionIcon(logCommand.command.directionType)}
         <Box>
             <Box sx={{minWidth: 0}}>
                 {

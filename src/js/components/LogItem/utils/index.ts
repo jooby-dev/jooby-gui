@@ -4,8 +4,6 @@ export {isAllCommandsUnknown} from './isAllCommandsUnknown';
 
 export {isAllCommandsHaveSameDirection} from './isAllCommandsHaveSameDirection';
 
-export {createSubLogArrowIcon} from './createSubLogArrowIcon';
-
 export {getSubLogColor} from './getSubLogColor';
 
 export {getLogColor} from './getLogColor';
