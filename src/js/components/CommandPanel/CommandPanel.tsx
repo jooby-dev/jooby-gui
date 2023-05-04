@@ -1,23 +1,21 @@
-import {useState, useEffect, useRef} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import {utils, message} from 'jooby-codec';
 import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
     Autocomplete, Box, Typography, TextField, InputAdornment, ButtonGroup, Button, IconButton,
-    Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Link, List, ListItem, ListItemText,
+    Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, List, ListItem, ListItemText,
     Stack
 } from '@mui/material';
 
 import {
     Clear as ClearIcon, ArrowDropDown as ArrowDropDownIcon, Delete as DeleteIcon,
-    FormatAlignLeft as FormatAlignLeftIcon, Edit as EditIcon
+    Edit as EditIcon
 } from '@mui/icons-material';
 
-import {createCommandDocLink, createCommandDirectionIcon} from '../../utils';
+import {createCommandDirectionIcon} from '../../utils';
 
 import {useSnackbar} from '../../contexts/SnackbarContext';
-
-import HighlightedText from '../HighlightedText';
 
 import {SetLogs, Log} from '../../types';
 
@@ -26,9 +24,10 @@ import {
     SEVERITY_TYPE_WARNING
 } from '../../constants';
 
-import {
-    isValidJson, formatJson, getHardwareType, getHardwareTypeName, createCtrlEnterSubmitHandler
-} from './utils';
+import HighlightedText from '../HighlightedText';
+import CommandParameterEditor from '../CommandParameterEditor';
+
+import {getHardwareType, getHardwareTypeName, createCtrlEnterSubmitHandler} from './utils';
 
 import {
     HardwareType, HandleHardwareTypeChange, HandleBufferChange, HandleCommandExampleChange,
@@ -85,23 +84,13 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
         setBuffer('');
     };
 
-    const handleParametersChange: HandleParametersChange = (event) => {
-        setParameters(event.target.value);
-    };
-
-    const handleClearParametersClick = () => {
-        setParameters('');
-    };
+    const handleParametersChange: HandleParametersChange = useCallback((event) => {
+        setParameters(event);
+    }, []);
 
     const handleDeletePreparedCommandClick: HandleDeletePreparedCommandClick = (index) => {
         const newPreparedCommands = preparedCommands.filter((preparedCommand) => preparedCommand.id !== index);
         setPreparedCommands(newPreparedCommands);
-    };
-
-    const handleFormatParametersClick = () => {
-        if (isValidJson(parameters)) {
-            setParameters(formatJson(parameters));
-        }
     };
 
     const handleClearCommandListClick = () => {
@@ -143,6 +132,12 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
             setHardwareType(hardwareTypeData);
             showSnackbar({message: `Hardware type has been changed to "${hardwareTypeData.label}"`, severity: SEVERITY_TYPE_WARNING});
         }
+
+        setTimeout(() => {
+            if (parametersTextFieldRef.current) {
+                parametersTextFieldRef.current.focus();
+            }
+        }, 0);
     };
 
     const handleCommandChange: HandleCommandChange = (event, newValue) => {
@@ -154,6 +149,12 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                 ? newValue.value.examples.map(example => ({value: example, label: example.name}))
                 : []
         );
+
+        setTimeout(() => {
+            if (parametersTextFieldRef.current) {
+                parametersTextFieldRef.current.focus();
+            }
+        }, 0);
     };
 
     const handleMenuItemClick: HandleMenuItemClick = (event, directionType) => {
@@ -500,66 +501,17 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
 
                 {command && (
                     <Box>
-                        <TextField
-                            sx={{'& .MuiInputBase-input': {fontFamily: 'Roboto Mono, monospace'}}}
-                            fullWidth={true}
-                            disabled={!command.value.hasParameters}
-                            label={command.value.hasParameters ? 'Parameters' : 'This command has no parameters'}
-                            spellCheck={false}
-                            variant="filled"
+                        <CommandParameterEditor
+                            value={parameters}
                             onChange={handleParametersChange}
-                            onKeyDown={createCtrlEnterSubmitHandler(
+                            disabled={!command.value.hasParameters}
+                            inputRef={parametersTextFieldRef}
+                            command={command}
+                            onSubmit={
                                 editingCommandId
                                     ? handleSaveEditedCommandClick
                                     : handleAddToMessageClick
-                            )}
-                            multiline
-                            minRows={4}
-                            maxRows={12}
-                            value={parameters}
-                            inputRef={parametersTextFieldRef}
-                            helperText={
-                                <>
-                                    JSON/object with command parameters
-                                    {command && (
-                                        <>
-                                            {' (see '}
-                                            <Link
-                                                href={createCommandDocLink(command.value)}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                onClick={event => event.stopPropagation()}
-                                            >
-                                                {command.label}
-                                            </Link>
-                                            {' documentation)'}
-                                        </>
-                                    )}
-                                </>
                             }
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        {parameters && (
-                                            <Box display="flex" flexDirection="column">
-                                                <IconButton
-                                                    aria-label="clear parameters"
-                                                    onClick={handleClearParametersClick}
-                                                >
-                                                    <ClearIcon fontSize="medium" />
-                                                </IconButton>
-
-                                                <IconButton
-                                                    aria-label="format parameters"
-                                                    onClick={handleFormatParametersClick}
-                                                >
-                                                    <FormatAlignLeftIcon fontSize="medium" />
-                                                </IconButton>
-                                            </Box>
-                                        )}
-                                    </InputAdornment>
-                                )
-                            }}
                         />
                     </Box>
                 )}
@@ -653,7 +605,8 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                                                                         : 'background.filled',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
-                                                                gap: 1
+                                                                gap: 1,
+                                                                transition: 'background-color 0.3s'
                                                             }}
                                                         >
                                                             <ListItemText
@@ -750,7 +703,8 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                     backgroundColor: 'background.default',
                     borderTopColor: 'divider',
                     borderTopWidth: 1,
-                    borderTopStyle: 'solid'
+                    borderTopStyle: 'solid',
+                    zIndex: 1000
                 }}>
                     <a href="https://github.com/jooby-dev/jooby-gui" target="_blank" rel="noopener noreferrer">
                         <img
