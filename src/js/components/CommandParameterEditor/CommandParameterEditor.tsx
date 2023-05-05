@@ -106,6 +106,18 @@ const CommandParameterEditor = ({
         }
     }, [disabled, inputRef]);
 
+    useEffect(() => {
+        if (inputRef && inputRef.current) {
+            const placeholderNode = inputRef.current.renderer.placeholderNode;
+
+            if (placeholderNode) {
+                placeholderNode.textContent = command.value.hasParameters
+                    ? 'Parameters'
+                    : 'This command has no parameters';
+            }
+        }
+    }, [command, inputRef]);
+
     const handleFormatClick = () => {
         if (inputRef && inputRef.current) {
             if (isValidJson(inputRef.current.getValue())) {
