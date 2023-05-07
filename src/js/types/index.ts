@@ -23,9 +23,9 @@ export type ExpandedLogs = Array<string>;
 
 export type SetExpandedLogs = (expandedLogs: Array<string>) => void;
 
-export type HandleCopyToClipboard = (data: string, snackbarConfig: ShowSnackbarParams) => Promise<void>;
+export type HandleCopyToClipboard = (data: string, snackbarConfig: ShowSnackbarParams) => void;
 
-export type HandleShareLogsClick = (event: React.SyntheticEvent, logsData: Array<Log>) => Promise<void>;
+export type HandleShareLogsClick = (event: React.SyntheticEvent, logsData: Array<Log>) => void;
 
 export type ExpandAllLogs = (event: React.SyntheticEvent, ids: Array<string>) => void;
 

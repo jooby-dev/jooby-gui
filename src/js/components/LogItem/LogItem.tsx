@@ -13,6 +13,8 @@ import {
     UnfoldLess as UnfoldLessIcon, ContentCopy as ContentCopyIcon
 } from '@mui/icons-material';
 
+import IconButtonWithTooltip from '../IconButtonWithTooltip';
+
 import {
     Log, ParametersTab, HandleLogClick, HandleDeleteLogClick, HandleParametersTabChange,
     HandleCopyToClipboard, HandleShareLogsClick, ExpandAllLogs, CollapseAllLogs, ExpandedLogs
@@ -22,7 +24,9 @@ import {
     LOG_TYPE_ERROR, PARAMETERS_TAB_VIEW_TYPE_JSON, PARAMETERS_TAB_VIEW_TYPE_TREE
 } from '../../constants';
 
-import {getSubLogColor, getLogColor, createSubLogTitle, createLogTitle, createCommandHeaderDocLink} from './utils';
+import {
+    getSubLogColor, getLogColor, createSubLogTitle, createLogTitle, createCommandHeaderDocLink
+} from './utils';
 
 import {JSONTreeTheme} from './constants';
 
@@ -91,27 +95,33 @@ const LogItem = ({
                             {date}
                         </Box>
 
-                        <IconButton
-                            aria-label="expand log"
+                        <IconButtonWithTooltip
+                            title="Expand log"
                             onClick={event => expandAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                         >
                             <UnfoldMoreIcon />
-                        </IconButton>
+                        </IconButtonWithTooltip>
 
-                        <IconButton
-                            aria-label="collapse log"
+                        <IconButtonWithTooltip
+                            title="Collapse log"
                             onClick={event => collapseAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                         >
                             <UnfoldLessIcon />
-                        </IconButton>
+                        </IconButtonWithTooltip>
 
-                        <IconButton aria-label="share log" onClick={event => handleShareLogsClick(event, [log])}>
+                        <IconButtonWithTooltip
+                            title="Share log"
+                            onClick={event => handleShareLogsClick(event, [log])}
+                        >
                             <ShareIcon />
-                        </IconButton>
+                        </IconButtonWithTooltip>
 
-                        <IconButton aria-label="delete log" onClick={event => handleDeleteLogClick(event, id)}>
+                        <IconButtonWithTooltip
+                            title="Delete log"
+                            onClick={event => handleDeleteLogClick(event, id)}
+                        >
                             <DeleteIcon />
-                        </IconButton>
+                        </IconButtonWithTooltip>
                     </Box>
                 </AccordionSummary>
                 {
@@ -122,16 +132,15 @@ const LogItem = ({
                                     <>
                                         <Typography variant="h6" gutterBottom>
                                             {'Dump '}
-                                            <IconButton
+                                            <IconButtonWithTooltip
+                                                title="Copy dump"
                                                 onClick={() => handleCopyToClipboard(
                                                     buffer,
                                                     {message: 'Message dump copied to clipboard'}
                                                 )}
-                                                size="small"
-                                                edge="end"
                                             >
                                                 <ContentCopyIcon />
-                                            </IconButton>
+                                            </IconButtonWithTooltip>
                                         </Typography>
                                         <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{buffer}</Typography>
                                     </>
@@ -184,27 +193,27 @@ const LogItem = ({
                         {date}
                     </Box>
 
-                    <IconButton
-                        aria-label="expand log"
+                    <IconButtonWithTooltip
+                        title="Expand log"
                         onClick={event => expandAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                     >
                         <UnfoldMoreIcon />
-                    </IconButton>
+                    </IconButtonWithTooltip>
 
-                    <IconButton
-                        aria-label="collapse log"
+                    <IconButtonWithTooltip
+                        title="Collapse log"
                         onClick={event => collapseAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                     >
                         <UnfoldLessIcon />
-                    </IconButton>
+                    </IconButtonWithTooltip>
 
-                    <IconButton aria-label="delete log" onClick={event => handleShareLogsClick(event, [log])}>
+                    <IconButtonWithTooltip title="Delete log" onClick={event => handleShareLogsClick(event, [log])}>
                         <ShareIcon />
-                    </IconButton>
+                    </IconButtonWithTooltip>
 
-                    <IconButton aria-label="share log" onClick={event => handleDeleteLogClick(event, id)}>
+                    <IconButtonWithTooltip title="Share log" onClick={event => handleDeleteLogClick(event, id)}>
                         <DeleteIcon />
-                    </IconButton>
+                    </IconButtonWithTooltip>
                 </Box>
             </AccordionSummary>
             {
@@ -212,16 +221,15 @@ const LogItem = ({
                     <AccordionDetails>
                         <Typography variant="h6" gutterBottom>
                             {'Dump '}
-                            <IconButton
+                            <IconButtonWithTooltip
+                                title="Copy dump"
                                 onClick={() => handleCopyToClipboard(
                                     buffer,
                                     {message: 'Message dump copied to clipboard'}
                                 )}
-                                size="small"
-                                edge="end"
                             >
                                 <ContentCopyIcon />
-                            </IconButton>
+                            </IconButtonWithTooltip>
                         </Typography>
                         <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{buffer}</Typography>
 
@@ -257,16 +265,15 @@ const LogItem = ({
                                 <AccordionDetails>
                                     <Typography variant="h6" gutterBottom>
                                         {'Dump '}
-                                        <IconButton
+                                        <IconButtonWithTooltip
+                                            title="Copy dump"
                                             onClick={() => handleCopyToClipboard(
                                                 `${commandData.data.header.hex} ${commandData.data.body.hex}`,
                                                 {message: 'Command dump copied to clipboard'}
                                             )}
-                                            size="small"
-                                            edge="end"
                                         >
                                             <ContentCopyIcon />
-                                        </IconButton>
+                                        </IconButtonWithTooltip>
                                     </Typography>
                                     <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
                                         <>
@@ -287,18 +294,15 @@ const LogItem = ({
                                             <>
                                                 <Typography variant="h6" gutterBottom>
                                                     {'Parameters '}
-                                                    <Tooltip title="Copy parameters in JSON format to clipboard">
-                                                        <IconButton
-                                                            onClick={() => handleCopyToClipboard(
-                                                                JSON.stringify(commandData.command.parameters, null, 4),
-                                                                {message: 'Parameters copied to clipboard'}
-                                                            )}
-                                                            size="small"
-                                                            edge="end"
-                                                        >
-                                                            <ContentCopyIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
+                                                    <IconButtonWithTooltip
+                                                        title="Copy parameters in JSON format"
+                                                        onClick={() => handleCopyToClipboard(
+                                                            JSON.stringify(commandData.command.parameters, null, 4),
+                                                            {message: 'Parameters copied to clipboard'}
+                                                        )}
+                                                    >
+                                                        <ContentCopyIcon />
+                                                    </IconButtonWithTooltip>
                                                 </Typography>
 
                                                 <TabContext value={parametersTab}>

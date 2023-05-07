@@ -17,6 +17,8 @@ import {createCommandDirectionIcon} from '../../utils';
 
 import {useSnackbar} from '../../contexts/SnackbarContext';
 
+import IconButtonWithTooltip from '../IconButtonWithTooltip';
+
 import {SetLogs, Log} from '../../types';
 
 import {
@@ -25,7 +27,7 @@ import {
 } from '../../constants';
 
 import HighlightedText from '../HighlightedText';
-import CommandParameterEditor from '../CommandParameterEditor';
+import CommandParametersEditor from '../CommandParametersEditor';
 
 import {getHardwareType, getHardwareTypeName, createCtrlEnterSubmitHandler} from './utils';
 
@@ -390,12 +392,12 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                             endAdornment: (
                                 <InputAdornment position="end">
                                     {buffer && (
-                                        <IconButton
-                                            aria-label="clear buffer"
+                                        <IconButtonWithTooltip
+                                            title="Clear dump"
                                             onClick={handleClearBufferClick}
                                         >
-                                            <ClearIcon fontSize="medium" />
-                                        </IconButton>
+                                            <ClearIcon />
+                                        </IconButtonWithTooltip>
                                     )}
                                 </InputAdornment>
                             )
@@ -501,7 +503,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
 
                 {command && (
                     <Box>
-                        <CommandParameterEditor
+                        <CommandParametersEditor
                             value={parameters}
                             onChange={handleParametersChange}
                             disabled={!command.value.hasParameters}
@@ -631,24 +633,23 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                                                                 sx={{flexGrow: 1}}
                                                             />
                                                             <Stack direction="row">
-                                                                <IconButton
-                                                                    edge="end"
-                                                                    aria-label="edit command"
+                                                                <IconButtonWithTooltip
+                                                                    title="Edit parameters"
                                                                     onClick={() => handleEditPreparedCommandClick(preparedCommand.id)}
                                                                     disabled={editingCommandId === preparedCommand.id}
                                                                     sx={{marginRight: 0}}
                                                                 >
                                                                     <EditIcon />
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    edge="end"
-                                                                    aria-label="delete command from message"
+                                                                </IconButtonWithTooltip>
+
+                                                                <IconButtonWithTooltip
+                                                                    title="Delete command from message"
                                                                     onClick={() => handleDeletePreparedCommandClick(preparedCommand.id)}
                                                                     disabled={editingCommandId === preparedCommand.id}
                                                                     sx={{marginRight: 0}}
                                                                 >
                                                                     <DeleteIcon />
-                                                                </IconButton>
+                                                                </IconButtonWithTooltip>
                                                             </Stack>
                                                         </ListItem>
                                                     )}

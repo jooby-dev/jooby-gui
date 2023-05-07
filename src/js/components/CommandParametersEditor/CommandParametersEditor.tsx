@@ -1,5 +1,5 @@
 import {useRef, useEffect, useCallback, memo} from 'react';
-import {IconButton, Box, FormHelperText, Link, FormControl} from '@mui/material';
+import {useTheme, Box, FormHelperText, Link, FormControl} from '@mui/material';
 import {Clear as ClearIcon, FormatAlignLeft as FormatAlignLeftIcon} from '@mui/icons-material';
 import ace from 'ace-builds';
 import 'ace-builds/src-noconflict/mode-json';
@@ -9,13 +9,15 @@ import 'ace-builds/src-noconflict/worker-json?worker';
 
 import {createCommandDocLink} from '../../utils';
 
+import IconButtonWithTooltip from '../IconButtonWithTooltip';
+
 import {isValidJson, formatJson} from './utils';
 
 
 const workerJsonUrl = new URL('ace-builds/src-noconflict/worker-json.js', import.meta.url).toString();
 
 
-interface CommandParameterEditorProps {
+interface CommandParametersEditorProps {
     value: string;
     onChange: (value: string) => void;
     disabled: boolean;
@@ -31,9 +33,10 @@ const CommandParameterEditor = ({
     inputRef,
     command,
     onSubmit
-}: CommandParameterEditorProps) => {
+}: CommandParametersEditorProps) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const onSubmitRef = useRef(onSubmit);
+    const theme = useTheme();
 
     const handleValueChange = useCallback(
         (newValue: string) => {
@@ -118,6 +121,15 @@ const CommandParameterEditor = ({
         }
     }, [command, inputRef]);
 
+    useEffect(() => {
+        if (inputRef && inputRef.current) {
+            const placeholderNode = inputRef.current.renderer.placeholderNode;
+            if (placeholderNode) {
+                placeholderNode.style.color = theme.palette.text.secondary;
+            }
+        }
+    }, [theme, inputRef]);
+
     const handleFormatClick = () => {
         if (inputRef && inputRef.current) {
             if (isValidJson(inputRef.current.getValue())) {
@@ -142,28 +154,28 @@ const CommandParameterEditor = ({
                 alignItems="center"
                 justifyContent="space-between"
             >
-                <div
+                <Box
                     ref={editorRef}
-                    style={{
+                    sx={{
                         flexGrow: 1,
                         height: '100%'
                     }}
-                ></div>
+                ></Box>
                 <Box display="flex" flexDirection="column">
-                    <IconButton
-                        aria-label="clear parameters"
+                    <IconButtonWithTooltip
+                        title="Clear parameters"
                         onClick={handleClearClick}
                         disabled={value === ''}
                     >
-                        <ClearIcon fontSize="medium" />
-                    </IconButton>
-                    <IconButton
-                        aria-label="format parameters"
+                        <ClearIcon />
+                    </IconButtonWithTooltip>
+                    <IconButtonWithTooltip
+                        title="Format parameters"
                         onClick={handleFormatClick}
                         disabled={value === ''}
                     >
-                        <FormatAlignLeftIcon fontSize="medium" />
-                    </IconButton>
+                        <FormatAlignLeftIcon />
+                    </IconButtonWithTooltip>
                 </Box>
             </Box>
             <FormHelperText>

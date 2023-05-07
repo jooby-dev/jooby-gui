@@ -12,6 +12,7 @@ import {
 import {useSnackbar} from '../../contexts/SnackbarContext';
 
 import LogList from '../LogList';
+import IconButtonWithTooltip from '../IconButtonWithTooltip';
 
 import {
     Log, SetLogs, HandleCopyToClipboard, HandleShareLogsClick, ExpandAllLogs, CollapseAllLogs,
@@ -53,19 +54,19 @@ const LogsPanel = ({
         setExpandedLogs(Array.from(new Set([...expandedLogs, ...ids])));
     }, [expandedLogs]);
 
-    const handleCopyToClipboard: HandleCopyToClipboard = useCallback(async (data, snackbarConfig) => {
-        try {
-            await navigator.clipboard.writeText(data);
-
-            if (snackbarConfig) {
-                showSnackbar(snackbarConfig);
-            }
-        } catch {
-            showSnackbar({message: 'Failed to copy data to clipboard'});
-        }
+    const handleCopyToClipboard: HandleCopyToClipboard = useCallback((data, snackbarConfig) => {
+        navigator.clipboard.writeText(data)
+            .then(() => {
+                if (snackbarConfig) {
+                    showSnackbar(snackbarConfig);
+                }
+            })
+            .catch(() => {
+                showSnackbar({message: 'Failed to copy data to clipboard'});
+            });
     }, [showSnackbar]);
 
-    const handleShareLogsClick: HandleShareLogsClick = useCallback(async (event, logsData) => {
+    const handleShareLogsClick: HandleShareLogsClick = useCallback((event, logsData) => {
         event.stopPropagation();
 
         if (logsData.length > LOG_AMOUNT_LIMIT) {
@@ -74,7 +75,7 @@ const LogsPanel = ({
             return;
         }
 
-        await handleCopyToClipboard(createShareableLogsLink(logsData), {message: 'Logs sharing link copied to clipboard'});
+        handleCopyToClipboard(createShareableLogsLink(logsData), {message: 'Logs sharing link copied to clipboard'});
     }, [handleCopyToClipboard]);
 
     const handleClearLogsClick = () => {
@@ -89,10 +90,8 @@ const LogsPanel = ({
     return (
         <Box sx={{
             flexGrow: 1,
-            display:
-            'flex',
-            flexDirection:
-            'column',
+            display: 'flex',
+            flexDirection: 'column',
             gap: 2,
             borderLeftColor: 'divider',
             borderLeftWidth: 1,
@@ -114,38 +113,38 @@ const LogsPanel = ({
             }}>
                 <Typography variant="h5">{`Logs${logs.length > 0 ? `: (${logs.length})` : ''}`}</Typography>
 
-                <IconButton
+                <IconButtonWithTooltip
                     disabled={logs.length === 0}
-                    aria-label="expand logs"
+                    title="Expand logs"
                     sx={{ml: 'auto'}}
                     onClick={event => expandAllLogs(event, logs.flatMap((log) => [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])]))}
                 >
                     <UnfoldMoreIcon />
-                </IconButton>
+                </IconButtonWithTooltip>
 
-                <IconButton
+                <IconButtonWithTooltip
                     disabled={logs.length === 0}
-                    aria-label="collapse logs"
+                    title="Collapse logs"
                     onClick={event => collapseAllLogs(event, logs.flatMap((log) => [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])]))}
                 >
                     <UnfoldLessIcon />
-                </IconButton>
+                </IconButtonWithTooltip>
 
-                <IconButton
+                <IconButtonWithTooltip
                     disabled={logs.length === 0}
-                    aria-label="share log"
+                    title="Share logs"
                     onClick={event => handleShareLogsClick(event, logs)}
                 >
                     <ShareIcon />
-                </IconButton>
+                </IconButtonWithTooltip>
 
-                <IconButton
+                <IconButtonWithTooltip
                     disabled={logs.length === 0}
-                    aria-label="delete log"
+                    title="Delete logs"
                     onClick={handleClearLogsClick}
                 >
                     <DeleteIcon />
-                </IconButton>
+                </IconButtonWithTooltip>
 
                 <Dialog
                     open={logsLimitExceededDialogOpen}
