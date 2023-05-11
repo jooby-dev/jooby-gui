@@ -1,5 +1,5 @@
 import {commands} from 'jooby-codec';
-import {directions} from '../../constants';
+import {directions} from '../../constants.js';
 
 
 export const preparedCommandList = [...Object.values(commands.uplink), ...Object.values(commands.downlink)]

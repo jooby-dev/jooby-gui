@@ -1,35 +1,36 @@
 import {ReactNode, createContext, useContext, useState, useRef, useEffect} from 'react';
 import {Snackbar, Alert, SnackbarCloseReason} from '@mui/material';
 
-import {ShowSnackbarParams, Severity} from '../types';
-import {SEVERITY_TYPE_SUCCESS} from '../constants';
+import {IShowSnackbarParams, TSeverity} from '../types.js';
+import {SEVERITY_TYPE_SUCCESS} from '../constants.js';
 
 
 const DEFAULT_SNACKBAR_DURATION = 3000;
 
 
-interface SnackbarContextData {
-    showSnackbar: (params: ShowSnackbarParams) => void;
+interface ISnackbarContextData {
+    showSnackbar: (params: IShowSnackbarParams) => void;
 }
 
-interface SnackbarProviderProps {
+interface ISnackbarProviderProps {
     children: ReactNode;
 }
 
 
-const SnackbarContext = createContext<SnackbarContextData>({} as SnackbarContextData);
+const SnackbarContext = createContext<ISnackbarContextData>({} as ISnackbarContextData);
 
-const SnackbarProvider = ({children}: SnackbarProviderProps) => {
+const SnackbarProvider = ({children}: ISnackbarProviderProps) => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [snackbarSeverity, setSnackbarSeverity] = useState<Severity>(SEVERITY_TYPE_SUCCESS);
+    const [snackbarSeverity, setSnackbarSeverity] = useState<TSeverity>(SEVERITY_TYPE_SUCCESS);
     const [snackbarDuration, setSnackbarDuration] = useState(DEFAULT_SNACKBAR_DURATION);
-    const snackbarQueue = useRef<Array<{message: string; duration: number, severity: Severity}>>([]);
+    const snackbarQueue = useRef<Array<{message: string; duration: number, severity: TSeverity}>>([]);
     const timeoutId = useRef<number | null>(null);
 
     const processQueue = () => {
         if (snackbarQueue.current.length > 0) {
             const nextSnackbar = snackbarQueue.current.shift();
+
             if (nextSnackbar) {
                 setSnackbarMessage(nextSnackbar.message);
                 setSnackbarDuration(nextSnackbar.duration);
@@ -39,7 +40,11 @@ const SnackbarProvider = ({children}: SnackbarProviderProps) => {
         }
     };
 
-    const showSnackbar = ({message, duration = DEFAULT_SNACKBAR_DURATION, severity = SEVERITY_TYPE_SUCCESS}: ShowSnackbarParams) => {
+    const showSnackbar = ({
+        message,
+        duration = DEFAULT_SNACKBAR_DURATION,
+        severity = SEVERITY_TYPE_SUCCESS
+    }: IShowSnackbarParams) => {
         snackbarQueue.current.push({message, duration, severity});
 
         if (!snackbarOpen && !timeoutId.current) {
@@ -64,13 +69,14 @@ const SnackbarProvider = ({children}: SnackbarProviderProps) => {
         }, 200);
     };
 
-    useEffect(() => {
-        return () => {
+    useEffect(
+        () => () => {
             if (timeoutId.current) {
                 clearTimeout(timeoutId.current);
             }
-        };
-    }, []);
+        },
+        []
+    );
 
     return (
         <SnackbarContext.Provider value={{showSnackbar}}>

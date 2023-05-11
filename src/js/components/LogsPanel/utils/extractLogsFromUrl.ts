@@ -1,8 +1,8 @@
 import * as lzString from 'lz-string';
-import {Log} from '../../../types';
+import {ILogItem} from '../../../types.js';
 
 
-export const extractLogsFromUrl = (): Array<Log> | null => {
+export default (): Array<ILogItem> | null => {
     const urlParams = new URLSearchParams(window.location.search);
     const logsData = urlParams.get('logs');
 

@@ -1,9 +1,13 @@
-import {Log} from '../../../types';
-import {LOG_TYPE_ERROR} from '../../../constants';
-import {isAllCommandsHaveSameDirection, isAllCommandsUnknown, getSubLogColor} from './';
+import {ILogItem} from '../../../types.js';
+
+import {LOG_TYPE_ERROR} from '../../../constants.js';
+
+import isAllCommandsHaveSameDirection from './isAllCommandsHaveSameDirection.js';
+import isAllCommandsUnknown from './isAllCommandsUnknown.js';
+import getSubLogColor from './getSubLogColor.js';
 
 
-export const getLogColor = (log: Log): string => {
+export default (log: ILogItem): string => {
     if (log.type === LOG_TYPE_ERROR) {
         return 'error.light';
     }

@@ -1,0 +1,47 @@
+import {
+    SEVERITY_TYPE_SUCCESS, SEVERITY_TYPE_WARNING, SEVERITY_TYPE_ERROR, LOG_TYPE_ERROR, LOG_TYPE_MESSAGE,
+    PARAMETERS_TAB_VIEW_TYPE_TREE, PARAMETERS_TAB_VIEW_TYPE_JSON
+} from './constants.js';
+
+
+export type TSeverity = typeof SEVERITY_TYPE_SUCCESS | typeof SEVERITY_TYPE_WARNING | typeof SEVERITY_TYPE_ERROR;
+
+export type TParametersTab = typeof PARAMETERS_TAB_VIEW_TYPE_TREE | typeof PARAMETERS_TAB_VIEW_TYPE_JSON;
+
+export type TSetLogs = (logs: Array<ILogItem>) => void;
+
+export type TLogs = Array<ILogItem>;
+
+export type TLogCommands = Array<object>;
+
+export type TExpandedLogs = Array<string>;
+
+export type THandleCopyToClipboard = (data: string, snackbarConfig: IShowSnackbarParams) => void;
+
+export type THandleShareLogsClick = (event: React.SyntheticEvent, logsData: TLogs) => void;
+
+export type TExpandAllLogs = (event: React.SyntheticEvent, ids: TExpandedLogs) => void;
+
+export type TCollapseAllLogs = (event: React.SyntheticEvent, ids: TExpandedLogs) => void;
+
+export type THandleLogClick = (id: string) => void;
+
+export type THandleDeleteLogClick = (event: React.SyntheticEvent, id: string) => void;
+
+export type THandleParametersTabChange = (event: React.SyntheticEvent, newValue: TParametersTab) => void;
+
+export interface IShowSnackbarParams {
+    message: string;
+    duration?: number;
+    severity?: TSeverity;
+}
+
+export interface ILogItem {
+    hardwareType: string | undefined;
+    buffer: string;
+    data: Array<object> | null;
+    date: string;
+    errorMessage: string | undefined;
+    type: typeof LOG_TYPE_ERROR | typeof LOG_TYPE_MESSAGE;
+    id: string;
+}

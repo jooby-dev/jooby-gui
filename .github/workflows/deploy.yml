@@ -28,7 +28,12 @@ jobs:
                 cache: npm
 
           - run: npm ci
+
+          - name: update jooby-codec to latest version
+            run: npm install jooby-codec@latest
+
           - run: npx vite build
+          - run: touch ./dist/.nojekyll
 
           - name: upload artifact
             uses: actions/upload-pages-artifact@v1

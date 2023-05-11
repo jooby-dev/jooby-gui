@@ -7,17 +7,18 @@ import 'ace-builds/src-noconflict/theme-xcode';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/worker-json?worker';
 
-import {createCommandDocLink} from '../../utils';
+import createCommandDocLink from '../../utils/createCommandDocLink.js';
 
-import IconButtonWithTooltip from '../IconButtonWithTooltip';
+import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
 
-import {isValidJson, formatJson} from './utils';
+import isValidJson from './utils/isValidJson.js';
+import formatJson from './utils/formatJson.js';
 
 
 const workerJsonUrl = new URL('ace-builds/src-noconflict/worker-json.js', import.meta.url).toString();
 
 
-interface CommandParametersEditorProps {
+interface ICommandParametersEditorProps {
     value: string;
     onChange: (value: string) => void;
     disabled: boolean;
@@ -33,7 +34,7 @@ const CommandParameterEditor = ({
     inputRef,
     command,
     onSubmit
-}: CommandParametersEditorProps) => {
+}: ICommandParametersEditorProps) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const onSubmitRef = useRef(onSubmit);
     const theme = useTheme();
@@ -45,90 +46,108 @@ const CommandParameterEditor = ({
         [onChange]
     );
 
-    useEffect(() => {
-        onSubmitRef.current = onSubmit;
-    }, [onSubmit]);
+    useEffect(
+        () => {
+            onSubmitRef.current = onSubmit;
+        },
+        [onSubmit]
+    );
 
-    useEffect(() => {
-        if (!editorRef.current) {
-            return;
-        }
-
-        ace.config.set('basePath', '/jooby-gui/assets');
-        ace.config.setModuleUrl('ace/mode/json_worker', workerJsonUrl);
-
-        const editor = ace.edit(editorRef.current);
-
-        editor.setTheme('ace/theme/xcode');
-        editor.getSession().setMode('ace/mode/json');
-        editor.setOptions({
-            placeholder: 'Parameters',
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            showLineNumbers: true,
-            tabSize: 4,
-            minLines: 4,
-            maxLines: 12,
-            fontSize: '16px',
-            fontFamily: 'Roboto Mono, monospace'
-        });
-
-        editor.on('change', () => {
-            const newValue = editor.getValue();
-            handleValueChange(newValue);
-        });
-
-        editor.commands.addCommand({
-            name: 'submit',
-            bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
-            exec: () => {
-                onSubmitRef.current();
+    useEffect(
+        () => {
+            if (!editorRef.current) {
+                return;
             }
-        });
 
-        if (inputRef) {
-            inputRef.current = editor;
-        }
+            ace.config.set('basePath', '/jooby-gui/assets');
+            ace.config.setModuleUrl('ace/mode/json_worker', workerJsonUrl);
 
-        return () => {
-            editor.destroy();
-        };
-    }, [handleValueChange, inputRef]);
+            const editor = ace.edit(editorRef.current);
 
-    useEffect(() => {
-        if (inputRef && inputRef.current) {
-            const cursorPosition = inputRef.current.getCursorPosition();
-            inputRef.current.setValue(value, -1);
-            inputRef.current.moveCursorToPosition(cursorPosition);
-        }
-    }, [value, inputRef]);
+            editor.setTheme('ace/theme/xcode');
+            editor.getSession().setMode('ace/mode/json');
+            editor.setOptions({
+                placeholder: 'Parameters',
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true,
+                showLineNumbers: true,
+                tabSize: 4,
+                minLines: 4,
+                maxLines: 12,
+                fontSize: '16px',
+                fontFamily: 'Roboto Mono, monospace'
+            });
 
-    useEffect(() => {
-        if (inputRef && inputRef.current) {
-            inputRef.current.setReadOnly(disabled);
-        }
-    }, [disabled, inputRef]);
+            editor.on('change', () => {
+                const newValue = editor.getValue();
+                handleValueChange(newValue);
+            });
 
-    useEffect(() => {
-        if (inputRef && inputRef.current) {
-            const placeholderNode = inputRef.current.renderer.placeholderNode;
+            editor.commands.addCommand({
+                name: 'submit',
+                bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+                exec: () => {
+                    onSubmitRef.current();
+                }
+            });
 
-            if (placeholderNode) {
-                placeholderNode.textContent = command.value.hasParameters
-                    ? 'Parameters'
-                    : 'This command has no parameters';
+            if (inputRef) {
+                inputRef.current = editor;
             }
-        }
-    }, [command, inputRef]);
 
-    useEffect(() => {
-        if (inputRef && inputRef.current) {
-            const placeholderNode = inputRef.current.renderer.placeholderNode;
-            if (placeholderNode) {
-                placeholderNode.style.color = theme.palette.text.secondary;
+            return () => {
+                editor.destroy();
+            };
+        },
+        [handleValueChange, inputRef]
+    );
+
+    useEffect(
+        () => {
+            if (inputRef && inputRef.current) {
+                const cursorPosition = inputRef.current.getCursorPosition();
+                inputRef.current.setValue(value, -1);
+                inputRef.current.moveCursorToPosition(cursorPosition);
             }
-        }
-    }, [theme, inputRef]);
+        },
+        [value, inputRef]
+    );
+
+    useEffect(
+        () => {
+            if (inputRef && inputRef.current) {
+                inputRef.current.setReadOnly(disabled);
+            }
+        },
+        [disabled, inputRef]
+    );
+
+    useEffect(
+        () => {
+            if (inputRef && inputRef.current) {
+                const placeholderNode = inputRef.current.renderer.placeholderNode;
+
+                if (placeholderNode) {
+                    placeholderNode.textContent = command.value.hasParameters
+                        ? 'Parameters'
+                        : 'This command has no parameters';
+                }
+            }
+        },
+        [command, inputRef]
+    );
+
+    useEffect(
+        () => {
+            if (inputRef && inputRef.current) {
+                const placeholderNode = inputRef.current.renderer.placeholderNode;
+                if (placeholderNode) {
+                    placeholderNode.style.color = theme.palette.text.secondary;
+                }
+            }
+        },
+        [theme, inputRef]
+    );
 
     const handleFormatClick = () => {
         if (inputRef && inputRef.current) {
@@ -167,20 +186,20 @@ const CommandParameterEditor = ({
                         onClick={handleClearClick}
                         disabled={value === ''}
                     >
-                        <ClearIcon />
+                        <ClearIcon/>
                     </IconButtonWithTooltip>
                     <IconButtonWithTooltip
                         title="Format parameters"
                         onClick={handleFormatClick}
                         disabled={value === ''}
                     >
-                        <FormatAlignLeftIcon />
+                        <FormatAlignLeftIcon/>
                     </IconButtonWithTooltip>
                 </Box>
             </Box>
             <FormHelperText>
                 <>
-                    {'JSON/object with command parameters (see '}
+                    {'JSON with command parameters (see '}
                     <Link
                         href={createCommandDocLink(command.value)}
                         target="_blank"

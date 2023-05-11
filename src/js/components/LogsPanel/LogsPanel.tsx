@@ -1,7 +1,7 @@
 import {useState, useEffect, useCallback} from 'react';
 
 import {
-    Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton,
+    Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
     Typography
 } from '@mui/material';
 
@@ -9,52 +9,55 @@ import {
     UnfoldMore as UnfoldMoreIcon, UnfoldLess as UnfoldLessIcon, Delete as DeleteIcon, Share as ShareIcon
 } from '@mui/icons-material';
 
-import {useSnackbar} from '../../contexts/SnackbarContext';
+import {useSnackbar} from '../../contexts/SnackbarContext.js';
 
-import LogList from '../LogList';
-import IconButtonWithTooltip from '../IconButtonWithTooltip';
+import LogList from '../LogList.js';
+import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
 
 import {
-    Log, SetLogs, HandleCopyToClipboard, HandleShareLogsClick, ExpandAllLogs, CollapseAllLogs,
-    HandleLogsLimitExceededDialogClose
-} from '../../types';
+    ILogItem, TSetLogs, THandleCopyToClipboard, THandleShareLogsClick, TExpandAllLogs, TCollapseAllLogs
+} from '../../types.js';
 
-import {LOG_AMOUNT_LIMIT} from '../../constants';
+import {LOG_COUNT_LIMIT} from '../../constants.js';
 
-import {createShareableLogsLink, extractLogsFromUrl} from './utils';
+import createShareableLogsLink from './utils/createShareableLogsLink.js';
+import extractLogsFromUrl from './utils/extractLogsFromUrl.js';
 
 
 const LogsPanel = ({
     logs,
     setLogs
 }: {
-    logs: Array<Log>;
-    setLogs: SetLogs;
+    logs: Array<ILogItem>;
+    setLogs: TSetLogs;
 }) => {
     const [logsLimitExceededDialogOpen, setLogsLimitExceededDialogOpen] = useState(false);
     const [expandedLogs, setExpandedLogs] = useState<Array<string>>([]);
 
     const {showSnackbar} = useSnackbar();
 
-    useEffect(() => {
-        const sharedLogs = extractLogsFromUrl();
+    useEffect(
+        () => {
+            const sharedLogs = extractLogsFromUrl();
 
-        if (sharedLogs) {
-            setLogs(sharedLogs);
-        }
-    }, [setLogs]);
+            if (sharedLogs) {
+                setLogs(sharedLogs);
+            }
+        },
+        [setLogs]
+    );
 
-    const collapseAllLogs: CollapseAllLogs = useCallback((event, ids) => {
+    const collapseAllLogs: TCollapseAllLogs = useCallback((event, ids) => {
         event.stopPropagation();
         setExpandedLogs(expandedLogs.filter((id) => !ids.includes(id)));
     }, [expandedLogs]);
 
-    const expandAllLogs: ExpandAllLogs = useCallback((event, ids) => {
+    const expandAllLogs: TExpandAllLogs = useCallback((event, ids) => {
         event.stopPropagation();
         setExpandedLogs(Array.from(new Set([...expandedLogs, ...ids])));
     }, [expandedLogs]);
 
-    const handleCopyToClipboard: HandleCopyToClipboard = useCallback((data, snackbarConfig) => {
+    const handleCopyToClipboard: THandleCopyToClipboard = useCallback((data, snackbarConfig) => {
         navigator.clipboard.writeText(data)
             .then(() => {
                 if (snackbarConfig) {
@@ -66,10 +69,10 @@ const LogsPanel = ({
             });
     }, [showSnackbar]);
 
-    const handleShareLogsClick: HandleShareLogsClick = useCallback((event, logsData) => {
+    const handleShareLogsClick: THandleShareLogsClick = useCallback((event, logsData) => {
         event.stopPropagation();
 
-        if (logsData.length > LOG_AMOUNT_LIMIT) {
+        if (logsData.length > LOG_COUNT_LIMIT) {
             setLogsLimitExceededDialogOpen(true);
 
             return;
@@ -83,7 +86,7 @@ const LogsPanel = ({
         setExpandedLogs([]);
     };
 
-    const handleLogsLimitExceededDialogClose: HandleLogsLimitExceededDialogClose = () => {
+    const handleLogsLimitExceededDialogClose = () => {
         setLogsLimitExceededDialogOpen(false);
     };
 
@@ -119,7 +122,7 @@ const LogsPanel = ({
                     sx={{ml: 'auto'}}
                     onClick={event => expandAllLogs(event, logs.flatMap((log) => [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])]))}
                 >
-                    <UnfoldMoreIcon />
+                    <UnfoldMoreIcon/>
                 </IconButtonWithTooltip>
 
                 <IconButtonWithTooltip
@@ -127,7 +130,7 @@ const LogsPanel = ({
                     title="Collapse logs"
                     onClick={event => collapseAllLogs(event, logs.flatMap((log) => [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])]))}
                 >
-                    <UnfoldLessIcon />
+                    <UnfoldLessIcon/>
                 </IconButtonWithTooltip>
 
                 <IconButtonWithTooltip
@@ -135,7 +138,7 @@ const LogsPanel = ({
                     title="Share logs"
                     onClick={event => handleShareLogsClick(event, logs)}
                 >
-                    <ShareIcon />
+                    <ShareIcon/>
                 </IconButtonWithTooltip>
 
                 <IconButtonWithTooltip
@@ -143,7 +146,7 @@ const LogsPanel = ({
                     title="Delete logs"
                     onClick={handleClearLogsClick}
                 >
-                    <DeleteIcon />
+                    <DeleteIcon/>
                 </IconButtonWithTooltip>
 
                 <Dialog
@@ -156,7 +159,7 @@ const LogsPanel = ({
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            {`You can only share up to ${LOG_AMOUNT_LIMIT} logs.`}
+                            {`You can only share up to ${LOG_COUNT_LIMIT} logs.`}
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

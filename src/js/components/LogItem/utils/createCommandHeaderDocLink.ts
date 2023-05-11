@@ -1,7 +1,7 @@
 const baseUrl = 'https://github.com/jooby-dev/jooby-docs/blob/main/docs/message.md#';
 
 
-export const createCommandHeaderDocLink = (headerLength: number) => {
+export default (headerLength: number) => {
     switch (headerLength) {
         case 1:
             return `${baseUrl}command-with-a-one-byte-header`;

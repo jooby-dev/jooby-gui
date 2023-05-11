@@ -2,8 +2,7 @@ import {memo} from 'react';
 import {JSONTree} from 'react-json-tree';
 
 import {
-    Box, IconButton, Typography, Accordion, AccordionSummary, AccordionDetails, Link,
-    Tooltip, Tab
+    Box, Typography, Accordion, AccordionSummary, AccordionDetails, Link, Tab
 } from '@mui/material';
 
 import {TabContext, TabList, TabPanel} from '@mui/lab';
@@ -13,22 +12,38 @@ import {
     UnfoldLess as UnfoldLessIcon, ContentCopy as ContentCopyIcon
 } from '@mui/icons-material';
 
-import IconButtonWithTooltip from '../IconButtonWithTooltip';
+import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
 
 import {
-    Log, ParametersTab, HandleLogClick, HandleDeleteLogClick, HandleParametersTabChange,
-    HandleCopyToClipboard, HandleShareLogsClick, ExpandAllLogs, CollapseAllLogs, ExpandedLogs
-} from '../../types';
+    ILogItem, TParametersTab, THandleLogClick, THandleDeleteLogClick, THandleParametersTabChange,
+    THandleCopyToClipboard, THandleShareLogsClick, TExpandAllLogs, TCollapseAllLogs, TExpandedLogs
+} from '../../types.js';
 
 import {
     LOG_TYPE_ERROR, PARAMETERS_TAB_VIEW_TYPE_JSON, PARAMETERS_TAB_VIEW_TYPE_TREE
-} from '../../constants';
+} from '../../constants.js';
 
-import {
-    getSubLogColor, getLogColor, createSubLogTitle, createLogTitle, createCommandHeaderDocLink
-} from './utils';
+import getSubLogColor from './utils/getSubLogColor.js';
+import getLogColor from './utils/getLogColor.js';
+import createSubLogTitle from './utils/createSubLogTitle.js';
+import createLogTitle from './utils/createLogTitle.js';
+import createCommandHeaderDocLink from './utils/createCommandHeaderDocLink.js';
 
-import {JSONTreeTheme} from './constants';
+import {JSONTreeTheme} from './constants.js';
+
+
+interface ILogItemProps {
+    log: ILogItem;
+    expandedLogs: TExpandedLogs;
+    handleLogClick: THandleLogClick;
+    handleDeleteLogClick: THandleDeleteLogClick;
+    handleParametersTabChange: THandleParametersTabChange;
+    parametersTab: TParametersTab;
+    handleCopyToClipboard: THandleCopyToClipboard;
+    handleShareLogsClick: THandleShareLogsClick;
+    expandAllLogs: TExpandAllLogs;
+    collapseAllLogs: TCollapseAllLogs;
+}
 
 
 const LogItem = ({
@@ -42,18 +57,7 @@ const LogItem = ({
     handleShareLogsClick,
     expandAllLogs,
     collapseAllLogs
-}: {
-    log: Log;
-    expandedLogs: ExpandedLogs;
-    handleLogClick: HandleLogClick;
-    handleDeleteLogClick: HandleDeleteLogClick;
-    handleParametersTabChange: HandleParametersTabChange;
-    parametersTab: ParametersTab;
-    handleCopyToClipboard: HandleCopyToClipboard;
-    handleShareLogsClick: HandleShareLogsClick;
-    expandAllLogs: ExpandAllLogs;
-    collapseAllLogs: CollapseAllLogs;
-}) => {
+}: ILogItemProps) => {
     const {buffer, data, date, errorMessage, type, id} = log;
 
     if (type === LOG_TYPE_ERROR) {
@@ -66,7 +70,7 @@ const LogItem = ({
             >
                 <AccordionSummary
                     content="div"
-                    expandIcon={<ExpandMoreIcon />}
+                    expandIcon={<ExpandMoreIcon/>}
                     aria-controls={`panel${id}bh-content`}
                     sx={{
                         backgroundColor: `${getLogColor(log)}`,
@@ -99,28 +103,28 @@ const LogItem = ({
                             title="Expand log"
                             onClick={event => expandAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                         >
-                            <UnfoldMoreIcon />
+                            <UnfoldMoreIcon/>
                         </IconButtonWithTooltip>
 
                         <IconButtonWithTooltip
                             title="Collapse log"
                             onClick={event => collapseAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                         >
-                            <UnfoldLessIcon />
+                            <UnfoldLessIcon/>
                         </IconButtonWithTooltip>
 
                         <IconButtonWithTooltip
                             title="Share log"
                             onClick={event => handleShareLogsClick(event, [log])}
                         >
-                            <ShareIcon />
+                            <ShareIcon/>
                         </IconButtonWithTooltip>
 
                         <IconButtonWithTooltip
                             title="Delete log"
                             onClick={event => handleDeleteLogClick(event, id)}
                         >
-                            <DeleteIcon />
+                            <DeleteIcon/>
                         </IconButtonWithTooltip>
                     </Box>
                 </AccordionSummary>
@@ -139,7 +143,7 @@ const LogItem = ({
                                                     {message: 'Message dump copied to clipboard'}
                                                 )}
                                             >
-                                                <ContentCopyIcon />
+                                                <ContentCopyIcon/>
                                             </IconButtonWithTooltip>
                                         </Typography>
                                         <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{buffer}</Typography>
@@ -164,7 +168,7 @@ const LogItem = ({
         >
             <AccordionSummary
                 content="div"
-                expandIcon={<ExpandMoreIcon />}
+                expandIcon={<ExpandMoreIcon/>}
                 aria-controls={`panel${id}bh-content`}
                 sx={{
                     backgroundColor: `${getLogColor(log)}`,
@@ -197,22 +201,22 @@ const LogItem = ({
                         title="Expand log"
                         onClick={event => expandAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                     >
-                        <UnfoldMoreIcon />
+                        <UnfoldMoreIcon/>
                     </IconButtonWithTooltip>
 
                     <IconButtonWithTooltip
                         title="Collapse log"
                         onClick={event => collapseAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
                     >
-                        <UnfoldLessIcon />
+                        <UnfoldLessIcon/>
                     </IconButtonWithTooltip>
 
                     <IconButtonWithTooltip title="Delete log" onClick={event => handleShareLogsClick(event, [log])}>
-                        <ShareIcon />
+                        <ShareIcon/>
                     </IconButtonWithTooltip>
 
                     <IconButtonWithTooltip title="Share log" onClick={event => handleDeleteLogClick(event, id)}>
-                        <DeleteIcon />
+                        <DeleteIcon/>
                     </IconButtonWithTooltip>
                 </Box>
             </AccordionSummary>
@@ -228,7 +232,7 @@ const LogItem = ({
                                     {message: 'Message dump copied to clipboard'}
                                 )}
                             >
-                                <ContentCopyIcon />
+                                <ContentCopyIcon/>
                             </IconButtonWithTooltip>
                         </Typography>
                         <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{buffer}</Typography>
@@ -242,7 +246,7 @@ const LogItem = ({
                             >
                                 <AccordionSummary
                                     content="div"
-                                    expandIcon={<ExpandMoreIcon />}
+                                    expandIcon={<ExpandMoreIcon/>}
                                     aria-controls={`panel${commandData.id}bh-content`}
                                     sx={{
                                         alignItems: 'center',
@@ -272,7 +276,7 @@ const LogItem = ({
                                                 {message: 'Command dump copied to clipboard'}
                                             )}
                                         >
-                                            <ContentCopyIcon />
+                                            <ContentCopyIcon/>
                                         </IconButtonWithTooltip>
                                     </Typography>
                                     <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
@@ -301,15 +305,15 @@ const LogItem = ({
                                                             {message: 'Parameters copied to clipboard'}
                                                         )}
                                                     >
-                                                        <ContentCopyIcon />
+                                                        <ContentCopyIcon/>
                                                     </IconButtonWithTooltip>
                                                 </Typography>
 
                                                 <TabContext value={parametersTab}>
                                                     <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
                                                         <TabList onChange={handleParametersTabChange} aria-label="Display command parameters in tree, JSON view">
-                                                            <Tab label={PARAMETERS_TAB_VIEW_TYPE_TREE} value={PARAMETERS_TAB_VIEW_TYPE_TREE} />
-                                                            <Tab label={PARAMETERS_TAB_VIEW_TYPE_JSON} value={PARAMETERS_TAB_VIEW_TYPE_JSON} />
+                                                            <Tab label={PARAMETERS_TAB_VIEW_TYPE_TREE} value={PARAMETERS_TAB_VIEW_TYPE_TREE}/>
+                                                            <Tab label={PARAMETERS_TAB_VIEW_TYPE_JSON} value={PARAMETERS_TAB_VIEW_TYPE_JSON}/>
                                                         </TabList>
                                                     </Box>
                                                     <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_TREE}>

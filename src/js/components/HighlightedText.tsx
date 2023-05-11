@@ -2,19 +2,22 @@ import {ReactNode} from 'react';
 import {Box} from '@mui/material';
 
 
+interface IHighlightedTextProps {
+    children: ReactNode;
+    color?: string;
+    fontSize?: string;
+    fontWeight?: string
+    isMonospacedFont?: boolean;
+}
+
+
 const HighlightedText = ({
     children,
     color = 'inherit',
     fontSize = 'inherit',
     fontWeight = 'fontWeightMedium',
     isMonospacedFont = false
-}: {
-    children: ReactNode;
-    color?: string;
-    fontSize?: string;
-    fontWeight?: string
-    isMonospacedFont?: boolean;
-}) => (
+}: IHighlightedTextProps) => (
     <Box
         component="span"
         sx={{

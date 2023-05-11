@@ -1,15 +1,15 @@
 import {useState, useCallback} from 'react';
 import {Box} from '@mui/material';
 
-import LogItem from './LogItem';
+import LogItem from './LogItem/LogItem.js';
 
 import {
-    Logs, ParametersTab, HandleLogClick, HandleDeleteLogClick, HandleParametersTabChange,
-    HandleCopyToClipboard, HandleShareLogsClick, ExpandAllLogs, CollapseAllLogs, SetLogs,
-    SetExpandedLogs, ExpandedLogs
-} from '../types';
+    TLogs, TParametersTab, THandleLogClick, THandleDeleteLogClick, THandleParametersTabChange,
+    THandleCopyToClipboard, THandleShareLogsClick, TExpandAllLogs, TCollapseAllLogs, TSetLogs,
+    TExpandedLogs
+} from '../types.js';
 
-import {PARAMETERS_TAB_VIEW_TYPE_TREE} from '../constants';
+import {PARAMETERS_TAB_VIEW_TYPE_TREE} from '../constants.js';
 
 
 const LogList = ({
@@ -22,22 +22,22 @@ const LogList = ({
     expandAllLogs,
     collapseAllLogs
 }: {
-    logs: Logs;
-    expandedLogs: ExpandedLogs;
-    handleCopyToClipboard: HandleCopyToClipboard;
-    handleShareLogsClick: HandleShareLogsClick;
-    expandAllLogs: ExpandAllLogs;
-    collapseAllLogs: CollapseAllLogs;
-    setLogs: SetLogs;
-    setExpandedLogs: SetExpandedLogs;
+    logs: TLogs;
+    expandedLogs: TExpandedLogs;
+    handleCopyToClipboard: THandleCopyToClipboard;
+    handleShareLogsClick: THandleShareLogsClick;
+    expandAllLogs: TExpandAllLogs;
+    collapseAllLogs: TCollapseAllLogs;
+    setLogs: TSetLogs;
+    setExpandedLogs: (expandedLogs: TExpandedLogs) => void;
 }) => {
-    const [parametersTab, setParametersTab] = useState<ParametersTab>(PARAMETERS_TAB_VIEW_TYPE_TREE);
+    const [parametersTab, setParametersTab] = useState<TParametersTab>(PARAMETERS_TAB_VIEW_TYPE_TREE);
 
-    const handleParametersTabChange: HandleParametersTabChange = useCallback((event, newValue) => {
+    const handleParametersTabChange: THandleParametersTabChange = useCallback((event, newValue) => {
         setParametersTab(newValue);
     }, []);
 
-    const handleDeleteLogClick: HandleDeleteLogClick = useCallback((event, id) => {
+    const handleDeleteLogClick: THandleDeleteLogClick = useCallback((event, id) => {
         event.stopPropagation();
 
         const newLogs = [...logs];
@@ -50,7 +50,7 @@ const LogList = ({
         setExpandedLogs(expandedLogs.filter((expandedLogId) => !deletedLogIds.includes(expandedLogId)));
     }, [logs, setLogs, setExpandedLogs, expandedLogs]);
 
-    const handleLogClick: HandleLogClick = useCallback((id) => {
+    const handleLogClick: THandleLogClick = useCallback((id) => {
         const index = expandedLogs.indexOf(id);
 
         if (index === -1) {

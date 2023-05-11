@@ -3,31 +3,33 @@ import {constants} from 'jooby-codec';
 import {Box, Collapse, Tooltip} from '@mui/material';
 import {Close as CloseIcon, QuestionMark as QuestionMarkIcon, SyncAlt as SyncAltIcon} from '@mui/icons-material';
 
-import {createCommandDirectionIcon} from '../../../utils/createCommandDirectionIcon';
+import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.js';
 
-import HighlightedText from '../../../components/HighlightedText';
+import HighlightedText from '../../../components/HighlightedText.js';
 
-import {Log, ExpandedLogs, LogCommands} from '../../../types';
+import {ILogItem, TExpandedLogs, TLogCommands} from '../../../types.js';
 
-import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR} from '../../../constants';
+import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR} from '../../../constants.js';
 
-import {decimalToHex, isAllCommandsUnknown, isAllCommandsHaveSameDirection} from './';
+import decimalToHex from './decimalToHex.js';
+import isAllCommandsUnknown from './isAllCommandsUnknown.js';
+import isAllCommandsHaveSameDirection from './isAllCommandsHaveSameDirection.js';
 
 
-const createMessageDirectionIcon = (logCommands: LogCommands) => {
+const createMessageDirectionIcon = (logCommands: TLogCommands) => {
     if (isAllCommandsUnknown(logCommands)) {
-        return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}} />;
+        return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}}/>;
     }
 
     // commands have a different direction in the message
     if (!isAllCommandsHaveSameDirection(logCommands)) {
-        return <SyncAltIcon color="error" sx={{mr: 2, transform: 'rotate(90deg)'}} />;
+        return <SyncAltIcon color="error" sx={{mr: 2, transform: 'rotate(90deg)'}}/>;
     }
 
     return createCommandDirectionIcon(logCommands.find(logCommand => logCommand.command.directionType !== undefined).command.directionType);
 };
 
-export const renderHardwareType = (hardwareType: Log['hardwareType']) => {
+const renderHardwareType = (hardwareType: ILogItem['hardwareType']) => {
     if (!hardwareType) {
         return null;
     }
@@ -47,7 +49,7 @@ export const renderHardwareType = (hardwareType: Log['hardwareType']) => {
 };
 
 
-export const createLogTitle = (log: Log, expandedLogs: ExpandedLogs): ReactElement => {
+const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElement => {
     switch (log.type) {
         case LOG_TYPE_MESSAGE:
             return (
@@ -111,7 +113,7 @@ export const createLogTitle = (log: Log, expandedLogs: ExpandedLogs): ReactEleme
         case LOG_TYPE_ERROR:
             return (
                 <>
-                    <CloseIcon color="error" sx={{mr: 2}} />
+                    <CloseIcon color="error" sx={{mr: 2}}/>
                     <Box>
                         {renderHardwareType(log.hardwareType)}
                         <Box sx={{
@@ -139,3 +141,6 @@ export const createLogTitle = (log: Log, expandedLogs: ExpandedLogs): ReactEleme
             );
     }
 };
+
+
+export default createLogTitle;

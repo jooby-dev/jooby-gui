@@ -1,15 +1,15 @@
 import {Box, Collapse, Link} from '@mui/material';
+import createCommandDocLink from '../../../utils/createCommandDocLink.js';
+import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.js';
 
-import {createCommandDocLink, createCommandDirectionIcon} from '../../../utils';
+import HighlightedText from '../../../components/HighlightedText.js';
 
-import HighlightedText from '../../../components/HighlightedText';
+import {TExpandedLogs} from '../../../types.js';
 
-import {LogCommand, ExpandedLogs} from '../../../types';
-
-import {decimalToHex} from './';
+import decimalToHex from './decimalToHex.js';
 
 
-export const createSubLogTitle = (logCommand: LogCommand, expandedLogs: ExpandedLogs) => (
+const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs) => (
     <>
         {createCommandDirectionIcon(logCommand.command.directionType)}
         <Box>
@@ -73,3 +73,6 @@ export const createSubLogTitle = (logCommand: LogCommand, expandedLogs: Expanded
         </Box>
     </>
 );
+
+
+export default createSubLogTitle;

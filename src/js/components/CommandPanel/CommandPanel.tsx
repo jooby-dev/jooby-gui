@@ -1,11 +1,10 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
-import {utils, message} from 'jooby-codec';
+import {utils, message, constants} from 'jooby-codec';
 import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
-    Autocomplete, Box, Typography, TextField, InputAdornment, ButtonGroup, Button, IconButton,
-    Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, List, ListItem, ListItemText,
-    Stack
+    Autocomplete, Box, Typography, TextField, InputAdornment, ButtonGroup, Button, Popper,
+    Grow, Paper, ClickAwayListener, MenuList, MenuItem, List, ListItem, ListItemText, Stack
 } from '@mui/material';
 
 import {
@@ -13,72 +12,74 @@ import {
     Edit as EditIcon
 } from '@mui/icons-material';
 
-import {createCommandDirectionIcon} from '../../utils';
+import createCommandDirectionIcon from '../../utils/createCommandDirectionIcon.js';
 
-import {useSnackbar} from '../../contexts/SnackbarContext';
+import {useSnackbar} from '../../contexts/SnackbarContext.js';
 
-import IconButtonWithTooltip from '../IconButtonWithTooltip';
+import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
+import HighlightedText from '../HighlightedText.js';
+import CommandParametersEditor from '../CommandParametersEditor/CommandParametersEditor.js';
 
-import {SetLogs, Log} from '../../types';
-
-import {
-    hardwareTypeList, parseButtonNameMap, DIRECTION_TYPE_AUTO, LOG_TYPE_ERROR, LOG_TYPE_MESSAGE,
-    SEVERITY_TYPE_WARNING
-} from '../../constants';
-
-import HighlightedText from '../HighlightedText';
-import CommandParametersEditor from '../CommandParametersEditor';
-
-import {getHardwareType, getHardwareTypeName, createCtrlEnterSubmitHandler} from './utils';
+import {TSetLogs, ILogItem} from '../../types.js';
 
 import {
-    HardwareType, HandleHardwareTypeChange, HandleBufferChange, HandleCommandExampleChange,
-    SelectedParseButtonIndex, AnchorButtonGroupList, CommandExampleList, CommandExample,
-    HandleParseButtonGroupMenuClose, HandleDeletePreparedCommandClick, HandleParametersChange,
-    CommandList, PreparedCommands, HandleMenuItemClick, HandleCommandChange
-} from './types';
+    hardwareTypeList, parseButtonNameMap, LOG_TYPE_ERROR, LOG_TYPE_MESSAGE, SEVERITY_TYPE_WARNING
+} from '../../constants.js';
+
+import getHardwareType from './utils/getHardwareType.js';
+import getHardwareTypeName from './utils/getHardwareTypeName.js';
+import createCtrlEnterSubmitHandler from './utils/createCtrlEnterSubmitHandler.js';
+
+import {THandleChange} from './types';
 
 import {preparedCommandList} from './constants';
 
 
+const {AUTO, DOWNLINK, UPLINK} = constants.directions;
 const {getHexFromBytes} = utils;
 
 
-const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
-    const [hardwareType, setHardwareType] = useState<HardwareType>(null);
+const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
+    const [hardwareType, setHardwareType] = useState<object | null>(null);
     const [buffer, setBuffer] = useState('');
-    const [selectedParseButtonIndex, setSelectedParseButtonIndex] = useState<SelectedParseButtonIndex>(DIRECTION_TYPE_AUTO);
+    const [selectedParseButtonIndex, setSelectedParseButtonIndex] = useState<typeof AUTO | typeof DOWNLINK | typeof UPLINK>(AUTO);
     const [popperWidth, setPopperWidth] = useState(0);
     const [isOpenParseButtonGroup, setIsOpenParseButtonGroup] = useState(false);
-    const [commandList, setCommandList] = useState<CommandList>([]);
-    const [preparedCommands, setPreparedCommands] = useState<PreparedCommands>([]);
+    const [commandList, setCommandList] = useState<Array<object>>([]);
+    const [preparedCommands, setPreparedCommands] = useState<Array<object>>([]);
     const [command, setCommand] = useState<object | null>(null);
-    const [commandExampleList, setCommandExampleList] = useState<CommandExampleList>([]);
-    const [commandExample, setCommandExample] = useState<CommandExample>(null);
+    const [commandExampleList, setCommandExampleList] = useState<Array<object>>([]);
+    const [commandExample, setCommandExample] = useState<object | null>(null);
     const [parameters, setParameters] = useState('');
     const [editingCommandId, setEditingCommandId] = useState<string | null>(null);
     const [recentlyEditedCommandId, setRecentlyEditedCommandId] = useState<string | null>(null);
 
-    const anchorButtonGroupListRef = useRef<AnchorButtonGroupList>(null);
+    const anchorButtonGroupListRef = useRef<HTMLDivElement | null>(null);
     const parametersTextFieldRef = useRef<HTMLInputElement>(null);
 
     const {showSnackbar} = useSnackbar();
 
-    useEffect(() => {
-        setCommandList(preparedCommandList);
-    }, []);
+    useEffect(
+        () => {
+            setCommandList(preparedCommandList);
+        },
+        []
+    );
 
-    useEffect(() => {
-        if (anchorButtonGroupListRef.current) {
-            setPopperWidth(anchorButtonGroupListRef.current.offsetWidth);
-        }
-    }, [isOpenParseButtonGroup, anchorButtonGroupListRef]);
+    useEffect(
+        () => {
+            if (anchorButtonGroupListRef.current) {
+                setPopperWidth(anchorButtonGroupListRef.current.offsetWidth);
+            }
+        },
+        [isOpenParseButtonGroup, anchorButtonGroupListRef]
+    );
 
-    const handleHardwareTypeChange: HandleHardwareTypeChange = (event, newValue) => {
+    const handleHardwareTypeChange: THandleChange = (event, newValue) => {
         setHardwareType(newValue);
     };
 
-    const handleBufferChange: HandleBufferChange = (event) => {
+    const handleBufferChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setBuffer(event.target.value);
     };
 
@@ -86,11 +87,11 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
         setBuffer('');
     };
 
-    const handleParametersChange: HandleParametersChange = useCallback((event) => {
+    const handleParametersChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         setParameters(event);
     }, []);
 
-    const handleDeletePreparedCommandClick: HandleDeletePreparedCommandClick = (index) => {
+    const handleDeletePreparedCommandClick = (index: number) => {
         const newPreparedCommands = preparedCommands.filter((preparedCommand) => preparedCommand.id !== index);
         setPreparedCommands(newPreparedCommands);
     };
@@ -117,7 +118,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
         setCommandList(preparedCommandList);
     };
 
-    const handleCommandExampleChange: HandleCommandExampleChange = (event, newValue) => {
+    const handleCommandExampleChange: THandleChange = (event, newValue) => {
         setCommandExample(newValue);
 
         if (!newValue) {
@@ -142,7 +143,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
         }, 0);
     };
 
-    const handleCommandChange: HandleCommandChange = (event, newValue) => {
+    const handleCommandChange: THandleChange = (event, newValue) => {
         setCommand(newValue);
         setParameters('');
         setCommandExample(null);
@@ -159,12 +160,15 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
         }, 0);
     };
 
-    const handleMenuItemClick: HandleMenuItemClick = (event, directionType) => {
+    const handleMenuItemClick = (
+        event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+        directionType: number
+    ) => {
         setSelectedParseButtonIndex(directionType);
         setIsOpenParseButtonGroup(false);
     };
 
-    const handleParseButtonGroupMenuClose: HandleParseButtonGroupMenuClose = (event) => {
+    const handleParseButtonGroupMenuClose = (event: Event) => {
         if (
             anchorButtonGroupListRef.current &&
             anchorButtonGroupListRef.current.contains(event.target as HTMLElement)
@@ -225,7 +229,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
             });
         }
 
-        const log: Log = {
+        const log: ILogItem = {
             hardwareType: getHardwareTypeName(hardwareType),
             buffer: messageHex,
             data: buildError ? null : data,
@@ -248,37 +252,36 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
 
         try {
             data = message.fromHex(buffer, Number(selectedParseButtonIndex), getHardwareType(hardwareType));
+
         } catch (error) {
             parseError = error;
         }
 
         if (data) {
-            data.commands = data.commands.map((commandData) => {
-                return {
-                    command: {
-                        hasParameters: commandData.command.constructor.hasParameters,
-                        id: commandData.command.constructor.id,
-                        length: commandData.command.toBytes().length,
-                        name: commandData.command.constructor.name,
-                        directionType: commandData.command.constructor.directionType,
-                        parameters: commandData.command.getParameters()
+            data.commands = data.commands.map((commandData) => ({
+                command: {
+                    hasParameters: commandData.command.constructor.hasParameters,
+                    id: commandData.command.constructor.id,
+                    length: commandData.command.toBytes().length,
+                    name: commandData.command.constructor.name,
+                    directionType: commandData.command.constructor.directionType,
+                    parameters: commandData.command.getParameters()
+                },
+                data: {
+                    header: {
+                        length: commandData.data.header.length,
+                        hex: getHexFromBytes(commandData.data.header)
                     },
-                    data: {
-                        header: {
-                            length: commandData.data.header.length,
-                            hex: getHexFromBytes(commandData.data.header)
-                        },
-                        body: {
-                            length: commandData.data.body.length,
-                            hex: getHexFromBytes(commandData.data.body)
-                        }
-                    },
-                    id: uuidv4()
-                };
-            });
+                    body: {
+                        length: commandData.data.body.length,
+                        hex: getHexFromBytes(commandData.data.body)
+                    }
+                },
+                id: uuidv4()
+            }));
         }
 
-        const log: Log = {
+        const log: ILogItem = {
             buffer,
             hardwareType: getHardwareTypeName(hardwareType),
             data: parseError ? null : data,
@@ -292,7 +295,9 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
     };
 
     const onPreparedCommandDragEnd = (result) => {
-        if (!result.destination) return;
+        if (!result.destination) {
+            return;
+        }
 
         const startIndex = result.source.index;
         const endIndex = result.destination.index;
@@ -337,7 +342,6 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
         setEditingCommandId(null);
         setParameters('');
     };
-
 
 
     return (
@@ -396,7 +400,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                                             title="Clear dump"
                                             onClick={handleClearBufferClick}
                                         >
-                                            <ClearIcon />
+                                            <ClearIcon/>
                                         </IconButtonWithTooltip>
                                     )}
                                 </InputAdornment>
@@ -421,7 +425,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                         aria-haspopup="menu"
                         onClick={handleToggleParseButtonGroup}
                     >
-                        <ArrowDropDownIcon />
+                        <ArrowDropDownIcon/>
                     </Button>
                 </ButtonGroup>
                 <Popper
@@ -463,7 +467,15 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                 <Typography variant="h5">Message creation</Typography>
 
                 <Autocomplete
-                    options={commandList.sort((itemA, itemB) => itemA.direction.localeCompare(itemB.direction))}
+                    options={commandList.sort((itemA, itemB) => {
+                        let compare = itemA.direction.localeCompare(itemB.direction);
+
+                        if (compare === 0) {
+                            compare = itemA.value.id - itemB.value.id;
+                        }
+
+                        return compare;
+                    })}
                     getOptionDisabled={option => (
                         preparedCommands.length !== 0
                         && option.direction !== preparedCommands[0].command.direction
@@ -639,7 +651,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                                                                     disabled={editingCommandId === preparedCommand.id}
                                                                     sx={{marginRight: 0}}
                                                                 >
-                                                                    <EditIcon />
+                                                                    <EditIcon/>
                                                                 </IconButtonWithTooltip>
 
                                                                 <IconButtonWithTooltip
@@ -648,7 +660,7 @@ const CommandPanel = ({setLogs}: {setLogs: SetLogs}) => {
                                                                     disabled={editingCommandId === preparedCommand.id}
                                                                     sx={{marginRight: 0}}
                                                                 >
-                                                                    <DeleteIcon />
+                                                                    <DeleteIcon/>
                                                                 </IconButtonWithTooltip>
                                                             </Stack>
                                                         </ListItem>

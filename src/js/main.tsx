@@ -3,8 +3,8 @@ import {createRoot} from 'react-dom/client';
 import CssBaseline from '@mui/material/CssBaseline';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 
-import {SnackbarProvider} from './contexts/SnackbarContext';
-import App from './components/App';
+import {SnackbarProvider} from './contexts/SnackbarContext.js';
+import App from './components/App.js';
 import '../sass/main.scss';
 
 declare module '@mui/material/styles' {
@@ -38,12 +38,12 @@ const theme = createTheme({
 
 
 createRoot(document.getElementById('root') as HTMLElement).render(
-    // <React.StrictMode>
+    <React.StrictMode>
         <ThemeProvider theme={theme}>
-            <CssBaseline />
+            <CssBaseline/>
             <SnackbarProvider>
-                <App />
+                <App/>
             </SnackbarProvider>
         </ThemeProvider>
-    // </React.StrictMode>
+    </React.StrictMode>
 );

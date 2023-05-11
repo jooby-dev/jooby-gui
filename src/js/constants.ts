@@ -4,12 +4,6 @@ import {constants} from 'jooby-codec';
 const {AUTO, DOWNLINK, UPLINK} = constants.directions;
 
 
-export const DIRECTION_TYPE_AUTO = AUTO;
-
-export const DIRECTION_TYPE_DOWNLINK = DOWNLINK;
-
-export const DIRECTION_TYPE_UPLINK = UPLINK;
-
 export const LOG_TYPE_ERROR = 0;
 
 export const LOG_TYPE_MESSAGE = 1;
@@ -24,7 +18,7 @@ export const PARAMETERS_TAB_VIEW_TYPE_TREE = 'tree';
 
 export const PARAMETERS_TAB_VIEW_TYPE_JSON = 'json';
 
-export const LOG_AMOUNT_LIMIT = 30;
+export const LOG_COUNT_LIMIT = 30;
 
 export const directions = {
     [DOWNLINK]: 'downlink',
@@ -40,4 +34,4 @@ export const parseButtonNameMap = {
 export const hardwareTypeList = Object.entries(constants.hardwareTypes).map(([key, value]) => ({
     label: key,
     value
-}));
+} as const));
