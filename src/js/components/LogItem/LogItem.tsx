@@ -263,7 +263,7 @@ const LogItem = ({
                                         mr: 2,
                                         '& > *': {minWidth: 0}
                                     }}>
-                                        {createSubLogTitle(commandData, expandedLogs)}
+                                        {createSubLogTitle(commandData, expandedLogs, log.commandType)}
                                     </Box>
                                 </AccordionSummary>
                                 <AccordionDetails>
@@ -282,7 +282,7 @@ const LogItem = ({
                                     <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
                                         <>
                                             <Link
-                                                href={createCommandHeaderDocLink(commandData.data.header.length)}
+                                                href={createCommandHeaderDocLink(commandData.data.header.length, log.commandType)}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 onClick={event => event.stopPropagation()}

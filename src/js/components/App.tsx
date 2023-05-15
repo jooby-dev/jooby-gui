@@ -4,7 +4,7 @@ import {Box} from '@mui/material';
 import LogsPanel from './LogsPanel/LogsPanel.js';
 import CommandPanel from './CommandPanel/CommandPanel.js';
 
-import {ILogItem} from '../types';
+import {ILogItem} from '../types.js';
 
 
 const App = () => {

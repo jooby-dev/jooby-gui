@@ -1,20 +1,19 @@
-import {useState, useEffect, useRef, useCallback} from 'react';
-import {utils, message, constants} from 'jooby-codec';
+import {useState, useEffect, useRef, useCallback, useContext} from 'react';
+import * as joobyCodec from '@jooby-dev/jooby-codec';
 import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
-    Autocomplete, Box, Typography, TextField, InputAdornment, ButtonGroup, Button, Popper,
-    Grow, Paper, ClickAwayListener, MenuList, MenuItem, List, ListItem, ListItemText, Stack
+    Autocomplete, Box, Typography, TextField, InputAdornment, Button, MenuItem, List,
+    ListItem, ListItemText, Stack, Select, FormControl, InputLabel, SelectChangeEvent
 } from '@mui/material';
 
-import {
-    Clear as ClearIcon, ArrowDropDown as ArrowDropDownIcon, Delete as DeleteIcon,
-    Edit as EditIcon
-} from '@mui/icons-material';
+
+import {Clear as ClearIcon, Delete as DeleteIcon, Edit as EditIcon} from '@mui/icons-material';
 
 import createCommandDirectionIcon from '../../utils/createCommandDirectionIcon.js';
 
 import {useSnackbar} from '../../contexts/SnackbarContext.js';
+import {CommandTypeContext} from '../../contexts/CommandTypeContext.js';
 
 import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
 import HighlightedText from '../HighlightedText.js';
@@ -23,29 +22,27 @@ import CommandParametersEditor from '../CommandParametersEditor/CommandParameter
 import {TSetLogs, ILogItem} from '../../types.js';
 
 import {
-    hardwareTypeList, parseButtonNameMap, LOG_TYPE_ERROR, LOG_TYPE_MESSAGE, SEVERITY_TYPE_WARNING
+    LOG_TYPE_ERROR, LOG_TYPE_MESSAGE, SEVERITY_TYPE_WARNING, COMMAND_TYPE_ANALOG,
+    COMMAND_TYPE_OBIS_OBSERVER, commandTypeConfigMap
 } from '../../constants.js';
 
 import getHardwareType from './utils/getHardwareType.js';
 import getHardwareTypeName from './utils/getHardwareTypeName.js';
 import createCtrlEnterSubmitHandler from './utils/createCtrlEnterSubmitHandler.js';
+import hasHardwareTypeInCommandType from '../../utils/hasHardwareTypeInCommandType.js';
 
-import {THandleChange} from './types';
-
-import {preparedCommandList} from './constants';
+import {THandleChange} from './types.js';
 
 
-const {AUTO, DOWNLINK, UPLINK} = constants.directions;
-const {getHexFromBytes} = utils;
+const {getHexFromBytes} = joobyCodec.utils;
 
 
 const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
+    const {commandType, setCommandType} = useContext(CommandTypeContext);
+
     const [hardwareType, setHardwareType] = useState<object | null>(null);
     const [buffer, setBuffer] = useState('');
-    const [selectedParseButtonIndex, setSelectedParseButtonIndex] = useState<typeof AUTO | typeof DOWNLINK | typeof UPLINK>(AUTO);
-    const [popperWidth, setPopperWidth] = useState(0);
-    const [isOpenParseButtonGroup, setIsOpenParseButtonGroup] = useState(false);
-    const [commandList, setCommandList] = useState<Array<object>>([]);
+    const [commandList, setCommandList] = useState<Array<object>>(commandTypeConfigMap[commandType].preparedCommandList);
     const [preparedCommands, setPreparedCommands] = useState<Array<object>>([]);
     const [command, setCommand] = useState<object | null>(null);
     const [commandExampleList, setCommandExampleList] = useState<Array<object>>([]);
@@ -54,26 +51,29 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const [editingCommandId, setEditingCommandId] = useState<string | null>(null);
     const [recentlyEditedCommandId, setRecentlyEditedCommandId] = useState<string | null>(null);
 
-    const anchorButtonGroupListRef = useRef<HTMLDivElement | null>(null);
     const parametersTextFieldRef = useRef<HTMLInputElement>(null);
 
     const {showSnackbar} = useSnackbar();
 
+    // reset state when command type changes
     useEffect(
         () => {
-            setCommandList(preparedCommandList);
+            setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
+            setCommand(null);
+            setEditingCommandId(null);
+            setParameters('');
+            setBuffer('');
+            setHardwareType(null);
+            setCommandExample(null);
+            setCommandExampleList([]);
+            setPreparedCommands([]);
         },
-        []
+        [commandType]
     );
 
-    useEffect(
-        () => {
-            if (anchorButtonGroupListRef.current) {
-                setPopperWidth(anchorButtonGroupListRef.current.offsetWidth);
-            }
-        },
-        [isOpenParseButtonGroup, anchorButtonGroupListRef]
-    );
+    const handleCommandTypeChange = (event: SelectChangeEvent) => {
+        setCommandType(event.target.value);
+    };
 
     const handleHardwareTypeChange: THandleChange = (event, newValue) => {
         setHardwareType(newValue);
@@ -98,7 +98,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
     const handleClearCommandListClick = () => {
         setPreparedCommands([]);
-        setCommandList(preparedCommandList);
+        setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
     };
 
     const handleAddToMessageClick = () => {
@@ -115,7 +115,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         });
 
         setPreparedCommands(newPreparedCommands);
-        setCommandList(preparedCommandList);
+        setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
     };
 
     const handleCommandExampleChange: THandleChange = (event, newValue) => {
@@ -130,7 +130,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         }
 
         if (newValue.value.hardwareType) {
-            const hardwareTypeData = hardwareTypeList.find(hardwareType => hardwareType.value === newValue.value.hardwareType);
+            const hardwareTypeData = commandTypeConfigMap[commandType].hardwareTypeList.find(hardwareType => hardwareType.value === newValue.value.hardwareType);
 
             setHardwareType(hardwareTypeData);
             showSnackbar({message: `Hardware type has been changed to "${hardwareTypeData.label}"`, severity: SEVERITY_TYPE_WARNING});
@@ -160,29 +160,6 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         }, 0);
     };
 
-    const handleMenuItemClick = (
-        event: React.MouseEvent<HTMLLIElement, MouseEvent>,
-        directionType: number
-    ) => {
-        setSelectedParseButtonIndex(directionType);
-        setIsOpenParseButtonGroup(false);
-    };
-
-    const handleParseButtonGroupMenuClose = (event: Event) => {
-        if (
-            anchorButtonGroupListRef.current &&
-            anchorButtonGroupListRef.current.contains(event.target as HTMLElement)
-        ) {
-            return;
-        }
-
-        setIsOpenParseButtonGroup(false);
-    };
-
-    const handleToggleParseButtonGroup = () => {
-        setIsOpenParseButtonGroup(prevIsOpenParseButtonGroup => !prevIsOpenParseButtonGroup);
-    };
-
     const handleBuildClick = () => {
         let data;
         let messageHex;
@@ -190,7 +167,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         let buildError: unknown;
 
         try {
-            messageHex = message.toHex(preparedCommands.map(preparedCommand => {
+            messageHex = joobyCodec[commandType].message.toHex(preparedCommands.map(preparedCommand => {
                 preparedCommand.parameters.trim() === ''
                     ? commandParameters = undefined
                     : eval(`commandParameters = ${preparedCommand.parameters}`);
@@ -198,7 +175,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                 return new preparedCommand.command.value(commandParameters, getHardwareType(hardwareType));
             }));
 
-            data = message.fromHex(messageHex, preparedCommands[0].command.value.directionType, getHardwareType(hardwareType));
+            data = joobyCodec[commandType].message.fromHex(messageHex, undefined, getHardwareType(hardwareType));
         } catch (error) {
             buildError = error;
         }
@@ -230,6 +207,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         }
 
         const log: ILogItem = {
+            commandType,
             hardwareType: getHardwareTypeName(hardwareType),
             buffer: messageHex,
             data: buildError ? null : data,
@@ -251,7 +229,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         let parseError: unknown;
 
         try {
-            data = message.fromHex(buffer, Number(selectedParseButtonIndex), getHardwareType(hardwareType));
+            data = joobyCodec[commandType].message.fromHex(buffer, undefined, getHardwareType(hardwareType));
 
         } catch (error) {
             parseError = error;
@@ -282,6 +260,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         }
 
         const log: ILogItem = {
+            commandType,
             buffer,
             hardwareType: getHardwareTypeName(hardwareType),
             data: parseError ? null : data,
@@ -360,20 +339,37 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                 minHeight: 0,
                 '& > *': {minHeight: 0, flex: '0 0 auto', px: 2}
             }}>
-                <Autocomplete
-                    options={hardwareTypeList.sort((itemA, itemB) => itemA.label.localeCompare(itemB.label))}
-                    size="small"
-                    value={hardwareType}
-                    onChange={handleHardwareTypeChange}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label="Hardware type"
-                            variant="filled"
-                            helperText="May be required for parsing and creating a message"
-                        />
-                    )}
-                />
+                <Box>
+                    <FormControl variant="filled" fullWidth={true}>
+                        <InputLabel id="select-command-type-label">Codec class</InputLabel>
+                        <Select
+                            labelId="select-command-type-label"
+                            id="select-command-type"
+                            value={commandType}
+                            onChange={handleCommandTypeChange}
+                        >
+                            <MenuItem value={COMMAND_TYPE_ANALOG}>{COMMAND_TYPE_ANALOG}</MenuItem>
+                            <MenuItem value={COMMAND_TYPE_OBIS_OBSERVER}>{COMMAND_TYPE_OBIS_OBSERVER}</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Box>
+
+                {hasHardwareTypeInCommandType(commandType) && (
+                    <Autocomplete
+                        options={commandTypeConfigMap[commandType].hardwareTypeList.sort((itemA, itemB) => itemA.label.localeCompare(itemB.label))}
+                        size="small"
+                        value={hardwareType}
+                        onChange={handleHardwareTypeChange}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Hardware type"
+                                variant="filled"
+                                helperText="May be required for parsing and creating a message"
+                            />
+                        )}
+                    />
+                )}
 
                 <Typography variant="h5">Parse message</Typography>
 
@@ -409,60 +405,19 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     />
                 </Box>
 
-                <ButtonGroup
-                    disabled={!buffer}
-                    disableElevation
-                    sx={{mb: 2}}
-                    variant="contained"
-                    ref={anchorButtonGroupListRef}
-                    aria-label="parse button"
-                >
-                    <Button fullWidth onClick={handleParseClick}>{parseButtonNameMap[selectedParseButtonIndex]}</Button>
+                <Box>
                     <Button
-                        aria-controls={isOpenParseButtonGroup ? 'parse-button-group-menu' : undefined}
-                        aria-expanded={isOpenParseButtonGroup ? 'true' : undefined}
-                        aria-label="select parse strategy"
-                        aria-haspopup="menu"
-                        onClick={handleToggleParseButtonGroup}
+                        fullWidth={true}
+                        sx={{mb: 2}}
+                        disabled={!buffer}
+                        variant="contained"
+                        color="primary"
+                        disableElevation
+                        onClick={handleParseClick}
                     >
-                        <ArrowDropDownIcon/>
+                        Parse
                     </Button>
-                </ButtonGroup>
-                <Popper
-                    sx={{
-                        zIndex: 1000, minWidth: `${popperWidth}px}`
-                    }}
-                    open={isOpenParseButtonGroup}
-                    anchorEl={anchorButtonGroupListRef.current}
-                    role={undefined}
-                    transition
-                    disablePortal
-                >
-                    {({TransitionProps, placement}) => (
-                        <Grow
-                            {...TransitionProps}
-                            style={{
-                                transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                            }}
-                        >
-                            <Paper>
-                                <ClickAwayListener onClickAway={handleParseButtonGroupMenuClose}>
-                                    <MenuList id="parse-button-group-menu" autoFocusItem>
-                                        {Object.entries(parseButtonNameMap).map(([directionType, buttonName], index) => (
-                                            <MenuItem
-                                                key={buttonName}
-                                                selected={index === selectedParseButtonIndex}
-                                                onClick={(event) => handleMenuItemClick(event, Number(directionType))}
-                                            >
-                                                {buttonName}
-                                            </MenuItem>
-                                        ))}
-                                    </MenuList>
-                                </ClickAwayListener>
-                            </Paper>
-                        </Grow>
-                    )}
-                </Popper>
+                </Box>
 
                 <Typography variant="h5">Message creation</Typography>
 
@@ -526,6 +481,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                                     ? handleSaveEditedCommandClick
                                     : handleAddToMessageClick
                             }
+                            commandType={commandType}
                         />
                     </Box>
                 )}

@@ -1,6 +1,7 @@
 import {
     SEVERITY_TYPE_SUCCESS, SEVERITY_TYPE_WARNING, SEVERITY_TYPE_ERROR, LOG_TYPE_ERROR, LOG_TYPE_MESSAGE,
-    PARAMETERS_TAB_VIEW_TYPE_TREE, PARAMETERS_TAB_VIEW_TYPE_JSON
+    PARAMETERS_TAB_VIEW_TYPE_TREE, PARAMETERS_TAB_VIEW_TYPE_JSON, COMMAND_TYPE_ANALOG,
+    COMMAND_TYPE_OBIS_OBSERVER
 } from './constants.js';
 
 
@@ -30,6 +31,8 @@ export type THandleDeleteLogClick = (event: React.SyntheticEvent, id: string) =>
 
 export type THandleParametersTabChange = (event: React.SyntheticEvent, newValue: TParametersTab) => void;
 
+export type TCommandType = typeof COMMAND_TYPE_ANALOG | typeof COMMAND_TYPE_OBIS_OBSERVER;
+
 export interface IShowSnackbarParams {
     message: string;
     duration?: number;
@@ -37,6 +40,7 @@ export interface IShowSnackbarParams {
 }
 
 export interface ILogItem {
+    commandType: TCommandType;
     hardwareType: string | undefined;
     buffer: string;
     data: Array<object> | null;

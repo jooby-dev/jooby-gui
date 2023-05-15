@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 
 import {SnackbarProvider} from './contexts/SnackbarContext.js';
+import {CommandTypeProvider} from './contexts/CommandTypeContext.js';
 import App from './components/App.js';
 import '../sass/main.scss';
 
@@ -42,7 +43,9 @@ createRoot(document.getElementById('root') as HTMLElement).render(
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <SnackbarProvider>
-                <App/>
+                <CommandTypeProvider>
+                    <App/>
+                </CommandTypeProvider>
             </SnackbarProvider>
         </ThemeProvider>
     </React.StrictMode>

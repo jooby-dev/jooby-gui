@@ -1,7 +1,20 @@
-import {constants} from 'jooby-codec';
+import {analog, obisObserver} from '@jooby-dev/jooby-codec';
 
 
-const {AUTO, DOWNLINK, UPLINK} = constants.directions;
+const {DOWNLINK, UPLINK} = analog.constants.directions;
+
+export const directionNames = {
+    [DOWNLINK]: 'downlink',
+    [UPLINK]: 'uplink'
+} as const;
+
+const prepareCommandList = (commands) => [...Object.values(commands.uplink), ...Object.values(commands.downlink)]
+    .filter(item => item.id)
+    .map(item => ({
+        label: item.name,
+        value: item,
+        direction: directionNames[item.directionType]
+    }));
 
 
 export const LOG_TYPE_ERROR = 0;
@@ -20,18 +33,24 @@ export const PARAMETERS_TAB_VIEW_TYPE_JSON = 'json';
 
 export const LOG_COUNT_LIMIT = 30;
 
-export const directions = {
-    [DOWNLINK]: 'downlink',
-    [UPLINK]: 'uplink'
-} as const;
+export const COMMAND_TYPE_ANALOG = 'analog';
 
-export const parseButtonNameMap = {
-    [AUTO]: 'Parse (auto)',
-    [DOWNLINK]: `Parse (${directions[DOWNLINK]})`,
-    [UPLINK]: `Parse (${directions[UPLINK]})`
-} as const;
+export const COMMAND_TYPE_OBIS_OBSERVER = 'obisObserver';
 
-export const hardwareTypeList = Object.entries(constants.hardwareTypes).map(([key, value]) => ({
-    label: key,
-    value
-} as const));
+export const commandTypeConfigMap = {
+    [COMMAND_TYPE_ANALOG]: {
+        hasLrc: true,
+        hasHardwareType: true,
+        preparedCommandList: prepareCommandList(analog.commands),
+        hardwareTypeList: Object.entries(analog.constants.hardwareTypes).map(([key, value]) => ({
+            label: key,
+            value
+        } as const))
+    },
+    [COMMAND_TYPE_OBIS_OBSERVER]: {
+        hasLrc: false,
+        hasHardwareType: false,
+        preparedCommandList: prepareCommandList(obisObserver.commands),
+        hardwareTypeList: null
+    }
+} as const;

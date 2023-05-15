@@ -4,12 +4,12 @@ import createCommandDirectionIcon from '../../../utils/createCommandDirectionIco
 
 import HighlightedText from '../../../components/HighlightedText.js';
 
-import {TExpandedLogs} from '../../../types.js';
+import {TExpandedLogs, TCommandType} from '../../../types.js';
 
 import decimalToHex from './decimalToHex.js';
 
 
-const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs) => (
+const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs, commandType: TCommandType) => (
     <>
         {createCommandDirectionIcon(logCommand.command.directionType)}
         <Box>
@@ -32,7 +32,7 @@ const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs) => (
                     logCommand.command.id !== undefined
                         ? (
                             <Link
-                                href={createCommandDocLink(logCommand.command)}
+                                href={createCommandDocLink(logCommand.command, commandType)}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={event => event.stopPropagation()}

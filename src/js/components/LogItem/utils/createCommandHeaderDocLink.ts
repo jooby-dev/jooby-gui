@@ -1,15 +1,19 @@
-const baseUrl = 'https://github.com/jooby-dev/jooby-docs/blob/main/docs/message.md#';
+import {TCommandType} from '../../../types.js';
 
 
-export default (headerLength: number) => {
-    switch (headerLength) {
-        case 1:
-            return `${baseUrl}command-with-a-one-byte-header`;
+const headerLengthUrlParts: {[key: number]: string} = {
+    1: 'command-with-a-one-byte-header',
+    2: 'command-with-a-two-bytes-header',
+    3: 'command-with-a-three-bytes-header'
+};
 
-        case 2:
-            return `${baseUrl}command-with-a-two-bytes-header`;
 
-        case 3:
-            return `${baseUrl}command-with-a-three-bytes-header`;
+export default (headerLength: number, commandType: TCommandType): string => {
+    const headerLengthUrlPart = headerLengthUrlParts[headerLength];
+
+    if (!headerLengthUrlPart) {
+        throw new Error(`Invalid header length: ${headerLength}`);
     }
+
+    return `https://github.com/jooby-dev/jooby-docs/blob/main/docs/${commandType}/message.md#${headerLengthUrlPart}`;
 };

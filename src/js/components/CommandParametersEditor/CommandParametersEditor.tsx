@@ -11,6 +11,8 @@ import createCommandDocLink from '../../utils/createCommandDocLink.js';
 
 import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
 
+import {TCommandType} from '../../types.js';
+
 import isValidJson from './utils/isValidJson.js';
 import formatJson from './utils/formatJson.js';
 
@@ -25,6 +27,7 @@ interface ICommandParametersEditorProps {
     inputRef: React.RefObject<ace.Ace.Editor>;
     command: object | null;
     onSubmit: () => void;
+    commandType: TCommandType;
 }
 
 const CommandParameterEditor = ({
@@ -33,7 +36,8 @@ const CommandParameterEditor = ({
     disabled,
     inputRef,
     command,
-    onSubmit
+    onSubmit,
+    commandType
 }: ICommandParametersEditorProps) => {
     const editorRef = useRef<HTMLDivElement>(null);
     const onSubmitRef = useRef(onSubmit);
@@ -201,7 +205,7 @@ const CommandParameterEditor = ({
                 <>
                     {'JSON with command parameters (see '}
                     <Link
-                        href={createCommandDocLink(command.value)}
+                        href={createCommandDocLink(command.value, commandType)}
                         target="_blank"
                         rel="noreferrer"
                         onClick={(event) => event.stopPropagation()}

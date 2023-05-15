@@ -1,13 +1,14 @@
 import {Fragment, ReactElement} from 'react';
-import {constants} from 'jooby-codec';
+import * as joobyCodec from '@jooby-dev/jooby-codec';
 import {Box, Collapse, Tooltip} from '@mui/material';
 import {Close as CloseIcon, QuestionMark as QuestionMarkIcon, SyncAlt as SyncAltIcon} from '@mui/icons-material';
 
 import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.js';
+import hasLrc from '../../../utils/hasLrc.js';
 
 import HighlightedText from '../../../components/HighlightedText.js';
 
-import {ILogItem, TExpandedLogs, TLogCommands} from '../../../types.js';
+import {ILogItem, TExpandedLogs, TLogCommands, TCommandType} from '../../../types.js';
 
 import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR} from '../../../constants.js';
 
@@ -29,7 +30,7 @@ const createMessageDirectionIcon = (logCommands: TLogCommands) => {
     return createCommandDirectionIcon(logCommands.find(logCommand => logCommand.command.directionType !== undefined).command.directionType);
 };
 
-const renderHardwareType = (hardwareType: ILogItem['hardwareType']) => {
+const renderHardwareType = (hardwareType: ILogItem['hardwareType'], commandType: TCommandType) => {
     if (!hardwareType) {
         return null;
     }
@@ -37,7 +38,7 @@ const renderHardwareType = (hardwareType: ILogItem['hardwareType']) => {
     return (
         <>
             {'hardware type: '}
-            <Tooltip title={`ID: ${constants.hardwareTypes[hardwareType]}`}>
+            <Tooltip title={`ID: ${joobyCodec[commandType].constants.hardwareTypes[hardwareType]}`}>
                 <Box component="span">
                     <HighlightedText>
                         {hardwareType}
@@ -61,6 +62,7 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
                             <HighlightedText>{log.data.commands.length}</HighlightedText>
                             {'; '}
                             {
+                                hasLrc(log.commandType) &&
                                 log.data.lrc.expected !== log.data.lrc.actual
                                     ? (
                                         <>
@@ -75,7 +77,7 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
                                     )
                                     : null
                             }
-                            {renderHardwareType(log.hardwareType)}
+                            {renderHardwareType(log.hardwareType, log.commandType)}
                         </Box>
 
                         <Box sx={{
@@ -115,7 +117,7 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
                 <>
                     <CloseIcon color="error" sx={{mr: 2}}/>
                     <Box>
-                        {renderHardwareType(log.hardwareType)}
+                        {renderHardwareType(log.hardwareType, log.commandType)}
                         <Box sx={{
                             fontWeight: 'fontWeightRegular',
                             fontSize: '0.75rem',
