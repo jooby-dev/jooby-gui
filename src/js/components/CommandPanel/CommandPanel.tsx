@@ -214,7 +214,8 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             date: new Date().toLocaleString(),
             errorMessage: buildError?.message,
             type: buildError ? LOG_TYPE_ERROR : LOG_TYPE_MESSAGE,
-            id: uuidv4()
+            id: uuidv4(),
+            tags: ['build', commandType]
         };
 
         setLogs(prevLogs => [log, ...prevLogs]);
@@ -267,7 +268,8 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             date: new Date().toLocaleString(),
             errorMessage: parseError?.message,
             type: parseError ? LOG_TYPE_ERROR : LOG_TYPE_MESSAGE,
-            id: uuidv4()
+            id: uuidv4(),
+            tags: ['parse', commandType]
         };
 
         setLogs(prevLogs => [log, ...prevLogs]);
