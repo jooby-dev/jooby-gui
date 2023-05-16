@@ -12,12 +12,11 @@ import {ILogItem, TExpandedLogs, TLogCommands, TCommandType} from '../../../type
 
 import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR} from '../../../constants.js';
 
-import decimalToHex from './decimalToHex.js';
 import isAllCommandsUnknown from './isAllCommandsUnknown.js';
 import isAllCommandsHaveSameDirection from './isAllCommandsHaveSameDirection.js';
 
 
-const createMessageDirectionIcon = (logCommands: TLogCommands) => {
+const createMessageDirectionIcon = (logCommands: TLogCommands, commandType: TCommandType) => {
     if (isAllCommandsUnknown(logCommands)) {
         return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}}/>;
     }
@@ -27,7 +26,7 @@ const createMessageDirectionIcon = (logCommands: TLogCommands) => {
         return <SyncAltIcon color="error" sx={{mr: 2, transform: 'rotate(90deg)'}}/>;
     }
 
-    return createCommandDirectionIcon(logCommands.find(logCommand => logCommand.command.directionType !== undefined).command.directionType);
+    return createCommandDirectionIcon(logCommands.find(logCommand => logCommand.command.directionType !== undefined).command, commandType);
 };
 
 const renderHardwareType = (hardwareType: ILogItem['hardwareType'], commandType: TCommandType) => {
@@ -55,7 +54,7 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
         case LOG_TYPE_MESSAGE:
             return (
                 <>
-                    {createMessageDirectionIcon(log.data.commands)}
+                    {createMessageDirectionIcon(log.data.commands, log.commandType)}
                     <Box>
                         <Box sx={{minWidth: 0}}>
                             {'commands: '}
@@ -67,10 +66,10 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
                                     ? (
                                         <>
                                             {'LRC expected: '}
-                                            <HighlightedText isMonospacedFont={true}>{decimalToHex(log.data.lrc.expected)}</HighlightedText>
+                                            <HighlightedText isMonospacedFont={true}>{joobyCodec.utils.getHexFromNumber(log.data.lrc.expected, {prefix: '0x'})}</HighlightedText>
                                             {', actual: '}
                                             <HighlightedText isMonospacedFont={true} color="error.main">
-                                                {decimalToHex(log.data.lrc.actual)}
+                                                {joobyCodec.utils.getHexFromNumber(log.data.lrc.actual, {prefix: '0x'})}
                                             </HighlightedText>
                                             {'; '}
                                         </>

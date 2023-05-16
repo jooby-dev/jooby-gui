@@ -1,4 +1,6 @@
 import {Box, Collapse, Link} from '@mui/material';
+import {utils} from '@jooby-dev/jooby-codec';
+
 import createCommandDocLink from '../../../utils/createCommandDocLink.js';
 import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.js';
 
@@ -6,12 +8,10 @@ import HighlightedText from '../../../components/HighlightedText.js';
 
 import {TExpandedLogs, TCommandType} from '../../../types.js';
 
-import decimalToHex from './decimalToHex.js';
-
 
 const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs, commandType: TCommandType) => (
     <>
-        {createCommandDirectionIcon(logCommand.command.directionType)}
+        {createCommandDirectionIcon(logCommand.command, commandType)}
         <Box>
             <Box sx={{minWidth: 0}}>
                 {
@@ -20,7 +20,7 @@ const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs, comm
                             <>
                                 {'id: '}
                                 <HighlightedText isMonospacedFont={true}>
-                                    {decimalToHex(logCommand.command.id)}
+                                    {utils.getHexFromNumber(logCommand.command.id, {prefix: '0x'})}
                                 </HighlightedText>
                                 {'; '}
                             </>

@@ -129,8 +129,8 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             setParameters(JSON.stringify(newValue.value.parameters, null, 4));
         }
 
-        if (newValue.value.hardwareType) {
-            const hardwareTypeData = commandTypeConfigMap[commandType].hardwareTypeList.find(hardwareType => hardwareType.value === newValue.value.hardwareType);
+        if (newValue.value.config?.hardwareType) {
+            const hardwareTypeData = commandTypeConfigMap[commandType].hardwareTypeList.find(hardwareType => hardwareType.value === newValue.value.config.hardwareType);
 
             setHardwareType(hardwareTypeData);
             showSnackbar({message: `Hardware type has been changed to "${hardwareTypeData.label}"`, severity: SEVERITY_TYPE_WARNING});
@@ -172,10 +172,10 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     ? commandParameters = undefined
                     : eval(`commandParameters = ${preparedCommand.parameters}`);
 
-                return new preparedCommand.command.value(commandParameters, getHardwareType(hardwareType));
+                return new preparedCommand.command.value(commandParameters, {hardwareType: getHardwareType(hardwareType)});
             }));
 
-            data = joobyCodec[commandType].message.fromHex(messageHex, undefined, getHardwareType(hardwareType));
+            data = joobyCodec[commandType].message.fromHex(messageHex, {hardwareType: getHardwareType(hardwareType)});
         } catch (error) {
             buildError = error;
         }
@@ -229,7 +229,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         let parseError: unknown;
 
         try {
-            data = joobyCodec[commandType].message.fromHex(buffer, undefined, getHardwareType(hardwareType));
+            data = joobyCodec[commandType].message.fromHex(buffer, {hardwareType: getHardwareType(hardwareType)});
 
         } catch (error) {
             parseError = error;
@@ -527,7 +527,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     <>
                         <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center', gap: 1}}>
                             Message command list
-                            {createCommandDirectionIcon(preparedCommands[0].command.value.directionType)}
+                            {createCommandDirectionIcon(preparedCommands[0].command.value, commandType)}
                         </Typography>
 
                         <Box sx={{
