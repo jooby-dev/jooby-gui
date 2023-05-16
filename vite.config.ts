@@ -4,10 +4,19 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    optimizeDeps: {
+        esbuildOptions: {
+            keepNames: true
+        }
+    },
+    base: '/jooby-gui',
     root: './src',
     build: {
         outDir: '../dist',
         emptyOutDir: true
     },
-    plugins: [react()]
+    plugins: [react()],
+    esbuild: {
+        keepNames: true
+    }
 });

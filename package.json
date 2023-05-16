@@ -14,11 +14,22 @@
         "preinstall": "git config core.hooksPath .githooks"
     },
     "dependencies": {
+        "@emotion/react": "^11.10.6",
+        "@emotion/styled": "^11.10.6",
+        "@fontsource/roboto": "^4.5.8",
+        "@fontsource/roboto-mono": "^4.5.10",
+        "@jooby-dev/jooby-codec": "^2023.515.1136",
+        "@mui/icons-material": "^5.11.11",
+        "@mui/lab": "^5.0.0-alpha.126",
+        "@mui/material": "^5.11.14",
         "@types/react": "^18.0.28",
+        "@types/react-beautiful-dnd": "^13.1.4",
         "@types/react-dom": "^18.0.11",
+        "@types/uuid": "^9.0.1",
         "@typescript-eslint/eslint-plugin": "^5.56.0",
         "@typescript-eslint/parser": "^5.56.0",
         "@vitejs/plugin-react": "^3.1.0",
+        "ace-builds": "^1.19.0",
         "eslint": "^8.36.0",
         "eslint-config-airbnb": "^19.0.4",
         "eslint-config-airbnb-typescript": "^17.0.0",
@@ -27,10 +38,15 @@
         "eslint-plugin-jsx-a11y": "^6.7.1",
         "eslint-plugin-react": "^7.32.2",
         "eslint-plugin-react-hooks": "^4.6.0",
+        "jooby-codec": "^1.15.0",
+        "lz-string": "^1.5.0",
         "react": "^18.2.0",
+        "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^18.2.0",
+        "react-json-tree": "^0.18.0",
         "sass": "^1.59.3",
         "typescript": "^4.9.3",
-        "vite": "^4.2.0"
+        "uuid": "^9.0.0",
+        "vite": "^4.2.1"
     }
 }
