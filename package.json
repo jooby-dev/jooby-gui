@@ -10,15 +10,14 @@
         "preview": "vite preview",
         "lint": "tsc --noEmit && eslint ./src/**/*.{ts,tsx} ./*.{ts,tsx} --max-warnings=0",
         "lint-cached": "tsc --noEmit && eslint ./src/**/*.{ts,tsx} ./*.{ts,tsx} --cache --max-warnings=0",
-        "lint:fix": "eslint ./src/**/*.{ts,tsx} ./*.{ts,tsx} --fix --max-warnings=0",
-        "preinstall": "git config core.hooksPath .githooks"
+        "lint:fix": "eslint ./src/**/*.{ts,tsx} ./*.{ts,tsx} --fix --max-warnings=0"
     },
     "dependencies": {
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",
         "@fontsource/roboto": "^4.5.8",
         "@fontsource/roboto-mono": "^4.5.10",
-        "@jooby-dev/jooby-codec": "^2023.516.1343",
+        "@jooby-dev/jooby-codec": "^2023.517.1842",
         "@mui/icons-material": "^5.11.11",
         "@mui/lab": "^5.0.0-alpha.126",
         "@mui/material": "^5.11.14",
