@@ -66,7 +66,9 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
                                     ? (
                                         <>
                                             {'LRC expected: '}
-                                            <HighlightedText isMonospacedFont={true}>{joobyCodec.utils.getHexFromNumber(log.data.lrc.expected, {prefix: '0x'})}</HighlightedText>
+                                            <HighlightedText isMonospacedFont={true}>
+                                                {joobyCodec.utils.getHexFromNumber(log.data.lrc.expected, {prefix: '0x'})}
+                                            </HighlightedText>
                                             {', actual: '}
                                             <HighlightedText isMonospacedFont={true} color="error.main">
                                                 {joobyCodec.utils.getHexFromNumber(log.data.lrc.actual, {prefix: '0x'})}

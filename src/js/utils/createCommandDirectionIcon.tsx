@@ -16,7 +16,7 @@ const unknownCommandClassMap = {
     [COMMAND_TYPE_OBIS_OBSERVER]: ObisObserverUnknownCommand
 };
 
-const isUnknownCommandClassOrInstanceOf = (command: object, commandType: TCommandType) => {
+const isUnknownCommandKind = (command: object, commandType: TCommandType) => {
     const UnknownCommand = unknownCommandClassMap[commandType];
 
     if (command === UnknownCommand || command instanceof UnknownCommand) {
@@ -27,7 +27,7 @@ const isUnknownCommandClassOrInstanceOf = (command: object, commandType: TComman
 };
 
 const createCommandDirectionIcon = (command: object, commandType: TCommandType) => {
-    if (isUnknownCommandClassOrInstanceOf(command, commandType)) {
+    if (isUnknownCommandKind(command, commandType)) {
         return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}}/>;
     }
 
