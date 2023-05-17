@@ -2,7 +2,8 @@ import {memo} from 'react';
 import {JSONTree} from 'react-json-tree';
 
 import {
-    Box, Typography, Accordion, AccordionSummary, AccordionDetails, Link, Tab
+    Box, Typography, Accordion, AccordionSummary, AccordionDetails, Link, Tab,
+    Chip
 } from '@mui/material';
 
 import {TabContext, TabList, TabPanel} from '@mui/lab';
@@ -194,7 +195,18 @@ const LogItem = ({
                         flex: '0 0 auto',
                         fontSize: '0.8rem'
                     }}>
-                        {date}
+                        <Box sx={{display:'flex', justifyContent: 'end'}}>{date}</Box>
+                        <Box sx={{display:'flex', justifyContent: 'end', gap: 1}}>
+                            {log.tags.map((tag, index) => (
+                                <Chip
+                                    key={index}
+                                    label={tag}
+                                    variant="filled"
+                                    size="small"
+                                    sx={{color: 'grey.500'}}
+                                />
+                            ))}
+                        </Box>
                     </Box>
 
                     <IconButtonWithTooltip
