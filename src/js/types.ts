@@ -48,4 +48,5 @@ export interface ILogItem {
     errorMessage: string | undefined;
     type: typeof LOG_TYPE_ERROR | typeof LOG_TYPE_MESSAGE;
     id: string;
+    tags: Array<string>;
 }
