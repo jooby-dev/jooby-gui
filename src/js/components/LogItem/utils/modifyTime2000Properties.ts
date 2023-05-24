@@ -12,38 +12,40 @@ import formatUTCDate from './formatUTCDate.js';
 
 const TIME2000_KEY = 'time2000';
 
+const structuredClone = (source: any): any => JSON.parse(JSON.stringify(source));
+
 /**
  * Modifies "time2000" properties in a JSON object.
  *
  * This function recursively traverses the object and replaces any property
  * whose name contains "time2000" (case-insensitive) with a date string.
  *
- * @param obj - The object to modify.
+ * @param source - The object to modify.
  * @return A new object with modified "time2000" properties.
  */
-const modifyTime2000Parameter = (obj: any): any => {
-    const copy = JSON.parse(JSON.stringify(obj));
+const modifyTime2000Properties = (source: any): any => {
+    const copy = structuredClone(source);
 
     if (typeof copy !== 'object' || copy === null) {
         return copy;
     }
 
     if (Array.isArray(copy)) {
-        return copy.map(element => modifyTime2000Parameter(element));
+        return copy.map(element => modifyTime2000Properties(element));
     }
 
-    const newObj: {[key: string]: any} = {};
+    const result: {[key: string]: any} = {};
 
     for (const key in copy) {
         if (key.toLowerCase().includes(TIME2000_KEY)) {
-            newObj[key] = `${copy[key]} (${formatUTCDate(utils.time.getDateFromTime2000(copy[key]))})`;
+            result[key] = `${copy[key]} (${formatUTCDate(utils.time.getDateFromTime2000(copy[key]))})`;
         } else {
-            newObj[key] = modifyTime2000Parameter(copy[key]);
+            result[key] = modifyTime2000Properties(copy[key]);
         }
     }
 
-    return newObj;
+    return result;
 };
 
 
-export default modifyTime2000Parameter;
+export default modifyTime2000Properties;

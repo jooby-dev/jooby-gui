@@ -29,7 +29,7 @@ import getLogColor from './utils/getLogColor.js';
 import createSubLogTitle from './utils/createSubLogTitle.js';
 import createLogTitle from './utils/createLogTitle.js';
 import createCommandHeaderDocLink from './utils/createCommandHeaderDocLink.js';
-import modifyTime2000Parameter from './utils/modifyTime2000Parameter.js';
+import modifyTime2000Properties from './utils/modifyTime2000Properties.js';
 
 import {JSONTreeTheme} from './constants.js';
 
@@ -332,7 +332,7 @@ const LogItem = ({
                                                     <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_TREE}>
                                                         <Box sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
                                                             <JSONTree
-                                                                data={modifyTime2000Parameter(commandData.command.parameters)}
+                                                                data={modifyTime2000Properties(commandData.command.parameters)}
                                                                 theme={JSONTreeTheme}
                                                                 invertTheme={false}
                                                                 hideRoot={true}
