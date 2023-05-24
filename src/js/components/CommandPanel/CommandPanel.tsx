@@ -11,6 +11,7 @@ import {
 import {Clear as ClearIcon, Delete as DeleteIcon, Edit as EditIcon} from '@mui/icons-material';
 
 import createCommandDirectionIcon from '../../utils/createCommandDirectionIcon.js';
+import removeComments from '../../utils/removeComments.js';
 
 import {useSnackbar} from '../../contexts/SnackbarContext.js';
 import {CommandTypeContext} from '../../contexts/CommandTypeContext.js';
@@ -226,11 +227,13 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             return;
         }
 
+        const bufferWithoutComments = removeComments(buffer);
+
         let data;
         let parseError: unknown;
 
         try {
-            data = joobyCodec[commandType].message.fromHex(buffer, {hardwareType: getHardwareType(hardwareType)});
+            data = joobyCodec[commandType].message.fromHex(bufferWithoutComments, {hardwareType: getHardwareType(hardwareType)});
 
         } catch (error) {
             parseError = error;
@@ -262,7 +265,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
         const log: ILogItem = {
             commandType,
-            buffer,
+            buffer: bufferWithoutComments,
             hardwareType: getHardwareTypeName(hardwareType),
             data: parseError ? null : data,
             date: new Date().toLocaleString(),
