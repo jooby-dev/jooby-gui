@@ -42,7 +42,7 @@ export interface IShowSnackbarParams {
 export interface ILogItem {
     commandType: TCommandType;
     hardwareType: string | undefined;
-    buffer: string;
+    hex: string;
     data: Array<object> | null;
     date: string;
     errorMessage: string | undefined;

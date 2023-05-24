@@ -60,7 +60,7 @@ const LogItem = ({
     expandAllLogs,
     collapseAllLogs
 }: ILogItemProps) => {
-    const {buffer, data, date, errorMessage, type, id} = log;
+    const {hex, data, date, errorMessage, type, id} = log;
 
     if (type === LOG_TYPE_ERROR) {
         return (
@@ -134,21 +134,21 @@ const LogItem = ({
                     expandedLogs.includes(id) && (
                         <AccordionDetails>
                             {
-                                buffer && (
+                                hex && (
                                     <>
                                         <Typography variant="h6" gutterBottom>
                                             {'Dump '}
                                             <IconButtonWithTooltip
                                                 title="Copy dump"
                                                 onClick={() => handleCopyToClipboard(
-                                                    buffer,
+                                                    hex,
                                                     {message: 'Message dump copied to clipboard'}
                                                 )}
                                             >
                                                 <ContentCopyIcon/>
                                             </IconButtonWithTooltip>
                                         </Typography>
-                                        <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{buffer}</Typography>
+                                        <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{hex}</Typography>
                                     </>
                                 )
                             }
@@ -241,14 +241,14 @@ const LogItem = ({
                             <IconButtonWithTooltip
                                 title="Copy dump"
                                 onClick={() => handleCopyToClipboard(
-                                    buffer,
+                                    hex,
                                     {message: 'Message dump copied to clipboard'}
                                 )}
                             >
                                 <ContentCopyIcon/>
                             </IconButtonWithTooltip>
                         </Typography>
-                        <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{buffer}</Typography>
+                        <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{hex}</Typography>
 
                         {data.commands.length > 0 && data.commands.map((commandData: object) => (
                             <Accordion

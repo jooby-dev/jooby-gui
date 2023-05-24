@@ -42,7 +42,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const {commandType, setCommandType} = useContext(CommandTypeContext);
 
     const [hardwareType, setHardwareType] = useState<object | null>(null);
-    const [buffer, setBuffer] = useState('');
+    const [hex, setHex] = useState('');
     const [commandList, setCommandList] = useState<Array<object>>(commandTypeConfigMap[commandType].preparedCommandList);
     const [preparedCommands, setPreparedCommands] = useState<Array<object>>([]);
     const [command, setCommand] = useState<object | null>(null);
@@ -63,7 +63,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             setCommand(null);
             setEditingCommandId(null);
             setParameters('');
-            setBuffer('');
+            setHex('');
             setHardwareType(null);
             setCommandExample(null);
             setCommandExampleList([]);
@@ -80,12 +80,12 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         setHardwareType(newValue);
     };
 
-    const handleBufferChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setBuffer(event.target.value);
+    const handleHexChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setHex(event.target.value);
     };
 
-    const handleClearBufferClick = () => {
-        setBuffer('');
+    const handleClearHexClick = () => {
+        setHex('');
     };
 
     const handleParametersChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,7 +210,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         const log: ILogItem = {
             commandType,
             hardwareType: getHardwareTypeName(hardwareType),
-            buffer: messageHex,
+            hex: messageHex,
             data: buildError ? null : data,
             date: new Date().toLocaleString(),
             errorMessage: buildError?.message,
@@ -223,17 +223,17 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     };
 
     const handleParseClick = () => {
-        if (!buffer) {
+        if (!hex) {
             return;
         }
 
-        const bufferWithoutComments = removeComments(buffer);
+        const hexWithoutComments = removeComments(hex);
 
         let data;
         let parseError: unknown;
 
         try {
-            data = joobyCodec[commandType].message.fromHex(bufferWithoutComments, {hardwareType: getHardwareType(hardwareType)});
+            data = joobyCodec[commandType].message.fromHex(hexWithoutComments, {hardwareType: getHardwareType(hardwareType)});
 
         } catch (error) {
             parseError = error;
@@ -265,7 +265,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
         const log: ILogItem = {
             commandType,
-            buffer: bufferWithoutComments,
+            hex: hexWithoutComments,
             hardwareType: getHardwareTypeName(hardwareType),
             data: parseError ? null : data,
             date: new Date().toLocaleString(),
@@ -386,20 +386,20 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                         size="small"
                         label="Dump"
                         variant="filled"
-                        onChange={handleBufferChange}
+                        onChange={handleHexChange}
                         onKeyDown={createCtrlEnterSubmitHandler(handleParseClick)}
                         multiline
                         minRows={4}
                         maxRows={12}
-                        value={buffer}
+                        value={hex}
                         helperText="In a hex format"
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    {buffer && (
+                                    {hex && (
                                         <IconButtonWithTooltip
                                             title="Clear dump"
-                                            onClick={handleClearBufferClick}
+                                            onClick={handleClearHexClick}
                                         >
                                             <ClearIcon/>
                                         </IconButtonWithTooltip>
@@ -414,7 +414,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     <Button
                         fullWidth={true}
                         sx={{mb: 2}}
-                        disabled={!buffer}
+                        disabled={!hex}
                         variant="contained"
                         color="primary"
                         disableElevation

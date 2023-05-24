@@ -7,9 +7,9 @@ const COMMENT_IDENTIFIER = '//';
  * ignoring leading and trailing whitespace. It assumes that such lines are
  * comments and can be safely removed.
  *
- * @param {string} input - The input string to remove comments from.
+ * @param {string} input - the input string to remove comments from
  *
- * @returns {string} The input string with comment lines removed.
+ * @returns {string} the input string with comment lines removed
  */
 export default (input: string): string => {
     const lines = input.split('\n');
