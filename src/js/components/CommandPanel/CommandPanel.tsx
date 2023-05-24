@@ -527,9 +527,9 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
                 {preparedCommands.length > 0 && (
                     <>
-                        <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center', gap: 1}}>
-                            Message command list
+                        <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center'}}>
                             {createCommandDirectionIcon(preparedCommands[0].command.value, commandType)}
+                            Message command list
                         </Typography>
 
                         <Box sx={{
