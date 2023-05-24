@@ -1,8 +1,8 @@
 import {ArrowDownward as ArrowDownwardIcon, QuestionMark as QuestionMarkIcon} from '@mui/icons-material';
 import {yellow} from '@mui/material/colors';
-import * as joobyCodec from '@jooby-dev/jooby-codec';
-import AnalogUnknownCommand from '@jooby-dev/jooby-codec/analog/UnknownCommand.js';
-import ObisObserverUnknownCommand from '@jooby-dev/jooby-codec/obis-observer/UnknownCommand.js';
+import * as joobyCodec from 'jooby-codec';
+import AnalogUnknownCommand from 'jooby-codec/analog/UnknownCommand.js';
+import ObisObserverUnknownCommand from 'jooby-codec/obis-observer/UnknownCommand.js';
 
 import {TCommandType} from '../types.js';
 
