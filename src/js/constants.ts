@@ -1,4 +1,4 @@
-import {analog, obisObserver} from 'jooby-codec';
+import {analog, obisObserver} from '@jooby-dev/jooby-codec';
 
 
 const {DOWNLINK, UPLINK} = analog.constants.directions;

@@ -1,5 +1,5 @@
 import {yellow} from '@mui/material/colors';
-import {analog} from 'jooby-codec';
+import {analog} from '@jooby-dev/jooby-codec';
 import {TLogCommands} from '../../../types.js';
 
 
