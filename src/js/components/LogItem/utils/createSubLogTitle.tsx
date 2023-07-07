@@ -1,5 +1,5 @@
 import {Box, Collapse, Link} from '@mui/material';
-import {utils} from '@jooby-dev/jooby-codec';
+import {utils} from 'jooby-codec';
 
 import createCommandDocLink from '../../../utils/createCommandDocLink.js';
 import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.js';

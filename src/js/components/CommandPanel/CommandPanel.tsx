@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef, useCallback, useContext} from 'react';
-import * as joobyCodec from '@jooby-dev/jooby-codec';
+import * as joobyCodec from 'jooby-codec';
 import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
