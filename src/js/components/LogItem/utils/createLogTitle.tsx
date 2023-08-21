@@ -8,7 +8,7 @@ import hasLrc from '../../../utils/hasLrc.js';
 
 import HighlightedText from '../../../components/HighlightedText.js';
 
-import {ILogItem, TExpandedLogs, TLogCommands, TCommandType} from '../../../types.js';
+import {ILogItem, TLogCommands, TCommandType} from '../../../types.js';
 
 import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR} from '../../../constants.js';
 
@@ -49,7 +49,7 @@ const renderHardwareType = (hardwareType: ILogItem['hardwareType'], commandType:
 };
 
 
-const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElement => {
+const createLogTitle = (log: ILogItem): ReactElement => {
     switch (log.type) {
         case LOG_TYPE_MESSAGE:
             return (
@@ -96,7 +96,7 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
                                         textOverflow: 'ellipsis'
                                     }
                                 }}
-                                in={!expandedLogs.includes(log.id)}
+                                in={!log.isExpanded}
                             >
                                 {
                                     log.data.commands.map((commandData, index) => (
@@ -134,7 +134,7 @@ const createLogTitle = (log: ILogItem, expandedLogs: TExpandedLogs): ReactElemen
                                         textOverflow: 'ellipsis'
                                     }
                                 }}
-                                in={!expandedLogs.includes(log.id)}
+                                in={!log.isExpanded}
                             >
                                 {log.errorMessage}
                             </Collapse>

@@ -7,18 +7,16 @@ import {
 } from '@mui/material';
 
 import {TabContext, TabList, TabPanel} from '@mui/lab';
-
 import {
     ExpandMore as ExpandMoreIcon, Delete as DeleteIcon, Share as ShareIcon, UnfoldMore as UnfoldMoreIcon,
     UnfoldLess as UnfoldLessIcon, ContentCopy as ContentCopyIcon
 } from '@mui/icons-material';
 
+import useCopyToClipboard from '../../hooks/useCopyToClipboard.js';
+
 import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
 
-import {
-    ILogItem, TParametersTab, THandleLogClick, THandleDeleteLogClick, THandleParametersTabChange,
-    THandleCopyToClipboard, THandleShareLogsClick, TExpandAllLogs, TCollapseAllLogs, TExpandedLogs
-} from '../../types.js';
+import {ILogItem, TParametersTab, THandleShareLogsClick, TSetLogs} from '../../types.js';
 
 import {
     LOG_TYPE_ERROR, PARAMETERS_TAB_VIEW_TYPE_JSON, PARAMETERS_TAB_VIEW_TYPE_TREE
@@ -36,39 +34,109 @@ import {JSONTreeTheme} from './constants.js';
 
 interface ILogItemProps {
     log: ILogItem;
-    expandedLogs: TExpandedLogs;
-    handleLogClick: THandleLogClick;
-    handleDeleteLogClick: THandleDeleteLogClick;
-    handleParametersTabChange: THandleParametersTabChange;
     parametersTab: TParametersTab;
-    handleCopyToClipboard: THandleCopyToClipboard;
+    setParametersTab: React.Dispatch<React.SetStateAction<TParametersTab>>;
+    setLogs: TSetLogs;
     handleShareLogsClick: THandleShareLogsClick;
-    expandAllLogs: TExpandAllLogs;
-    collapseAllLogs: TCollapseAllLogs;
 }
 
 
 const LogItem = ({
     log,
-    expandedLogs,
-    handleLogClick,
-    handleDeleteLogClick,
-    handleParametersTabChange,
     parametersTab,
-    handleCopyToClipboard,
-    handleShareLogsClick,
-    expandAllLogs,
-    collapseAllLogs
+    setParametersTab,
+    setLogs,
+    handleShareLogsClick
 }: ILogItemProps) => {
-    const {hex, data, date, errorMessage, type, id} = log;
+    const {hex, data, date, errorMessage, type, id, isExpanded} = log;
 
-    if (type === LOG_TYPE_ERROR) {
+    const copyToClipboard = useCopyToClipboard();
+
+    const toggleLog = ( logId: string ): void => {
+        setLogs(prevLogs => {
+            const updatedLogs = prevLogs.map(prevLog => {
+                if ( prevLog.id !== logId ) {
+                    return prevLog;
+                }
+
+                return {
+                    ...prevLog,
+                    isExpanded: !prevLog.isExpanded
+                };
+            });
+
+            return updatedLogs;
+        });
+    };
+
+    const toggleLogAndNested = ( event: React.SyntheticEvent, logId: string, isLogExpanded = true ): void => {
+        event.stopPropagation();
+
+        setLogs(prevLogs => {
+            const updatedLogs = prevLogs.map(prevLog => {
+                if ( prevLog.id !== logId ) {
+                    return prevLog;
+                }
+
+                return {
+                    ...prevLog,
+                    isExpanded: isLogExpanded,
+                    data: {
+                        ...prevLog.data,
+                        commands: prevLog.data.commands.map(command => ({
+                            ...command,
+                            isExpanded: isLogExpanded
+                        }))
+                    }
+                };
+            });
+
+            return updatedLogs;
+        });
+    };
+
+    const toggleNestedLog = ( logId: string, nestedLogId: string ): void => {
+        setLogs(prevLogs => {
+            const updatedLogs = prevLogs.map(prevLog => {
+                if ( prevLog.id !== logId ) {
+                    return prevLog;
+                }
+
+                return {
+                    ...prevLog,
+                    data: {
+                        ...prevLog.data,
+                        commands: prevLog.data.commands.map(command => {
+                            if ( command.id !== nestedLogId ) {
+                                return command;
+                            }
+
+                            return {
+                                ...command,
+                                isExpanded: !command.isExpanded
+                            };
+                        })
+                    }
+                };
+            });
+
+            return updatedLogs;
+        });
+    };
+
+    const handleDeleteLogClick = ( event: React.SyntheticEvent, logId: string ): void => {
+        event.stopPropagation();
+
+        setLogs(prevLogs => prevLogs.filter(prevLog => prevLog.id !== logId));
+    };
+
+    if ( type === LOG_TYPE_ERROR ) {
         return (
             <Accordion
                 sx={{overflow: 'hidden', '& > *': {minWidth: 0}}}
                 key={id}
-                expanded={expandedLogs.includes(id)}
-                onChange={() => handleLogClick(id)}
+                expanded={isExpanded}
+                onChange={() => toggleLog(id)}
             >
                 <AccordionSummary
                     content="div"
@@ -87,7 +155,7 @@ const LogItem = ({
                             alignItems: 'center',
                             '& > *': {minWidth: 0}
                         }}>
-                            {createLogTitle(log, expandedLogs)}
+                            {createLogTitle(log)}
                         </Box>
 
                         <Box sx={{
@@ -101,17 +169,11 @@ const LogItem = ({
                             {date}
                         </Box>
 
-                        <IconButtonWithTooltip
-                            title="Expand log"
-                            onClick={event => expandAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
-                        >
+                        <IconButtonWithTooltip title="Expand log" onClick={event => toggleLogAndNested(event, id)}>
                             <UnfoldMoreIcon/>
                         </IconButtonWithTooltip>
 
-                        <IconButtonWithTooltip
-                            title="Collapse log"
-                            onClick={event => collapseAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
-                        >
+                        <IconButtonWithTooltip title="Collapse log" onClick={event => toggleLogAndNested(event, id, false)}>
                             <UnfoldLessIcon/>
                         </IconButtonWithTooltip>
 
@@ -131,7 +193,7 @@ const LogItem = ({
                     </Box>
                 </AccordionSummary>
                 {
-                    expandedLogs.includes(id) && (
+                    isExpanded && (
                         <AccordionDetails>
                             {
                                 hex && (
@@ -140,7 +202,7 @@ const LogItem = ({
                                             {'Dump '}
                                             <IconButtonWithTooltip
                                                 title="Copy dump"
-                                                onClick={() => handleCopyToClipboard(
+                                                onClick={() => copyToClipboard(
                                                     hex,
                                                     {message: 'Message dump copied to clipboard'}
                                                 )}
@@ -165,8 +227,8 @@ const LogItem = ({
         <Accordion
             sx={{overflow: 'hidden', '& > *': {minWidth: 0}}}
             key={id}
-            expanded={expandedLogs.includes(id)}
-            onChange={() => handleLogClick(id)}
+            expanded={isExpanded}
+            onChange={() => toggleLog(id)}
         >
             <AccordionSummary
                 content="div"
@@ -185,7 +247,7 @@ const LogItem = ({
                         alignItems: 'center',
                         '& > *': {minWidth: 0}
                     }}>
-                        {createLogTitle(log, expandedLogs)}
+                        {createLogTitle(log)}
                     </Box>
 
                     <Box sx={{
@@ -210,37 +272,31 @@ const LogItem = ({
                         </Box>
                     </Box>
 
-                    <IconButtonWithTooltip
-                        title="Expand log"
-                        onClick={event => expandAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
-                    >
+                    <IconButtonWithTooltip title="Expand log" onClick={event => toggleLogAndNested(event, id)}>
                         <UnfoldMoreIcon/>
                     </IconButtonWithTooltip>
 
-                    <IconButtonWithTooltip
-                        title="Collapse log"
-                        onClick={event => collapseAllLogs(event, [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])])}
-                    >
+                    <IconButtonWithTooltip title="Collapse log" onClick={event => toggleLogAndNested(event, id, false)}>
                         <UnfoldLessIcon/>
                     </IconButtonWithTooltip>
 
-                    <IconButtonWithTooltip title="Delete log" onClick={event => handleShareLogsClick(event, [log])}>
+                    <IconButtonWithTooltip title="Share log" onClick={event => handleShareLogsClick(event, [log])}>
                         <ShareIcon/>
                     </IconButtonWithTooltip>
 
-                    <IconButtonWithTooltip title="Share log" onClick={event => handleDeleteLogClick(event, id)}>
+                    <IconButtonWithTooltip title="Delete log" onClick={event => handleDeleteLogClick(event, id)}>
                         <DeleteIcon/>
                     </IconButtonWithTooltip>
                 </Box>
             </AccordionSummary>
             {
-                expandedLogs.includes(id) && (
+                isExpanded && (
                     <AccordionDetails>
                         <Typography variant="h6" gutterBottom>
                             {'Dump '}
                             <IconButtonWithTooltip
                                 title="Copy dump"
-                                onClick={() => handleCopyToClipboard(
+                                onClick={() => copyToClipboard(
                                     hex,
                                     {message: 'Message dump copied to clipboard'}
                                 )}
@@ -254,8 +310,8 @@ const LogItem = ({
                             <Accordion
                                 sx={{overflow: 'hidden', '& > *': {minWidth: 0}}}
                                 key={commandData.id}
-                                expanded={expandedLogs.includes(commandData.id)}
-                                onChange={() => handleLogClick(commandData.id)}
+                                expanded={commandData.isExpanded}
+                                onChange={() => toggleNestedLog(id, commandData.id)}
                             >
                                 <AccordionSummary
                                     content="div"
@@ -276,7 +332,7 @@ const LogItem = ({
                                         mr: 2,
                                         '& > *': {minWidth: 0}
                                     }}>
-                                        {createSubLogTitle(commandData, expandedLogs, log.commandType)}
+                                        {createSubLogTitle(commandData, log.commandType)}
                                     </Box>
                                 </AccordionSummary>
                                 <AccordionDetails>
@@ -284,7 +340,7 @@ const LogItem = ({
                                         {'Dump '}
                                         <IconButtonWithTooltip
                                             title="Copy dump"
-                                            onClick={() => handleCopyToClipboard(
+                                            onClick={() => copyToClipboard(
                                                 `${commandData.data.header.hex} ${commandData.data.body.hex}`,
                                                 {message: 'Command dump copied to clipboard'}
                                             )}
@@ -313,7 +369,7 @@ const LogItem = ({
                                                     {'Parameters '}
                                                     <IconButtonWithTooltip
                                                         title="Copy parameters in JSON format"
-                                                        onClick={() => handleCopyToClipboard(
+                                                        onClick={() => copyToClipboard(
                                                             JSON.stringify(commandData.command.parameters, null, 4),
                                                             {message: 'Parameters copied to clipboard'}
                                                         )}
@@ -324,7 +380,7 @@ const LogItem = ({
 
                                                 <TabContext value={parametersTab}>
                                                     <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                                                        <TabList onChange={handleParametersTabChange} aria-label="Display command parameters in tree, JSON view">
+                                                        <TabList onChange={(event, value) => setParametersTab(value)} aria-label="Display command parameters in tree, JSON view">
                                                             <Tab label={PARAMETERS_TAB_VIEW_TYPE_TREE} value={PARAMETERS_TAB_VIEW_TYPE_TREE}/>
                                                             <Tab label={PARAMETERS_TAB_VIEW_TYPE_JSON} value={PARAMETERS_TAB_VIEW_TYPE_JSON}/>
                                                         </TabList>

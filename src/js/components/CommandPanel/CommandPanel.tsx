@@ -7,7 +7,6 @@ import {
     ListItem, ListItemText, Stack, Select, FormControl, InputLabel, SelectChangeEvent
 } from '@mui/material';
 
-
 import {Clear as ClearIcon, Delete as DeleteIcon, Edit as EditIcon} from '@mui/icons-material';
 
 import createCommandDirectionIcon from '../../utils/createCommandDirectionIcon.js';
@@ -54,7 +53,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
     const parametersTextFieldRef = useRef<HTMLInputElement>(null);
 
-    const {showSnackbar} = useSnackbar();
+    const showSnackbar = useSnackbar();
 
     // reset state when command type changes
     useEffect(
@@ -202,7 +201,8 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                             hex: getHexFromBytes(commandData.data.body)
                         }
                     },
-                    id: uuidv4()
+                    id: uuidv4(),
+                    isExpanded: false
                 };
             });
         }
@@ -216,6 +216,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             errorMessage: buildError?.message,
             type: buildError ? LOG_TYPE_ERROR : LOG_TYPE_MESSAGE,
             id: uuidv4(),
+            isExpanded: false,
             tags: ['build', commandType]
         };
 
@@ -259,7 +260,8 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                         hex: getHexFromBytes(commandData.data.body)
                     }
                 },
-                id: uuidv4()
+                id: uuidv4(),
+                isExpanded: false
             }));
         }
 
@@ -272,6 +274,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             errorMessage: parseError?.message,
             type: parseError ? LOG_TYPE_ERROR : LOG_TYPE_MESSAGE,
             id: uuidv4(),
+            isExpanded: false,
             tags: ['parse', commandType]
         };
 
