@@ -1,5 +1,6 @@
-import {ReactNode, createContext, useContext, useState, useRef, useEffect} from 'react';
+import {ReactNode, createContext, useContext, useState, useCallback} from 'react';
 import {Snackbar, Alert, SnackbarCloseReason} from '@mui/material';
+import {v4 as uuidv4} from 'uuid';
 
 import {IShowSnackbarParams, TSeverity} from '../types.js';
 import {SEVERITY_TYPE_SUCCESS} from '../constants.js';
@@ -8,87 +9,54 @@ import {SEVERITY_TYPE_SUCCESS} from '../constants.js';
 const DEFAULT_SNACKBAR_DURATION = 3000;
 
 
-interface ISnackbarContextData {
-    showSnackbar: (params: IShowSnackbarParams) => void;
-}
-
 interface ISnackbarProviderProps {
     children: ReactNode;
 }
 
+interface ISnackbar {
+    id: string;
+    message: string;
+    duration: number;
+    severity: TSeverity;
+}
 
-const SnackbarContext = createContext<ISnackbarContextData>({} as ISnackbarContextData);
+type TSnackbarContext = (params: IShowSnackbarParams) => void;
 
-const SnackbarProvider = ({children}: ISnackbarProviderProps) => {
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [snackbarSeverity, setSnackbarSeverity] = useState<TSeverity>(SEVERITY_TYPE_SUCCESS);
-    const [snackbarDuration, setSnackbarDuration] = useState(DEFAULT_SNACKBAR_DURATION);
-    const snackbarQueue = useRef<Array<{message: string; duration: number, severity: TSeverity}>>([]);
-    const timeoutId = useRef<number | null>(null);
+const SnackbarContext = createContext<TSnackbarContext>(() => {});
 
-    const processQueue = () => {
-        if (snackbarQueue.current.length > 0) {
-            const nextSnackbar = snackbarQueue.current.shift();
+const SnackbarProvider = ( {children}: ISnackbarProviderProps ) => {
+    const [snackbar, setSnackbar] = useState<ISnackbar | null>(null);
 
-            if (nextSnackbar) {
-                setSnackbarMessage(nextSnackbar.message);
-                setSnackbarDuration(nextSnackbar.duration);
-                setSnackbarSeverity(nextSnackbar.severity);
-                setSnackbarOpen(true);
+    const showSnackbar = useCallback(
+        ({message, duration = DEFAULT_SNACKBAR_DURATION, severity = SEVERITY_TYPE_SUCCESS}: IShowSnackbarParams) => {
+            setSnackbar({id: uuidv4(), message, duration, severity});
+        },
+        []
+    );
+
+    const closeSnackbar = useCallback(
+        (event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
+            if ( reason === 'clickaway' ) {
+                return;
             }
-        }
-    };
 
-    const showSnackbar = ({
-        message,
-        duration = DEFAULT_SNACKBAR_DURATION,
-        severity = SEVERITY_TYPE_SUCCESS
-    }: IShowSnackbarParams) => {
-        snackbarQueue.current.push({message, duration, severity});
-
-        if (!snackbarOpen && !timeoutId.current) {
-            processQueue();
-        }
-    };
-
-    const handleClose = (event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        setSnackbarOpen(false);
-
-        if (timeoutId.current) {
-            clearTimeout(timeoutId.current);
-        }
-
-        timeoutId.current = setTimeout(() => {
-            processQueue();
-            timeoutId.current = null;
-        }, 200);
-    };
-
-    useEffect(
-        () => () => {
-            if (timeoutId.current) {
-                clearTimeout(timeoutId.current);
-            }
+            setSnackbar(null);
         },
         []
     );
 
     return (
-        <SnackbarContext.Provider value={{showSnackbar}}>
+        <SnackbarContext.Provider value={showSnackbar}>
             {children}
             <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={snackbarDuration}
-                onClose={handleClose}
+                open={!!snackbar}
+                key={snackbar?.id}
+                autoHideDuration={snackbar?.duration}
+                onClose={closeSnackbar}
                 anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
             >
-                <Alert onClose={handleClose} severity={snackbarSeverity} variant="filled">
-                    {snackbarMessage}
+                <Alert onClose={closeSnackbar} severity={snackbar?.severity} variant="filled">
+                    {snackbar?.message}
                 </Alert>
             </Snackbar>
         </SnackbarContext.Provider>

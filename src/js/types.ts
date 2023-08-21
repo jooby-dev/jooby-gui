@@ -15,21 +15,7 @@ export type TLogs = Array<ILogItem>;
 
 export type TLogCommands = Array<object>;
 
-export type TExpandedLogs = Array<string>;
-
-export type THandleCopyToClipboard = (data: string, snackbarConfig: IShowSnackbarParams) => void;
-
 export type THandleShareLogsClick = (event: React.SyntheticEvent, logsData: TLogs) => void;
-
-export type TExpandAllLogs = (event: React.SyntheticEvent, ids: TExpandedLogs) => void;
-
-export type TCollapseAllLogs = (event: React.SyntheticEvent, ids: TExpandedLogs) => void;
-
-export type THandleLogClick = (id: string) => void;
-
-export type THandleDeleteLogClick = (event: React.SyntheticEvent, id: string) => void;
-
-export type THandleParametersTabChange = (event: React.SyntheticEvent, newValue: TParametersTab) => void;
 
 export type TCommandType = typeof COMMAND_TYPE_ANALOG | typeof COMMAND_TYPE_OBIS_OBSERVER;
 
@@ -48,5 +34,6 @@ export interface ILogItem {
     errorMessage: string | undefined;
     type: typeof LOG_TYPE_ERROR | typeof LOG_TYPE_MESSAGE;
     id: string;
+    isExpanded: boolean;
     tags: Array<string>;
 }

@@ -9,14 +9,12 @@ import {
     UnfoldMore as UnfoldMoreIcon, UnfoldLess as UnfoldLessIcon, Delete as DeleteIcon, Share as ShareIcon
 } from '@mui/icons-material';
 
-import {useSnackbar} from '../../contexts/SnackbarContext.js';
+import useCopyToClipboard from '../../hooks/useCopyToClipboard.js';
 
 import LogList from '../LogList.js';
 import IconButtonWithTooltip from '../IconButtonWithTooltip.js';
 
-import {
-    ILogItem, TSetLogs, THandleCopyToClipboard, THandleShareLogsClick, TExpandAllLogs, TCollapseAllLogs
-} from '../../types.js';
+import {ILogItem, TSetLogs, THandleShareLogsClick} from '../../types.js';
 
 import {LOG_COUNT_LIMIT} from '../../constants.js';
 
@@ -24,17 +22,10 @@ import createShareableLogsLink from './utils/createShareableLogsLink.js';
 import extractLogsFromUrl from './utils/extractLogsFromUrl.js';
 
 
-const LogsPanel = ({
-    logs,
-    setLogs
-}: {
-    logs: Array<ILogItem>;
-    setLogs: TSetLogs;
-}) => {
+const LogsPanel = ({logs, setLogs}: {logs: Array<ILogItem>; setLogs: TSetLogs;}) => {
     const [logsLimitExceededDialogOpen, setLogsLimitExceededDialogOpen] = useState(false);
-    const [expandedLogs, setExpandedLogs] = useState<Array<string>>([]);
 
-    const {showSnackbar} = useSnackbar();
+    const copyToClipboard = useCopyToClipboard();
 
     useEffect(
         () => {
@@ -47,44 +38,53 @@ const LogsPanel = ({
         [setLogs]
     );
 
-    const collapseAllLogs: TCollapseAllLogs = useCallback((event, ids) => {
+    const toggleAllLogs = ( event: React.SyntheticEvent, expand: boolean ): void => {
         event.stopPropagation();
-        setExpandedLogs(expandedLogs.filter((id) => !ids.includes(id)));
-    }, [expandedLogs]);
 
-    const expandAllLogs: TExpandAllLogs = useCallback((event, ids) => {
-        event.stopPropagation();
-        setExpandedLogs(Array.from(new Set([...expandedLogs, ...ids])));
-    }, [expandedLogs]);
+        const updatedLogs = logs.map(log => {
+            let nestedLogChanged = false;
 
-    const handleCopyToClipboard: THandleCopyToClipboard = useCallback((data, snackbarConfig) => {
-        navigator.clipboard.writeText(data)
-            .then(() => {
-                if (snackbarConfig) {
-                    showSnackbar(snackbarConfig);
+            const updatedNestedLogs = log.data.commands.map(command => {
+                if ( command.isExpanded !== expand ) {
+                    nestedLogChanged = true;
+
+                    return {...command, isExpanded: expand};
                 }
-            })
-            .catch(() => {
-                showSnackbar({message: 'Failed to copy data to clipboard'});
+
+                return command;
             });
-    }, [showSnackbar]);
 
-    const handleShareLogsClick: THandleShareLogsClick = useCallback((event, logsData) => {
-        event.stopPropagation();
+            if ( log.isExpanded !== expand || nestedLogChanged ) {
+                return {
+                    ...log,
+                    isExpanded: expand,
+                    data: {
+                        ...log.data,
+                        commands: updatedNestedLogs
+                    }
+                };
+            }
 
-        if (logsData.length > LOG_COUNT_LIMIT) {
-            setLogsLimitExceededDialogOpen(true);
+            return log;
+        });
 
-            return;
-        }
-
-        handleCopyToClipboard(createShareableLogsLink(logsData), {message: 'Logs sharing link copied to clipboard'});
-    }, [handleCopyToClipboard]);
-
-    const handleClearLogsClick = () => {
-        setLogs([]);
-        setExpandedLogs([]);
+        setLogs(updatedLogs);
     };
+
+    const handleShareLogsClick: THandleShareLogsClick = useCallback(
+        (event, logsData) => {
+            event.stopPropagation();
+
+            if ( logsData.length > LOG_COUNT_LIMIT ) {
+                setLogsLimitExceededDialogOpen(true);
+
+                return;
+            }
+
+            copyToClipboard(createShareableLogsLink(logsData), {message: 'Logs sharing link copied to clipboard'});
+        },
+        [copyToClipboard]
+    );
 
     const handleLogsLimitExceededDialogClose = () => {
         setLogsLimitExceededDialogOpen(false);
@@ -114,13 +114,13 @@ const LogsPanel = ({
                 backgroundColor: 'background.default',
                 '& > *': {minWidth: 0}
             }}>
-                <Typography variant="h5">{`Logs${logs.length > 0 ? `: (${logs.length})` : ''}`}</Typography>
+                <Typography variant="h5">{logs.length === 0 ? 'Logs' : `Logs: ${logs.length}`}</Typography>
 
                 <IconButtonWithTooltip
                     disabled={logs.length === 0}
                     title="Expand logs"
                     sx={{ml: 'auto'}}
-                    onClick={event => expandAllLogs(event, logs.flatMap((log) => [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])]))}
+                    onClick={event => toggleAllLogs(event, true)}
                 >
                     <UnfoldMoreIcon/>
                 </IconButtonWithTooltip>
@@ -128,7 +128,7 @@ const LogsPanel = ({
                 <IconButtonWithTooltip
                     disabled={logs.length === 0}
                     title="Collapse logs"
-                    onClick={event => collapseAllLogs(event, logs.flatMap((log) => [log.id, ...(log.data ? log.data.commands.map((commandData) => commandData.id) : [])]))}
+                    onClick={event => toggleAllLogs(event, false)}
                 >
                     <UnfoldLessIcon/>
                 </IconButtonWithTooltip>
@@ -144,7 +144,7 @@ const LogsPanel = ({
                 <IconButtonWithTooltip
                     disabled={logs.length === 0}
                     title="Delete logs"
-                    onClick={handleClearLogsClick}
+                    onClick={() => setLogs([])}
                 >
                     <DeleteIcon/>
                 </IconButtonWithTooltip>
@@ -170,13 +170,8 @@ const LogsPanel = ({
 
             <LogList
                 logs={logs}
-                expandedLogs={expandedLogs}
                 setLogs={setLogs}
-                setExpandedLogs={setExpandedLogs}
-                handleCopyToClipboard={handleCopyToClipboard}
                 handleShareLogsClick={handleShareLogsClick}
-                expandAllLogs={expandAllLogs}
-                collapseAllLogs={collapseAllLogs}
             />
         </Box>
     );

@@ -6,10 +6,10 @@ import createCommandDirectionIcon from '../../../utils/createCommandDirectionIco
 
 import HighlightedText from '../../../components/HighlightedText.js';
 
-import {TExpandedLogs, TCommandType} from '../../../types.js';
+import {TCommandType} from '../../../types.js';
 
 
-const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs, commandType: TCommandType) => (
+const createSubLogTitle = (logCommand: object, commandType: TCommandType) => (
     <>
         {createCommandDirectionIcon(logCommand.command, commandType)}
         <Box>
@@ -63,7 +63,7 @@ const createSubLogTitle = (logCommand: object, expandedLogs: TExpandedLogs, comm
                                     textOverflow: 'ellipsis'
                                 }
                             }}
-                            in={!expandedLogs.includes(logCommand.id)}
+                            in={!logCommand.isExpanded}
                         >
                             {JSON.stringify(logCommand.command.parameters)}
                         </Collapse>
