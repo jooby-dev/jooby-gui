@@ -37,10 +37,8 @@ import {THandleChange} from './types.js';
 
 const {getHexFromBytes} = joobyCodec.utils;
 
-const base64ToHex = (base64: string) => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
 
-
-const parseFormats = {
+const dumpInputFormats = {
     HEX: '0',
     BASE64: '1'
 };
@@ -50,7 +48,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const {commandType, setCommandType} = useContext(CommandTypeContext);
 
     const [hardwareType, setHardwareType] = useState<object | null>(null);
-    const [hex, setHex] = useState('');
+    const [dump, setDump] = useState('');
     const [commandList, setCommandList] = useState<Array<object>>(commandTypeConfigMap[commandType].preparedCommandList);
     const [preparedCommands, setPreparedCommands] = useState<Array<object>>([]);
     const [command, setCommand] = useState<object | null>(null);
@@ -59,7 +57,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const [parameters, setParameters] = useState('');
     const [editingCommandId, setEditingCommandId] = useState<string | null>(null);
     const [recentlyEditedCommandId, setRecentlyEditedCommandId] = useState<string | null>(null);
-    const [parseFormat, setParseFormat] = useState<string>(parseFormats.HEX);
+    const [dumpInputFormat, setDumpInputFormat] = useState<string>(dumpInputFormats.HEX);
 
     const parametersTextFieldRef = useRef<HTMLInputElement>(null);
 
@@ -72,7 +70,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             setCommand(null);
             setEditingCommandId(null);
             setParameters('');
-            setHex('');
+            setDump('');
             setHardwareType(null);
             setCommandExample(null);
             setCommandExampleList([]);
@@ -82,7 +80,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     );
 
     const handleParseFormatChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setParseFormat(event.target.value);
+        setDumpInputFormat(event.target.value);
     };
 
     const handleCommandTypeChange = (event: SelectChangeEvent) => {
@@ -94,11 +92,11 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     };
 
     const handleHexChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setHex(event.target.value);
+        setDump(event.target.value);
     };
 
     const handleClearHexClick = () => {
-        setHex('');
+        setDump('');
     };
 
     const handleParametersChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -238,27 +236,27 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     };
 
     const handleParseClick = () => {
-        if (!hex) {
+        if (!dump) {
             return;
         }
 
-        let preparedHex;
+        let hex;
         let data;
         let parseError: unknown;
 
-        if ( parseFormat === parseFormats.BASE64 ) {
+        if ( dumpInputFormat === dumpInputFormats.BASE64 ) {
             try {
-                preparedHex = base64ToHex(hex);
+                hex = atob(dump);
             } catch (error) {
                 parseError = error;
             }
         } else {
-            preparedHex = removeComments(hex);
+            hex = removeComments(dump);
         }
 
         if ( !parseError ) {
             try {
-                data = joobyCodec[commandType].message.fromHex(preparedHex, {hardwareType: getHardwareType(hardwareType)});
+                data = joobyCodec[commandType].message.fromHex(hex, {hardwareType: getHardwareType(hardwareType)});
 
             } catch (error) {
                 parseError = error;
@@ -292,7 +290,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
         const log: ILogItem = {
             commandType,
-            hex: preparedHex,
+            hex,
             hardwareType: getHardwareTypeName(hardwareType),
             data: parseError ? null : data,
             date: new Date().toLocaleString(),
@@ -409,13 +407,13 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     <RadioGroup
                         sx={{ml: 'auto'}}
                         row
-                        aria-label="input-format"
-                        name="input-format"
-                        value={parseFormat}
+                        aria-label="dump-input-format"
+                        name="dump-input-format"
+                        value={dumpInputFormat}
                         onChange={handleParseFormatChange}
                     >
-                        <FormControlLabel value={parseFormats.HEX} control={<Radio/>} label="Hex"/>
-                        <FormControlLabel value={parseFormats.BASE64} control={<Radio/>} label="Base64"/>
+                        <FormControlLabel value={dumpInputFormats.HEX} control={<Radio/>} label="Hex"/>
+                        <FormControlLabel value={dumpInputFormats.BASE64} control={<Radio/>} label="Base64"/>
                     </RadioGroup>
                 </Box>
 
@@ -432,12 +430,12 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                         multiline
                         minRows={4}
                         maxRows={12}
-                        value={hex}
+                        value={dump}
                         helperText="In a hex or base64 format"
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    {hex && (
+                                    {dump && (
                                         <IconButtonWithTooltip
                                             title="Clear dump"
                                             onClick={handleClearHexClick}
@@ -455,7 +453,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     <Button
                         fullWidth={true}
                         sx={{mb: 2}}
-                        disabled={!hex}
+                        disabled={!dump}
                         variant="contained"
                         color="primary"
                         disableElevation
