@@ -37,7 +37,7 @@ import {THandleChange} from './types.js';
 
 const {getHexFromBytes} = joobyCodec.utils;
 
-const base64ToHex = (base64: string) => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+const base64ToHex = (base64: string) => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
 
 
 const dumpInputFormats = {
