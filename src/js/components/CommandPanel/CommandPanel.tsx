@@ -37,6 +37,8 @@ import {THandleChange} from './types.js';
 
 const {getHexFromBytes} = joobyCodec.utils;
 
+const base64ToHex = (base64: string) => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+
 
 const dumpInputFormats = {
     HEX: '0',
@@ -246,7 +248,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
         if ( dumpInputFormat === dumpInputFormats.BASE64 ) {
             try {
-                hex = atob(dump);
+                hex = base64ToHex(dump);
             } catch (error) {
                 parseError = error;
             }
