@@ -4,7 +4,8 @@ import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
     Autocomplete, Box, Typography, TextField, InputAdornment, Button, MenuItem, List,
-    ListItem, ListItemText, Stack, Select, FormControl, InputLabel, SelectChangeEvent
+    ListItem, ListItemText, Stack, Select, FormControl, InputLabel, SelectChangeEvent,
+    RadioGroup, FormControlLabel, Radio
 } from '@mui/material';
 
 import {Clear as ClearIcon, Delete as DeleteIcon, Edit as EditIcon} from '@mui/icons-material';
@@ -37,11 +38,17 @@ import {THandleChange} from './types.js';
 const {getHexFromBytes} = joobyCodec.utils;
 
 
+const dumpInputFormats = {
+    HEX: '0',
+    BASE64: '1'
+};
+
+
 const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const {commandType, setCommandType} = useContext(CommandTypeContext);
 
     const [hardwareType, setHardwareType] = useState<object | null>(null);
-    const [hex, setHex] = useState('');
+    const [dump, setDump] = useState('');
     const [commandList, setCommandList] = useState<Array<object>>(commandTypeConfigMap[commandType].preparedCommandList);
     const [preparedCommands, setPreparedCommands] = useState<Array<object>>([]);
     const [command, setCommand] = useState<object | null>(null);
@@ -50,6 +57,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const [parameters, setParameters] = useState('');
     const [editingCommandId, setEditingCommandId] = useState<string | null>(null);
     const [recentlyEditedCommandId, setRecentlyEditedCommandId] = useState<string | null>(null);
+    const [dumpInputFormat, setDumpInputFormat] = useState<string>(dumpInputFormats.HEX);
 
     const parametersTextFieldRef = useRef<HTMLInputElement>(null);
 
@@ -62,7 +70,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             setCommand(null);
             setEditingCommandId(null);
             setParameters('');
-            setHex('');
+            setDump('');
             setHardwareType(null);
             setCommandExample(null);
             setCommandExampleList([]);
@@ -70,6 +78,10 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         },
         [commandType]
     );
+
+    const handleParseFormatChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setDumpInputFormat(event.target.value);
+    };
 
     const handleCommandTypeChange = (event: SelectChangeEvent) => {
         setCommandType(event.target.value);
@@ -80,11 +92,11 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     };
 
     const handleHexChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setHex(event.target.value);
+        setDump(event.target.value);
     };
 
     const handleClearHexClick = () => {
-        setHex('');
+        setDump('');
     };
 
     const handleParametersChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -224,20 +236,31 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     };
 
     const handleParseClick = () => {
-        if (!hex) {
+        if (!dump) {
             return;
         }
 
-        const hexWithoutComments = removeComments(hex);
-
+        let hex;
         let data;
         let parseError: unknown;
 
-        try {
-            data = joobyCodec[commandType].message.fromHex(hexWithoutComments, {hardwareType: getHardwareType(hardwareType)});
+        if ( dumpInputFormat === dumpInputFormats.BASE64 ) {
+            try {
+                hex = atob(dump);
+            } catch (error) {
+                parseError = error;
+            }
+        } else {
+            hex = removeComments(dump);
+        }
 
-        } catch (error) {
-            parseError = error;
+        if ( !parseError ) {
+            try {
+                data = joobyCodec[commandType].message.fromHex(hex, {hardwareType: getHardwareType(hardwareType)});
+
+            } catch (error) {
+                parseError = error;
+            }
         }
 
         if (data) {
@@ -267,7 +290,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
         const log: ILogItem = {
             commandType,
-            hex: hexWithoutComments,
+            hex,
             hardwareType: getHardwareTypeName(hardwareType),
             data: parseError ? null : data,
             date: new Date().toLocaleString(),
@@ -379,7 +402,20 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     />
                 )}
 
-                <Typography variant="h5">Parse message</Typography>
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <Typography variant="h5">Parse message</Typography>
+                    <RadioGroup
+                        sx={{ml: 'auto'}}
+                        row
+                        aria-label="dump-input-format"
+                        name="dump-input-format"
+                        value={dumpInputFormat}
+                        onChange={handleParseFormatChange}
+                    >
+                        <FormControlLabel value={dumpInputFormats.HEX} control={<Radio/>} label="Hex"/>
+                        <FormControlLabel value={dumpInputFormats.BASE64} control={<Radio/>} label="Base64"/>
+                    </RadioGroup>
+                </Box>
 
                 <Box>
                     <TextField
@@ -394,12 +430,12 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                         multiline
                         minRows={4}
                         maxRows={12}
-                        value={hex}
-                        helperText="In a hex format"
+                        value={dump}
+                        helperText="In a hex or base64 format"
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    {hex && (
+                                    {dump && (
                                         <IconButtonWithTooltip
                                             title="Clear dump"
                                             onClick={handleClearHexClick}
@@ -417,7 +453,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     <Button
                         fullWidth={true}
                         sx={{mb: 2}}
-                        disabled={!hex}
+                        disabled={!dump}
                         variant="contained"
                         color="primary"
                         disableElevation
