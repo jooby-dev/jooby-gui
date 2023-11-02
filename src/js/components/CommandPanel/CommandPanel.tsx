@@ -4,7 +4,8 @@ import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
     Autocomplete, Box, Typography, TextField, InputAdornment, Button, MenuItem, List,
-    ListItem, ListItemText, Stack, Select, FormControl, InputLabel, SelectChangeEvent
+    ListItem, ListItemText, Stack, Select, FormControl, InputLabel, SelectChangeEvent,
+    RadioGroup, FormControlLabel, Radio
 } from '@mui/material';
 
 import {Clear as ClearIcon, Delete as DeleteIcon, Edit as EditIcon} from '@mui/icons-material';
@@ -36,6 +37,14 @@ import {THandleChange} from './types.js';
 
 const {getHexFromBytes} = joobyCodec.utils;
 
+const base64ToHex = (base64: string) => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
+
+
+const parseFormats = {
+    HEX: '0',
+    BASE64: '1'
+};
+
 
 const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const {commandType, setCommandType} = useContext(CommandTypeContext);
@@ -50,6 +59,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
     const [parameters, setParameters] = useState('');
     const [editingCommandId, setEditingCommandId] = useState<string | null>(null);
     const [recentlyEditedCommandId, setRecentlyEditedCommandId] = useState<string | null>(null);
+    const [parseFormat, setParseFormat] = useState<string>(parseFormats.HEX);
 
     const parametersTextFieldRef = useRef<HTMLInputElement>(null);
 
@@ -70,6 +80,10 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         },
         [commandType]
     );
+
+    const handleParseFormatChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setParseFormat(event.target.value);
+    };
 
     const handleCommandTypeChange = (event: SelectChangeEvent) => {
         setCommandType(event.target.value);
@@ -228,16 +242,27 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
             return;
         }
 
-        const hexWithoutComments = removeComments(hex);
-
+        let preparedHex;
         let data;
         let parseError: unknown;
 
-        try {
-            data = joobyCodec[commandType].message.fromHex(hexWithoutComments, {hardwareType: getHardwareType(hardwareType)});
+        if ( parseFormat === parseFormats.BASE64 ) {
+            try {
+                preparedHex = base64ToHex(hex);
+            } catch (error) {
+                parseError = error;
+            }
+        } else {
+            preparedHex = removeComments(hex);
+        }
 
-        } catch (error) {
-            parseError = error;
+        if ( !parseError ) {
+            try {
+                data = joobyCodec[commandType].message.fromHex(preparedHex, {hardwareType: getHardwareType(hardwareType)});
+
+            } catch (error) {
+                parseError = error;
+            }
         }
 
         if (data) {
@@ -267,7 +292,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
 
         const log: ILogItem = {
             commandType,
-            hex: hexWithoutComments,
+            hex: preparedHex,
             hardwareType: getHardwareTypeName(hardwareType),
             data: parseError ? null : data,
             date: new Date().toLocaleString(),
@@ -379,7 +404,20 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     />
                 )}
 
-                <Typography variant="h5">Parse message</Typography>
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <Typography variant="h5">Parse message</Typography>
+                    <RadioGroup
+                        sx={{ml: 'auto'}}
+                        row
+                        aria-label="input-format"
+                        name="input-format"
+                        value={parseFormat}
+                        onChange={handleParseFormatChange}
+                    >
+                        <FormControlLabel value={parseFormats.HEX} control={<Radio/>} label="Hex"/>
+                        <FormControlLabel value={parseFormats.BASE64} control={<Radio/>} label="Base64"/>
+                    </RadioGroup>
+                </Box>
 
                 <Box>
                     <TextField
@@ -395,7 +433,7 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                         minRows={4}
                         maxRows={12}
                         value={hex}
-                        helperText="In a hex format"
+                        helperText="In a hex or base64 format"
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
