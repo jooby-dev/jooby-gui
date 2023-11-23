@@ -9,7 +9,7 @@ export default defineConfig({
             keepNames: true
         }
     },
-    base: '/jooby-gui',
+    base: '',
     root: './src',
     build: {
         outDir: '../dist',

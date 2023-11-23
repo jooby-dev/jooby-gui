@@ -1,7 +1,8 @@
 import {analog, obisObserver} from 'jooby-codec';
+import {directions} from 'jooby-codec/constants/index.js';
 
 
-const {DOWNLINK, UPLINK} = analog.constants.directions;
+const {DOWNLINK, UPLINK} = directions;
 
 export const directionNames = {
     [DOWNLINK]: 'downlink',
