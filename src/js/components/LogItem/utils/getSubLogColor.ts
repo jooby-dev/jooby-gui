@@ -1,6 +1,6 @@
 import {yellow} from '@mui/material/colors';
 import {TLogCommands} from '../../../types.js';
-import {directions} from 'jooby-codec/constants/index.js';
+import {directions} from '@jooby-dev/jooby-codec/constants/index.js';
 
 
 export default (logCommand: TLogCommands): string => {
