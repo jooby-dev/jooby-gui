@@ -26,7 +26,6 @@ import getSubLogColor from './utils/getSubLogColor.js';
 import getLogColor from './utils/getLogColor.js';
 import createSubLogTitle from './utils/createSubLogTitle.js';
 import createLogTitle from './utils/createLogTitle.js';
-import createCommandHeaderDocLink from './utils/createCommandHeaderDocLink.js';
 import modifyTime2000Properties from './utils/modifyTime2000Properties.js';
 
 import {JSONTreeTheme} from './constants.js';
@@ -341,27 +340,14 @@ const LogItem = ({
                                         <IconButtonWithTooltip
                                             title="Copy dump"
                                             onClick={() => copyToClipboard(
-                                                `${commandData.data.header.hex} ${commandData.data.body.hex}`,
+                                                commandData.command.hex,
                                                 {message: 'Command dump copied to clipboard'}
                                             )}
                                         >
                                             <ContentCopyIcon/>
                                         </IconButtonWithTooltip>
                                     </Typography>
-                                    <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
-                                        <>
-                                            <Link
-                                                href={createCommandHeaderDocLink(commandData.data.header.length, log.commandType)}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                onClick={event => event.stopPropagation()}
-                                            >
-                                                {commandData.data.header.hex}
-                                            </Link>
-                                            {' '}
-                                            {commandData.data.body.hex}
-                                        </>
-                                    </Typography>
+                                    <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{commandData.command.hex}</Typography>
                                     {
                                         commandData.command.id !== undefined && commandData.command.hasParameters && (
                                             <>

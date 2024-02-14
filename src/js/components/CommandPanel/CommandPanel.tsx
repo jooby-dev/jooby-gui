@@ -195,30 +195,19 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
         }
 
         if (data) {
-            data.commands = data.commands.map((commandData) => {
-                return {
-                    command: {
-                        hasParameters: commandData.command.constructor.hasParameters,
-                        id: commandData.command.constructor.id,
-                        length: commandData.command.toBytes().length,
-                        name: commandData.command.constructor.name,
-                        directionType: commandData.command.constructor.directionType,
-                        parameters: commandData.command.getParameters()
-                    },
-                    data: {
-                        header: {
-                            length: commandData.data.header.length,
-                            hex: getHexFromBytes(commandData.data.header)
-                        },
-                        body: {
-                            length: commandData.data.body.length,
-                            hex: getHexFromBytes(commandData.data.body)
-                        }
-                    },
-                    id: uuidv4(),
-                    isExpanded: false
-                };
-            });
+            data.commands = data.commands.map((commandData) => ({
+                command: {
+                    hasParameters: commandData.command.constructor.hasParameters,
+                    id: commandData.command.constructor.id,
+                    length: commandData.command.toBytes().length,
+                    name: commandData.command.constructor.name,
+                    directionType: commandData.command.constructor.directionType,
+                    parameters: commandData.command.getParameters(),
+                    hex: commandData.command.toHex()
+                },
+                id: uuidv4(),
+                isExpanded: false
+            }));
         }
 
         const log: ILogItem = {
@@ -273,17 +262,8 @@ const CommandPanel = ({setLogs}: {setLogs: TSetLogs}) => {
                     length: commandData.command.toBytes().length,
                     name: commandData.command.constructor.name,
                     directionType: commandData.command.constructor.directionType,
-                    parameters: commandData.command.getParameters()
-                },
-                data: {
-                    header: {
-                        length: commandData.data.header.length,
-                        hex: getHexFromBytes(commandData.data.header)
-                    },
-                    body: {
-                        length: commandData.data.body.length,
-                        hex: getHexFromBytes(commandData.data.body)
-                    }
+                    parameters: commandData.command.getParameters(),
+                    hex: commandData.command.toHex()
                 },
                 id: uuidv4(),
                 isExpanded: false
