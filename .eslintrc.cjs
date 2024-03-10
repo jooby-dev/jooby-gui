@@ -5,6 +5,8 @@ module.exports = {
         }
     ],
 
+    ignorePatterns: ['dist/'],
+
     extends: [
         'eslint:recommended',
         'plugin:react/recommended',
@@ -36,6 +38,8 @@ module.exports = {
             jsx: true
         }
     },
+
+    plugins: ['custom-rules'],
 
     rules: {
         // base
@@ -85,6 +89,13 @@ module.exports = {
                 }
             }
         ],
+        'padding-line-between-statements': [
+            'error',
+            {blankLine: 'always', prev: '*', next: ['directive', 'return', 'export', 'cjs-export', 'try', 'function']},
+            {blankLine: 'always', prev: ['directive', 'export', 'cjs-export', 'try', 'function'], next: '*'},
+            {blankLine: 'any', prev: ['export'], next: ['export']},
+            {blankLine: 'any', prev: 'directive', next: 'directive'}
+        ],
 
         quotes: [
             'error',
@@ -106,11 +117,14 @@ module.exports = {
         // https://github.com/import-js/eslint-plugin-import/issues/1868
         'import/no-unresolved': [2, {ignore: ['^@jooby-dev/jooby-codec']}],
         'react/jsx-tag-spacing': ['error', {beforeSelfClosing: 'never'}],
+        'custom-rules/space-in-function-parens': 'error',
+        'custom-rules/space-in-control-parens': 'error',
 
         'no-param-reassign': 'off',
         'guard-for-in': 'off',
         'no-await-in-loop': 'off',
         'no-continue': 'off',
-        'no-bitwise': 'off'
+        'no-bitwise': 'off',
+        'no-restricted-syntax': 'off'
     }
 };
