@@ -178,17 +178,11 @@ const LogItem = ({
                             <UnfoldLessIcon/>
                         </IconButtonWithTooltip>
 
-                        <IconButtonWithTooltip
-                            title="Share log"
-                            onClick={event => handleShareLogsClick(event, [log])}
-                        >
+                        <IconButtonWithTooltip title="Share log" onClick={event => handleShareLogsClick(event, [log])}>
                             <ShareIcon/>
                         </IconButtonWithTooltip>
 
-                        <IconButtonWithTooltip
-                            title="Delete log"
-                            onClick={event => handleDeleteLogClick(event, id)}
-                        >
+                        <IconButtonWithTooltip title="Delete log" onClick={event => handleDeleteLogClick(event, id)}>
                             <DeleteIcon/>
                         </IconButtonWithTooltip>
                     </Box>

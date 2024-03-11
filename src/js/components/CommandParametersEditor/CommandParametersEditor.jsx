@@ -79,6 +79,7 @@ const CommandParameterEditor = ({
 
             editor.on('change', () => {
                 const newValue = editor.getValue();
+
                 handleValueChange(newValue);
             });
 
@@ -105,6 +106,7 @@ const CommandParameterEditor = ({
         () => {
             if ( inputRef && inputRef.current ) {
                 const cursorPosition = inputRef.current.getCursorPosition();
+
                 inputRef.current.setValue(value, -1);
                 inputRef.current.moveCursorToPosition(cursorPosition);
             }
@@ -140,6 +142,7 @@ const CommandParameterEditor = ({
         () => {
             if ( inputRef && inputRef.current ) {
                 const {placeholderNode} = inputRef.current.renderer;
+
                 if ( placeholderNode ) {
                     placeholderNode.style.color = theme.palette.text.secondary;
                 }

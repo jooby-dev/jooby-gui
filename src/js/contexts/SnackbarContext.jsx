@@ -45,9 +45,7 @@ const SnackbarProvider = ( {children} ) => {
                 onClose={closeSnackbar}
                 anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
             >
-                <Alert onClose={closeSnackbar} severity={snackbar?.severity} variant="filled">
-                    {snackbar?.message}
-                </Alert>
+                <Alert onClose={closeSnackbar} severity={snackbar?.severity} variant="filled">{snackbar?.message}</Alert>
             </Snackbar>
         </SnackbarContext.Provider>
     );

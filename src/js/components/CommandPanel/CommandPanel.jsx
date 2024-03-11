@@ -471,10 +471,7 @@ const CommandPanel = ( {setLogs} ) => {
                             endAdornment: (
                                 <InputAdornment position="end">
                                     {dump && (
-                                        <IconButtonWithTooltip
-                                            title="Clear dump"
-                                            onClick={handleClearHexClick}
-                                        >
+                                        <IconButtonWithTooltip title="Clear dump" onClick={handleClearHexClick}>
                                             <ClearIcon/>
                                         </IconButtonWithTooltip>
                                     )}
@@ -510,10 +507,7 @@ const CommandPanel = ( {setLogs} ) => {
 
                         return compare;
                     })}
-                    getOptionDisabled={option => (
-                        preparedCommands.length !== 0
-                        && option.direction !== preparedCommands[0].command.direction
-                    )}
+                    getOptionDisabled={option => (preparedCommands.length !== 0 && option.direction !== preparedCommands[0].command.direction)}
                     groupBy={option => option.direction}
                     size="small"
                     value={command}
@@ -661,9 +655,7 @@ const CommandPanel = ( {setLogs} ) => {
                                                             <ListItemText
                                                                 primary={
                                                                     <Box component="span" sx={{wordBreak: 'break-word'}}>
-                                                                        <HighlightedText>
-                                                                            {preparedCommand.command.value.name}
-                                                                        </HighlightedText>
+                                                                        <HighlightedText>{preparedCommand.command.value.name}</HighlightedText>
                                                                     </Box>
                                                                 }
                                                                 secondary={

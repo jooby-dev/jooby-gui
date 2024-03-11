@@ -63,8 +63,7 @@ const createLogTitle = log => {
                             <HighlightedText>{log.data.commands.length}</HighlightedText>
                             {'; '}
                             {
-                                hasLrc(log.commandType)
-                                && log.data.lrc.expected !== log.data.lrc.actual
+                                hasLrc(log.commandType) && log.data.lrc.expected !== log.data.lrc.actual
                                     ? (
                                         <>
                                             {'LRC expected: '}

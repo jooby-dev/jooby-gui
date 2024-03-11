@@ -164,13 +164,9 @@ const LogsPanel = ( {logs, setLogs} ) => {
                     onClose={handleLogsLimitExceededDialogClose}
                     aria-labelledby="logs-limit-exceeded-dialog-title"
                 >
-                    <DialogTitle id="logs-limit-exceeded-dialog-title">
-                        Logs limit exceeded
-                    </DialogTitle>
+                    <DialogTitle id="logs-limit-exceeded-dialog-title">Logs limit exceeded</DialogTitle>
                     <DialogContent>
-                        <DialogContentText>
-                            {`You can only share up to ${LOG_COUNT_LIMIT} logs.`}
-                        </DialogContentText>
+                        <DialogContentText>{`You can only share up to ${LOG_COUNT_LIMIT} logs.`}</DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleLogsLimitExceededDialogClose}>Close</Button>
