@@ -30,7 +30,7 @@ import createShareableLogsLink from './utils/createShareableLogsLink.js';
 import extractLogsFromUrl from './utils/extractLogsFromUrl.js';
 
 
-const LogsPanel = ({logs, setLogs}) => {
+const LogsPanel = ( {logs, setLogs} ) => {
     const [logsLimitExceededDialogOpen, setLogsLimitExceededDialogOpen] = useState(false);
 
     const copyToClipboard = useCopyToClipboard();
@@ -39,21 +39,21 @@ const LogsPanel = ({logs, setLogs}) => {
         () => {
             const sharedLogs = extractLogsFromUrl();
 
-            if (sharedLogs) {
+            if ( sharedLogs ) {
                 setLogs(sharedLogs);
             }
         },
         [setLogs]
     );
 
-    const toggleAllLogs = (event, expand) => {
+    const toggleAllLogs = ( event, expand ) => {
         event.stopPropagation();
 
         const updatedLogs = logs.map(log => {
             let nestedLogChanged = false;
 
             const updatedNestedLogs = log.data.commands.map(command => {
-                if (command.isExpanded !== expand) {
+                if ( command.isExpanded !== expand ) {
                     nestedLogChanged = true;
 
                     return {...command, isExpanded: expand};
@@ -62,7 +62,7 @@ const LogsPanel = ({logs, setLogs}) => {
                 return command;
             });
 
-            if (log.isExpanded !== expand || nestedLogChanged) {
+            if ( log.isExpanded !== expand || nestedLogChanged ) {
                 return {
                     ...log,
                     isExpanded: expand,
@@ -83,7 +83,7 @@ const LogsPanel = ({logs, setLogs}) => {
         (event, logsData) => {
             event.stopPropagation();
 
-            if (logsData.length > LOG_COUNT_LIMIT) {
+            if ( logsData.length > LOG_COUNT_LIMIT ) {
                 setLogsLimitExceededDialogOpen(true);
 
                 return;

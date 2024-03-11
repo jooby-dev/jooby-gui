@@ -56,7 +56,7 @@ const LogItem = ({
     const toggleLog = logId => {
         setLogs(prevLogs => {
             const updatedLogs = prevLogs.map(prevLog => {
-                if (prevLog.id !== logId) {
+                if ( prevLog.id !== logId ) {
                     return prevLog;
                 }
 
@@ -70,12 +70,12 @@ const LogItem = ({
         });
     };
 
-    const toggleLogAndNested = (event, logId, isLogExpanded = true) => {
+    const toggleLogAndNested = ( event, logId, isLogExpanded = true ) => {
         event.stopPropagation();
 
         setLogs(prevLogs => {
             const updatedLogs = prevLogs.map(prevLog => {
-                if (prevLog.id !== logId) {
+                if ( prevLog.id !== logId ) {
                     return prevLog;
                 }
 
@@ -96,10 +96,10 @@ const LogItem = ({
         });
     };
 
-    const toggleNestedLog = (logId, nestedLogId) => {
+    const toggleNestedLog = ( logId, nestedLogId ) => {
         setLogs(prevLogs => {
             const updatedLogs = prevLogs.map(prevLog => {
-                if (prevLog.id !== logId) {
+                if ( prevLog.id !== logId ) {
                     return prevLog;
                 }
 
@@ -108,7 +108,7 @@ const LogItem = ({
                     data: {
                         ...prevLog.data,
                         commands: prevLog.data.commands.map(command => {
-                            if (command.id !== nestedLogId) {
+                            if ( command.id !== nestedLogId ) {
                                 return command;
                             }
 
@@ -125,7 +125,7 @@ const LogItem = ({
         });
     };
 
-    const handleDeleteLogClick = (event, logId) => {
+    const handleDeleteLogClick = ( event, logId ) => {
         event.stopPropagation();
 
         setLogs(prevLogs => prevLogs.filter(prevLog => prevLog.id !== logId));

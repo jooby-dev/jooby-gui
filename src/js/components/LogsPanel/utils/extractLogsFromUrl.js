@@ -5,10 +5,10 @@ export default () => {
     const urlParams = new URLSearchParams(window.location.search);
     const logsData = urlParams.get('logs');
 
-    if (logsData) {
+    if ( logsData ) {
         try {
             return JSON.parse(lzString.decompressFromEncodedURIComponent(logsData));
-        } catch (error) {
+        } catch ( error ) {
             console.error('Error parsing logs from URL:', error);
         }
     }

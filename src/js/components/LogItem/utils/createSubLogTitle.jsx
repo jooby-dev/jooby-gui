@@ -7,7 +7,7 @@ import createCommandDirectionIcon from '../../../utils/createCommandDirectionIco
 import HighlightedText from '../../HighlightedText.jsx';
 
 
-const createSubLogTitle = (logCommand, commandType) => (
+const createSubLogTitle = ( logCommand, commandType ) => (
     <>
         {createCommandDirectionIcon(logCommand.command, commandType)}
         <Box>

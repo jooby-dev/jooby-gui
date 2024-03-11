@@ -18,13 +18,13 @@ import isAllCommandsUnknown from './isAllCommandsUnknown.js';
 import isAllCommandsHaveSameDirection from './isAllCommandsHaveSameDirection.js';
 
 
-const createMessageDirectionIcon = (logCommands, commandType) => {
-    if (isAllCommandsUnknown(logCommands)) {
+const createMessageDirectionIcon = ( logCommands, commandType ) => {
+    if ( isAllCommandsUnknown(logCommands) ) {
         return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}}/>;
     }
 
     // commands have a different direction in the message
-    if (!isAllCommandsHaveSameDirection(logCommands)) {
+    if ( !isAllCommandsHaveSameDirection(logCommands) ) {
         return <SyncAltIcon color="error" sx={{mr: 2, transform: 'rotate(90deg)'}}/>;
     }
 
@@ -34,8 +34,8 @@ const createMessageDirectionIcon = (logCommands, commandType) => {
     );
 };
 
-const renderHardwareType = (hardwareType, commandType) => {
-    if (!hardwareType) {
+const renderHardwareType = ( hardwareType, commandType ) => {
+    if ( !hardwareType ) {
         return null;
     }
 
@@ -52,7 +52,7 @@ const renderHardwareType = (hardwareType, commandType) => {
 };
 
 const createLogTitle = log => {
-    switch (log.type) {
+    switch ( log.type ) {
         case LOG_TYPE_MESSAGE:
             return (
                 <>

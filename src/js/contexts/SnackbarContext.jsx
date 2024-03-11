@@ -10,7 +10,7 @@ const DEFAULT_SNACKBAR_DURATION = 3000;
 
 const SnackbarContext = createContext(() => { });
 
-const SnackbarProvider = ({children}) => {
+const SnackbarProvider = ( {children} ) => {
     const [snackbar, setSnackbar] = useState(null);
 
     const showSnackbar = useCallback(
@@ -26,7 +26,7 @@ const SnackbarProvider = ({children}) => {
 
     const closeSnackbar = useCallback(
         (event, reason) => {
-            if (reason === 'clickaway') {
+            if ( reason === 'clickaway' ) {
                 return;
             }
 

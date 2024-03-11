@@ -54,7 +54,7 @@ const CommandParameterEditor = ({
 
     useEffect(
         () => {
-            if (!editorRef.current) {
+            if ( !editorRef.current ) {
                 return undefined;
             }
 
@@ -90,7 +90,7 @@ const CommandParameterEditor = ({
                 }
             });
 
-            if (inputRef) {
+            if ( inputRef ) {
                 inputRef.current = editor;
             }
 
@@ -103,7 +103,7 @@ const CommandParameterEditor = ({
 
     useEffect(
         () => {
-            if (inputRef && inputRef.current) {
+            if ( inputRef && inputRef.current ) {
                 const cursorPosition = inputRef.current.getCursorPosition();
                 inputRef.current.setValue(value, -1);
                 inputRef.current.moveCursorToPosition(cursorPosition);
@@ -114,7 +114,7 @@ const CommandParameterEditor = ({
 
     useEffect(
         () => {
-            if (inputRef && inputRef.current) {
+            if ( inputRef && inputRef.current ) {
                 inputRef.current.setReadOnly(disabled);
             }
         },
@@ -123,10 +123,10 @@ const CommandParameterEditor = ({
 
     useEffect(
         () => {
-            if (inputRef && inputRef.current) {
+            if ( inputRef && inputRef.current ) {
                 const {placeholderNode} = inputRef.current.renderer;
 
-                if (placeholderNode) {
+                if ( placeholderNode ) {
                     placeholderNode.textContent = command.value.hasParameters
                         ? 'Parameters'
                         : 'This command has no parameters';
@@ -138,9 +138,9 @@ const CommandParameterEditor = ({
 
     useEffect(
         () => {
-            if (inputRef && inputRef.current) {
+            if ( inputRef && inputRef.current ) {
                 const {placeholderNode} = inputRef.current.renderer;
-                if (placeholderNode) {
+                if ( placeholderNode ) {
                     placeholderNode.style.color = theme.palette.text.secondary;
                 }
             }
@@ -149,8 +149,8 @@ const CommandParameterEditor = ({
     );
 
     const handleFormatClick = () => {
-        if (inputRef && inputRef.current) {
-            if (isValidJson(inputRef.current.getValue())) {
+        if ( inputRef && inputRef.current ) {
+            if ( isValidJson(inputRef.current.getValue()) ) {
                 inputRef.current.setValue(formatJson(inputRef.current.getValue()), -1);
             }
 
@@ -159,7 +159,7 @@ const CommandParameterEditor = ({
     };
 
     const handleClearClick = () => {
-        if (inputRef && inputRef.current) {
+        if ( inputRef && inputRef.current ) {
             inputRef.current.setValue('', -1);
             inputRef.current.focus();
         }

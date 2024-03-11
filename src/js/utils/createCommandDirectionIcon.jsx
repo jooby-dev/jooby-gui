@@ -12,22 +12,22 @@ const unknownCommandClassMap = {
     [COMMAND_TYPE_OBIS_OBSERVER]: ObisObserverUnknownCommand
 };
 
-const isUnknownCommandKind = (command, commandType) => {
+const isUnknownCommandKind = ( command, commandType ) => {
     const UnknownCommand = unknownCommandClassMap[commandType];
 
-    if (command === UnknownCommand || command instanceof UnknownCommand) {
+    if ( command === UnknownCommand || command instanceof UnknownCommand ) {
         return true;
     }
 
     return false;
 };
 
-const createCommandDirectionIcon = (command, commandType) => {
-    if (isUnknownCommandKind(command, commandType)) {
+const createCommandDirectionIcon = ( command, commandType ) => {
+    if ( isUnknownCommandKind(command, commandType) ) {
         return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}}/>;
     }
 
-    if (command.directionType === directions.UPLINK) {
+    if ( command.directionType === directions.UPLINK ) {
         return <ArrowDownwardIcon sx={{mr: 2, transform: 'rotate(180deg)', color: `${yellow[800]}`}}/>;
     }
 

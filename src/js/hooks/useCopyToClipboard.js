@@ -11,7 +11,7 @@ const useCopyToClipboard = () => {
             navigator.clipboard
                 .writeText(data)
                 .then(() => {
-                    if (snackbarConfig) {
+                    if ( snackbarConfig ) {
                         showSnackbar(snackbarConfig);
                     }
                 })

@@ -7,7 +7,7 @@ import LogItem from './LogItem/LogItem.jsx';
 import {PARAMETERS_TAB_VIEW_TYPE_TREE} from '../constants.js';
 
 
-const LogList = ({logs, setLogs, handleShareLogsClick}) => {
+const LogList = ( {logs, setLogs, handleShareLogsClick} ) => {
     const [parametersTab, setParametersTab] = useState(PARAMETERS_TAB_VIEW_TYPE_TREE);
 
     return (

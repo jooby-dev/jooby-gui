@@ -10,7 +10,7 @@ const IconButtonWithTooltip = ({
 }) => {
     const button = <IconButton size={size} disabled={disabled} {...otherProps}></IconButton>;
 
-    if (disabled) {
+    if ( disabled ) {
         return button;
     }
 

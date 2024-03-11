@@ -56,12 +56,12 @@ import hasHardwareTypeInCommandType from '../../utils/hasHardwareTypeInCommandTy
 
 const base64ToHex = base64 => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
 
-const getBackgroundColor = (preparedCommand, editingCommandId, recentlyEditedCommandId) => {
-    if (editingCommandId === preparedCommand.id) {
+const getBackgroundColor = ( preparedCommand, editingCommandId, recentlyEditedCommandId ) => {
+    if ( editingCommandId === preparedCommand.id ) {
         return 'background.filledHover';
     }
 
-    if (recentlyEditedCommandId === preparedCommand.id) {
+    if ( recentlyEditedCommandId === preparedCommand.id ) {
         return 'success.light';
     }
 
@@ -73,7 +73,7 @@ const dumpInputFormats = {
     BASE64: '1'
 };
 
-const CommandPanel = ({setLogs}) => {
+const CommandPanel = ( {setLogs} ) => {
     const {commandType, setCommandType} = useContext(CommandTypeContext);
 
     const [hardwareType, setHardwareType] = useState(null);
@@ -118,7 +118,7 @@ const CommandPanel = ({setLogs}) => {
         setCommandType(event.target.value);
     };
 
-    const handleHardwareTypeChange = (event, newValue) => {
+    const handleHardwareTypeChange = ( event, newValue ) => {
         setHardwareType(newValue);
     };
 
@@ -149,7 +149,7 @@ const CommandPanel = ({setLogs}) => {
     };
 
     const handleAddToMessageClick = () => {
-        if (!command || (!parameters && command.value.hasParameters)) {
+        if ( !command || (!parameters && command.value.hasParameters) ) {
             return;
         }
 
@@ -165,18 +165,18 @@ const CommandPanel = ({setLogs}) => {
         setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
     };
 
-    const handleCommandExampleChange = (event, newValue) => {
+    const handleCommandExampleChange = ( event, newValue ) => {
         setCommandExample(newValue);
 
-        if (!newValue) {
+        if ( !newValue ) {
             return;
         }
 
-        if (newValue.value.parameters) {
+        if ( newValue.value.parameters ) {
             setParameters(JSON.stringify(newValue.value.parameters, null, 4));
         }
 
-        if (newValue.value.config?.hardwareType) {
+        if ( newValue.value.config?.hardwareType ) {
             const hardwareTypeData = commandTypeConfigMap[commandType].hardwareTypeList
                 .find(type => type.value === newValue.value.config.hardwareType);
 
@@ -189,7 +189,7 @@ const CommandPanel = ({setLogs}) => {
 
         setTimeout(
             () => {
-                if (parametersTextFieldRef.current) {
+                if ( parametersTextFieldRef.current ) {
                     parametersTextFieldRef.current.focus();
                 }
             },
@@ -197,7 +197,7 @@ const CommandPanel = ({setLogs}) => {
         );
     };
 
-    const handleCommandChange = (event, newValue) => {
+    const handleCommandChange = ( event, newValue ) => {
         setCommand(newValue);
         setParameters('');
         setCommandExample(null);
@@ -212,7 +212,7 @@ const CommandPanel = ({setLogs}) => {
 
         setTimeout(
             () => {
-                if (parametersTextFieldRef.current) {
+                if ( parametersTextFieldRef.current ) {
                     parametersTextFieldRef.current.focus();
                 }
             },
@@ -228,7 +228,7 @@ const CommandPanel = ({setLogs}) => {
 
         try {
             messageHex = joobyCodec[commandType].message.toHex(preparedCommands.map(preparedCommand => {
-                if (preparedCommand.parameters.trim() === '') {
+                if ( preparedCommand.parameters.trim() === '' ) {
                     commandParameters = undefined;
                 } else {
                     // eslint-disable-next-line no-eval
@@ -240,11 +240,11 @@ const CommandPanel = ({setLogs}) => {
             }));
 
             data = joobyCodec[commandType].message.fromHex(messageHex, {hardwareType: getHardwareType(hardwareType)});
-        } catch (error) {
+        } catch ( error ) {
             buildError = error;
         }
 
-        if (data) {
+        if ( data ) {
             data.commands = data.commands.map(commandData => ({
                 command: {
                     hasParameters: commandData.command.constructor.hasParameters,
@@ -277,7 +277,7 @@ const CommandPanel = ({setLogs}) => {
     };
 
     const handleParseClick = () => {
-        if (!dump) {
+        if ( !dump ) {
             return;
         }
 
@@ -285,25 +285,25 @@ const CommandPanel = ({setLogs}) => {
         let data;
         let parseError;
 
-        if (dumpInputFormat === dumpInputFormats.BASE64) {
+        if ( dumpInputFormat === dumpInputFormats.BASE64 ) {
             try {
                 hex = base64ToHex(dump);
-            } catch (error) {
+            } catch ( error ) {
                 parseError = error;
             }
         } else {
             hex = removeComments(dump);
         }
 
-        if (!parseError) {
+        if ( !parseError ) {
             try {
                 data = joobyCodec[commandType].message.fromHex(hex, {hardwareType: getHardwareType(hardwareType)});
-            } catch (error) {
+            } catch ( error ) {
                 parseError = error;
             }
         }
 
-        if (data) {
+        if ( data ) {
             data.commands = data.commands.map(commandData => ({
                 command: {
                     hasParameters: commandData.command.constructor.hasParameters,
@@ -336,7 +336,7 @@ const CommandPanel = ({setLogs}) => {
     };
 
     const onPreparedCommandDragEnd = result => {
-        if (!result.destination) {
+        if ( !result.destination ) {
             return;
         }
 
@@ -353,13 +353,13 @@ const CommandPanel = ({setLogs}) => {
     const handleEditPreparedCommandClick = index => {
         const commandToEdit = preparedCommands.find(preparedCommand => preparedCommand.id === index);
 
-        if (commandToEdit) {
+        if ( commandToEdit ) {
             handleCommandChange(null, commandToEdit.command);
             setParameters(commandToEdit.parameters);
             setEditingCommandId(index);
             setTimeout(
                 () => {
-                    if (parametersTextFieldRef.current) {
+                    if ( parametersTextFieldRef.current ) {
                         parametersTextFieldRef.current.focus();
                     }
                 },
@@ -369,7 +369,7 @@ const CommandPanel = ({setLogs}) => {
     };
 
     const handleSaveEditedCommandClick = () => {
-        if (editingCommandId !== null) {
+        if ( editingCommandId !== null ) {
             const updatedCommands = preparedCommands.map(preparedCommand => (
                 preparedCommand.id === editingCommandId
                     ? {...preparedCommand, parameters}
@@ -504,7 +504,7 @@ const CommandPanel = ({setLogs}) => {
                     options={commandList.sort((itemA, itemB) => {
                         let compare = itemA.direction.localeCompare(itemB.direction);
 
-                        if (compare === 0) {
+                        if ( compare === 0 ) {
                             compare = itemA.value.id - itemB.value.id;
                         }
 

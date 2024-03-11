@@ -6,15 +6,15 @@ import getSubLogColor from './getSubLogColor.js';
 
 
 export default log => {
-    if (log.type === LOG_TYPE_ERROR) {
+    if ( log.type === LOG_TYPE_ERROR ) {
         return 'error.light';
     }
 
-    if (isAllCommandsUnknown(log.data.commands)) {
+    if ( isAllCommandsUnknown(log.data.commands) ) {
         return 'grey.100';
     }
 
-    if (!isAllCommandsHaveSameDirection(log.data.commands)) {
+    if ( !isAllCommandsHaveSameDirection(log.data.commands) ) {
         return 'error.light';
     }
 
