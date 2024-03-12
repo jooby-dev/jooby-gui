@@ -9,6 +9,7 @@ module.exports = {
         fixable: 'whitespace',
         schema: []
     },
+
     create ( context ) {
         const sourceCode = context.getSourceCode();
 
@@ -54,7 +55,6 @@ module.exports = {
                 };
             };
 
-
             const {openingParen, closingParen} = getParenTokens(node);
 
             if ( openingParen && closingParen ) {
@@ -95,5 +95,4 @@ module.exports = {
             SwitchStatement: checkSpacing
         };
     }
-
 };
