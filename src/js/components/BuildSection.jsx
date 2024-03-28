@@ -123,6 +123,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     const [commandExampleList, setCommandExampleList] = useState([]);
     const [commandExample, setCommandExample] = useState(null);
     const [commandParameters, setCommandParameters] = useState('');
+    const [commandParametersError, setCommandParametersError] = useState(false);
     const [editingCommandId, setEditingCommandId] = useState(null);
     const [recentlyEditedCommandId, setRecentlyEditedCommandId] = useState(null);
     const [parameters, setParameters] = useState({...parametersState});
@@ -150,6 +151,20 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
     const onParametersChange = useCallback(
         event => {
+            if ( event.trim() === '' ) {
+                setCommandParametersError(false);
+                setCommandParameters('');
+
+                return;
+            }
+
+            try {
+                JSON.parse(event);
+                setCommandParametersError(false);
+            } catch ( error ) {
+                setCommandParametersError(true);
+            }
+
             setCommandParameters(event);
         },
         []
@@ -167,7 +182,11 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     };
 
     const onAddToMessageClick = () => {
-        if ( !command || (!commandParameters && command.value.hasParameters) ) {
+        if (
+            !command
+            || (!commandParameters && command.value.hasParameters)
+            || commandParametersError
+        ) {
             return;
         }
 
@@ -386,19 +405,21 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     };
 
     const onSaveEditedCommandClick = () => {
-        if ( editingCommandId !== null ) {
-            const updatedCommands = preparedCommands.map(preparedCommand => (
-                preparedCommand.id === editingCommandId
-                    ? {...preparedCommand, parameters: commandParameters}
-                    : preparedCommand
-            ));
-
-            setPreparedCommands(updatedCommands);
-            setEditingCommandId(null);
-            setCommandParameters('');
-            setRecentlyEditedCommandId(editingCommandId);
-            setTimeout(() => setRecentlyEditedCommandId(null), 2000);
+        if ( editingCommandId === null || commandParametersError ) {
+            return;
         }
+
+        const updatedCommands = preparedCommands.map(preparedCommand => (
+            preparedCommand.id === editingCommandId
+                ? {...preparedCommand, parameters: commandParameters}
+                : preparedCommand
+        ));
+
+        setPreparedCommands(updatedCommands);
+        setEditingCommandId(null);
+        setCommandParameters('');
+        setRecentlyEditedCommandId(editingCommandId);
+        setTimeout(() => setRecentlyEditedCommandId(null), 2000);
     };
 
     const onCancelEditingCommandClick = () => {
@@ -521,7 +542,11 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 {editingCommandId === null
                     ? (
                         <Button
-                            disabled={!command || (!commandParameters && command.value.hasParameters)}
+                            disabled={
+                                !command
+                                || (!commandParameters && command.value.hasParameters)
+                                || commandParametersError
+                            }
                             onClick={onAddToMessageClick}
                         >
                             Add command
@@ -529,7 +554,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     )
                     : (
                         <>
-                            <Button onClick={onSaveEditedCommandClick}>Save</Button>
+                            <Button onClick={onSaveEditedCommandClick} disabled={commandParametersError}>Save</Button>
                             <Button variant="outlined" onClick={onCancelEditingCommandClick}>Cancel</Button>
                         </>
                     )
@@ -680,7 +705,11 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                                                         fontWeight="fontWeightRegular"
                                                                         fontSize="0.75rem"
                                                                     >
-                                                                        {JSON.stringify(JSON.parse(preparedCommand.parameters))}
+                                                                        {
+                                                                            preparedCommand.parameters.trim() === ''
+                                                                                ? ''
+                                                                                : JSON.stringify(JSON.parse(preparedCommand.parameters))
+                                                                        }
                                                                     </HighlightedText>
                                                                 </Box>
                                                             }
