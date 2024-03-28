@@ -1,6 +1,9 @@
 import {memo} from 'react';
 import PropTypes from 'prop-types';
 import {JSONTree} from 'react-json-tree';
+import {frameTypes, accessLevels} from '@jooby-dev/jooby-codec/mtx/constants/index.js';
+import {utils} from '@jooby-dev/jooby-codec';
+import invertObject from '@jooby-dev/jooby-codec/utils/invertObject.js';
 
 import {
     Box,
@@ -28,6 +31,7 @@ import IconButtonWithTooltip from '../IconButtonWithTooltip.jsx';
 
 import {
     LOG_TYPE_ERROR,
+    LOG_TYPE_FRAME,
     PARAMETERS_TAB_VIEW_TYPE_JSON,
     PARAMETERS_TAB_VIEW_TYPE_TREE
 } from '../../constants.js';
@@ -40,6 +44,32 @@ import modifyTime2000Properties from './utils/modifyTime2000Properties.js';
 
 import {JSONTreeTheme} from './constants.js';
 
+
+const frameNamesByType = invertObject(frameTypes);
+const accessLevelNames = invertObject(accessLevels);
+
+const TypographyBold = ( {children, ...props} ) => (
+    <Typography {...props} sx={{fontWeight: '500', ...props.sx}}>
+        {children}
+    </Typography>
+);
+
+TypographyBold.propTypes = {
+    children: PropTypes.node,
+    sx: PropTypes.object
+};
+
+const TypographyMono = ( {children, ...props} ) => (
+    <Typography {...props} sx={{fontFamily: 'Roboto Mono, monospace', ...props.sx}}>
+        {children}
+    </Typography>
+);
+
+TypographyMono.propTypes = {
+    children: PropTypes.node,
+    sx: PropTypes.object
+};
+
 const LogItem = ({
     log,
     parametersTab,
@@ -48,7 +78,7 @@ const LogItem = ({
     handleShareLogsClick
 }) => {
     const {
-        hex, data, date, errorMessage, type, id, isExpanded
+        hex, data, date, errorMessage, type, id, isExpanded, frameParameters
     } = log;
 
     const copyToClipboard = useCopyToClipboard();
@@ -205,7 +235,7 @@ const LogItem = ({
                                                 <ContentCopyIcon/>
                                             </IconButtonWithTooltip>
                                         </Typography>
-                                        <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{hex}</Typography>
+                                        <TypographyMono sx={{mb: 2}}>{hex}</TypographyMono>
                                     </>
                                 )
                             }
@@ -287,115 +317,159 @@ const LogItem = ({
             {
                 isExpanded && (
                     <AccordionDetails>
-                        <Typography variant="h6" gutterBottom>
-                            {'Dump '}
-                            <IconButtonWithTooltip
-                                title="Copy dump"
-                                onClick={() => copyToClipboard(
-                                    hex,
-                                    {message: 'Message dump copied to clipboard'}
-                                )}
-                            >
-                                <ContentCopyIcon/>
-                            </IconButtonWithTooltip>
-                        </Typography>
-                        <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{hex}</Typography>
-
-                        {data.commands.length > 0 && data.commands.map(commandData => (
-                            <Accordion
-                                sx={{overflow: 'hidden', '& > *': {minWidth: 0}}}
-                                key={commandData.id}
-                                expanded={commandData.isExpanded}
-                                onChange={() => toggleNestedLog(id, commandData.id)}
-                            >
-                                <AccordionSummary
-                                    content="div"
-                                    expandIcon={<ExpandMoreIcon/>}
-                                    aria-controls={`panel${commandData.id}bh-content`}
-                                    sx={{
-                                        alignItems: 'center',
-                                        backgroundColor: `${getSubLogColor(commandData)}`,
-                                        '& > *': {minWidth: 0},
-                                        '& .MuiAccordionSummary-expandIconWrapper': {flex: '0 0 auto'}
-                                    }}
+                        <Box sx={{
+                            display: 'grid',
+                            gridTemplateColumns: 'max-content 1fr',
+                            alignItems: 'center',
+                            columnGap: 2,
+                            rowGap: 1,
+                            mb: 1
+                        }}>
+                            <TypographyBold>
+                                {'dump '}
+                                <IconButtonWithTooltip
+                                    title="Copy dump"
+                                    onClick={() => copyToClipboard(
+                                        hex,
+                                        {message: 'Message dump copied to clipboard'}
+                                    )}
                                 >
-                                    <Box sx={{
-                                        flexShrink: 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        minWidth: 0,
-                                        mr: 2,
-                                        '& > *': {minWidth: 0}
-                                    }}>
-                                        {createSubLogTitle(commandData, log.commandType)}
-                                    </Box>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Typography variant="h6" gutterBottom>
-                                        {'Dump '}
-                                        <IconButtonWithTooltip
-                                            title="Copy dump"
-                                            onClick={() => copyToClipboard(
-                                                commandData.command.hex,
-                                                {message: 'Command dump copied to clipboard'}
-                                            )}
+                                    <ContentCopyIcon/>
+                                </IconButtonWithTooltip>
+                            </TypographyBold>
+                            <TypographyMono>{hex}</TypographyMono>
+
+                            {type === LOG_TYPE_FRAME && (
+                                <>
+                                    <TypographyBold>frame type</TypographyBold>
+                                    <TypographyMono>
+                                        {`${
+                                            frameNamesByType[frameParameters.type]
+                                        } (0x${
+                                            utils.getHexFromNumber(frameParameters.type, {separator: ''})
+                                        })`}
+                                    </TypographyMono>
+                                    <TypographyBold>access level</TypographyBold>
+                                    <TypographyMono>
+                                        {`${
+                                            accessLevelNames[frameParameters.accessLevel]
+                                        } (0x${
+                                            utils.getHexFromNumber(frameParameters.accessLevel, {separator: ''})
+                                        })`}
+                                    </TypographyMono>
+                                    <TypographyBold>destination address</TypographyBold>
+                                    <TypographyMono>
+                                        {`0x${utils.getHexFromNumber(frameParameters.destination, {separator: ''})}`}
+                                    </TypographyMono>
+                                    <TypographyBold>source address</TypographyBold>
+                                    <TypographyMono>
+                                        {`0x${utils.getHexFromNumber(frameParameters.source, {separator: ''})}`}
+                                    </TypographyMono>
+                                    <TypographyBold>message ID</TypographyBold>
+                                    <TypographyMono>{frameParameters.messageId}</TypographyMono>
+                                </>
+                            )}
+                        </Box>
+
+                        {data.commands.length > 0 && (
+                            <>
+                                <TypographyBold gutterBottom>commands</TypographyBold>
+                                {data.commands.map(commandData => (
+                                    <Accordion
+                                        key={commandData.id}
+                                        sx={{overflow: 'hidden', '& > *': {minWidth: 0}}}
+                                        expanded={commandData.isExpanded}
+                                        onChange={() => toggleNestedLog(id, commandData.id)}
+                                    >
+                                        <AccordionSummary
+                                            content="div"
+                                            expandIcon={<ExpandMoreIcon/>}
+                                            aria-controls={`panel${commandData.id}bh-content`}
+                                            sx={{
+                                                alignItems: 'center',
+                                                backgroundColor: `${getSubLogColor(commandData)}`,
+                                                '& > *': {minWidth: 0},
+                                                '& .MuiAccordionSummary-expandIconWrapper': {flex: '0 0 auto'}
+                                            }}
                                         >
-                                            <ContentCopyIcon/>
-                                        </IconButtonWithTooltip>
-                                    </Typography>
-                                    <Typography sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>{commandData.command.hex}</Typography>
-                                    {
-                                        commandData.command.id !== undefined && commandData.command.hasParameters && (
-                                            <>
-                                                <Typography variant="h6" gutterBottom>
-                                                    {'Parameters '}
+                                            <Box sx={{
+                                                flexShrink: 1,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                minWidth: 0,
+                                                mr: 2,
+                                                '& > *': {minWidth: 0}
+                                            }}>
+                                                {createSubLogTitle(commandData, log.commandType)}
+                                            </Box>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 1}}>
+                                                <TypographyBold>
+                                                    {'dump '}
                                                     <IconButtonWithTooltip
-                                                        title="Copy parameters in JSON format"
+                                                        title="Copy dump"
                                                         onClick={() => copyToClipboard(
-                                                            JSON.stringify(commandData.command.parameters, null, 4),
-                                                            {message: 'Parameters copied to clipboard'}
+                                                            commandData.command.hex,
+                                                            {message: 'Command dump copied to clipboard'}
                                                         )}
                                                     >
                                                         <ContentCopyIcon/>
                                                     </IconButtonWithTooltip>
-                                                </Typography>
+                                                </TypographyBold>
+                                                <TypographyMono>{commandData.command.hex}</TypographyMono>
+                                            </Box>
+                                            {
+                                                commandData.command.id !== undefined && commandData.command.hasParameters && (
+                                                    <>
+                                                        <TypographyBold gutterBottom>
+                                                            {'parameters '}
+                                                            <IconButtonWithTooltip
+                                                                title="Copy parameters in JSON format"
+                                                                onClick={() => copyToClipboard(
+                                                                    JSON.stringify(commandData.command.parameters, null, 4),
+                                                                    {message: 'Parameters copied to clipboard'}
+                                                                )}
+                                                            >
+                                                                <ContentCopyIcon/>
+                                                            </IconButtonWithTooltip>
+                                                        </TypographyBold>
 
-                                                <TabContext value={parametersTab}>
-                                                    <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                                                        <TabList
-                                                            onChange={(event, value) => setParametersTab(value)}
-                                                            aria-label="Display command parameters in tree, JSON view"
-                                                        >
-                                                            <Tab label={PARAMETERS_TAB_VIEW_TYPE_TREE} value={PARAMETERS_TAB_VIEW_TYPE_TREE}/>
-                                                            <Tab label={PARAMETERS_TAB_VIEW_TYPE_JSON} value={PARAMETERS_TAB_VIEW_TYPE_JSON}/>
-                                                        </TabList>
-                                                    </Box>
-                                                    <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_TREE}>
-                                                        <Box sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
-                                                            <JSONTree
-                                                                data={modifyTime2000Properties(commandData.command.parameters)}
-                                                                theme={JSONTreeTheme}
-                                                                invertTheme={false}
-                                                                hideRoot={true}
-                                                                shouldExpandNodeInitially={() => true}
-                                                            />
-                                                        </Box>
-                                                    </TabPanel>
-                                                    <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_JSON}>
-                                                        <Typography
-                                                            component="pre"
-                                                            sx={{fontFamily: 'Roboto Mono, monospace', whiteSpace: 'pre-wrap'}}
-                                                        >
-                                                            {JSON.stringify(commandData.command.parameters, null, 4)}
-                                                        </Typography>
-                                                    </TabPanel>
-                                                </TabContext>
-                                            </>
-                                        )
-                                    }
-                                </AccordionDetails>
-                            </Accordion>
-                        ))}
+                                                        <TabContext value={parametersTab}>
+                                                            <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                                                                <TabList
+                                                                    onChange={(event, value) => setParametersTab(value)}
+                                                                    aria-label="Display command parameters in tree, JSON view"
+                                                                >
+                                                                    <Tab label={PARAMETERS_TAB_VIEW_TYPE_TREE} value={PARAMETERS_TAB_VIEW_TYPE_TREE}/>
+                                                                    <Tab label={PARAMETERS_TAB_VIEW_TYPE_JSON} value={PARAMETERS_TAB_VIEW_TYPE_JSON}/>
+                                                                </TabList>
+                                                            </Box>
+                                                            <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_TREE}>
+                                                                <Box sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
+                                                                    <JSONTree
+                                                                        data={modifyTime2000Properties(commandData.command.parameters)}
+                                                                        theme={JSONTreeTheme}
+                                                                        invertTheme={false}
+                                                                        hideRoot={true}
+                                                                        shouldExpandNodeInitially={() => true}
+                                                                    />
+                                                                </Box>
+                                                            </TabPanel>
+                                                            <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_JSON}>
+                                                                <TypographyMono component="pre" sx={{whiteSpace: 'pre-wrap'}}>
+                                                                    {JSON.stringify(commandData.command.parameters, null, 4)}
+                                                                </TypographyMono>
+                                                            </TabPanel>
+                                                        </TabContext>
+                                                    </>
+                                                )
+                                            }
+                                        </AccordionDetails>
+                                    </Accordion>
+                                ))}
+                            </>
+                        )}
                     </AccordionDetails>
                 )
             }

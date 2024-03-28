@@ -20,7 +20,7 @@ import IconButtonWithTooltip from '../IconButtonWithTooltip.jsx';
 import isValidJson from './utils/isValidJson.js';
 import formatJson from './utils/formatJson.js';
 
-import {COMMAND_TYPE_ANALOG, COMMAND_TYPE_OBIS_OBSERVER} from '../../constants.js';
+import {COMMAND_TYPE_ANALOG, COMMAND_TYPE_OBIS_OBSERVER, COMMAND_TYPE_MTX} from '../../constants.js';
 
 const workerJsonUrl = new URL('ace-builds/src-noconflict/worker-json.js', import.meta.url).toString();
 
@@ -214,7 +214,7 @@ CommandParameterEditor.propTypes = {
     inputRef: PropTypes.object.isRequired,
     command: PropTypes.object.isRequired,
     onSubmit: PropTypes.func.isRequired,
-    commandType: PropTypes.oneOf([COMMAND_TYPE_ANALOG, COMMAND_TYPE_OBIS_OBSERVER]).isRequired
+    commandType: PropTypes.oneOf([COMMAND_TYPE_ANALOG, COMMAND_TYPE_OBIS_OBSERVER, COMMAND_TYPE_MTX]).isRequired
 };
 
 

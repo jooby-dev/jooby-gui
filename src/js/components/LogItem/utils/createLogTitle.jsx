@@ -12,7 +12,7 @@ import hasLrc from '../../../utils/hasLrc.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
-import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR} from '../../../constants.js';
+import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR, LOG_TYPE_FRAME} from '../../../constants.js';
 
 import isAllCommandsUnknown from './isAllCommandsUnknown.js';
 import isAllCommandsHaveSameDirection from './isAllCommandsHaveSameDirection.js';
@@ -54,6 +54,7 @@ const renderHardwareType = ( hardwareType, commandType ) => {
 const createLogTitle = log => {
     switch ( log.type ) {
         case LOG_TYPE_MESSAGE:
+        case LOG_TYPE_FRAME:
             return (
                 <>
                     {createMessageDirectionIcon(log.data.commands, log.commandType)}
