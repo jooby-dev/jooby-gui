@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {JSONTree} from 'react-json-tree';
 import {frameTypes, accessLevels} from '@jooby-dev/jooby-codec/mtx/constants/index.js';
 import {utils} from '@jooby-dev/jooby-codec';
+import invertObject from '@jooby-dev/jooby-codec/utils/invertObject.js';
 
 import {
     Box,
@@ -35,7 +36,6 @@ import {
     PARAMETERS_TAB_VIEW_TYPE_TREE
 } from '../../constants.js';
 
-import invertObject from '../../utils/invertObject.js';
 import getSubLogColor from './utils/getSubLogColor.js';
 import getLogColor from './utils/getLogColor.js';
 import createSubLogTitle from './utils/createSubLogTitle.jsx';
