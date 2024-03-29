@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {Box} from '@mui/material';
 
 import LogsPanel from './LogsPanel/LogsPanel.jsx';
-import CommandPanel from './CommandPanel/CommandPanel.jsx';
+import CommandPanel from './CommandPanel.jsx';
 
 
 const App = () => {
