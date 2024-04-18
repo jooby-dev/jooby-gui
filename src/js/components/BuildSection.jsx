@@ -50,10 +50,8 @@ import isValidHex from '../utils/isValidHex.js';
 import isValidNumber from '../utils/isValidNumber.js';
 import cleanHexString from '../utils/cleanHexString.js';
 import getLogType from '../utils/getLogType.js';
-import {
-    convertCommandParametersFromCodecFormat,
-    convertCommandParametersToCodecFormat
-} from '../utils/commandParameterConverters.js';
+import convertCommandParametersToCodecFormat from '../utils/convertCommandParametersToCodecFormat.js';
+import normalizeCommandParameters from '../utils/normalizeCommandParameters.js';
 
 
 const incrementMessageId = messageId => (parseInt(messageId, 10) + 1) % BYTE_RANGE_LIMIT;
@@ -215,18 +213,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
         if ( newValue.value.parameters ) {
             // prepare parameters for editing
-            setCommandParameters(
-                JSON.stringify(
-                    convertCommandParametersFromCodecFormat({
-                        id: command.value.id,
-                        type: commandType,
-                        direction: command.value.directionType,
-                        parameters: newValue.value.parameters
-                    }),
-                    null,
-                    4
-                )
-            );
+            setCommandParameters(JSON.stringify(normalizeCommandParameters(newValue.value.parameters), null, 4));
         }
 
         if ( newValue.value.config?.hardwareType ) {
@@ -345,29 +332,19 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }
 
         if ( data ) {
-            data.commands = data.commands.map(commandData => {
-                const {id} = commandData.command.constructor;
-                const {directionType} = commandData.command.constructor;
-
-                return {
-                    command: {
-                        id,
-                        directionType,
-                        hasParameters: commandData.command.constructor.hasParameters,
-                        length: commandData.command.toBytes().length,
-                        name: commandData.command.constructor.name,
-                        parameters: convertCommandParametersFromCodecFormat({
-                            id,
-                            type: commandType,
-                            direction: directionType,
-                            parameters: commandData.command.getParameters()
-                        }),
-                        hex: commandData.command.toHex()
-                    },
-                    id: uuidv4(),
-                    isExpanded: false
-                };
-            });
+            data.commands = data.commands.map(commandData => ({
+                command: {
+                    id: commandData.command.constructor.id,
+                    directionType: commandData.command.constructor.directionType,
+                    hasParameters: commandData.command.constructor.hasParameters,
+                    length: commandData.command.toBytes().length,
+                    name: commandData.command.constructor.name,
+                    parameters: normalizeCommandParameters(commandData.command.getParameters()),
+                    hex: commandData.command.toHex()
+                },
+                id: uuidv4(),
+                isExpanded: false
+            }));
         }
 
         const logType = getLogType(commandType, buildError);

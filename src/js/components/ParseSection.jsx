@@ -41,7 +41,7 @@ import getHardwareTypeName from '../utils/getHardwareTypeName.js';
 import createCtrlEnterSubmitHandler from '../utils/createCtrlEnterSubmitHandler.js';
 import isValidHex from '../utils/isValidHex.js';
 import getLogType from '../utils/getLogType.js';
-import {convertCommandParametersFromCodecFormat} from '../utils/commandParameterConverters.js';
+import normalizeCommandParameters from '../utils/normalizeCommandParameters.js';
 
 
 const base64ToHex = base64 => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
@@ -144,28 +144,19 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
         }
 
         if ( data ) {
-            data.commands = data.commands.map(commandData => {
-                const {id} = commandData.command.constructor;
-
-                return {
-                    command: {
-                        id,
-                        hasParameters: commandData.command.constructor.hasParameters,
-                        length: commandData.command.toBytes().length,
-                        name: commandData.command.constructor.name,
-                        directionType: commandData.command.constructor.directionType,
-                        parameters: convertCommandParametersFromCodecFormat({
-                            id,
-                            type: commandType,
-                            direction: parameters.direction,
-                            parameters: commandData.command.getParameters()
-                        }),
-                        hex: commandData.command.toHex()
-                    },
-                    id: uuidv4(),
-                    isExpanded: false
-                };
-            });
+            data.commands = data.commands.map(commandData => ({
+                command: {
+                    id: commandData.command.constructor.id,
+                    hasParameters: commandData.command.constructor.hasParameters,
+                    length: commandData.command.toBytes().length,
+                    name: commandData.command.constructor.name,
+                    directionType: commandData.command.constructor.directionType,
+                    parameters: normalizeCommandParameters(commandData.command.getParameters()),
+                    hex: commandData.command.toHex()
+                },
+                id: uuidv4(),
+                isExpanded: false
+            }));
         }
 
         const logType = getLogType(commandType, parseError);
