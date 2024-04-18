@@ -1,4 +1,4 @@
-import {utils} from '@jooby-dev/jooby-codec';
+import {utils} from 'jooby-codec';
 import formatUTCDate from './formatUTCDate.js';
 
 

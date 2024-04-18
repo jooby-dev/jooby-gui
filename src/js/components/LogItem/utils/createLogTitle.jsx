@@ -1,5 +1,5 @@
 import {Fragment} from 'react';
-import * as joobyCodec from '@jooby-dev/jooby-codec';
+import * as joobyCodec from 'jooby-codec';
 import {Box, Collapse, Tooltip} from '@mui/material';
 import {
     Close as CloseIcon,

@@ -1,9 +1,9 @@
 import {memo} from 'react';
 import PropTypes from 'prop-types';
 import {JSONTree} from 'react-json-tree';
-import {frameTypes, accessLevels} from '@jooby-dev/jooby-codec/mtx/constants/index.js';
-import {utils} from '@jooby-dev/jooby-codec';
-import invertObject from '@jooby-dev/jooby-codec/utils/invertObject.js';
+import {frameTypes, accessLevels} from 'jooby-codec/mtx/constants/index.js';
+import {utils} from 'jooby-codec';
+import invertObject from 'jooby-codec/utils/invertObject.js';
 
 import {
     Box,

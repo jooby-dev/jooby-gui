@@ -17,7 +17,6 @@
         "@emotion/styled": "^11.11.0",
         "@fontsource/roboto": "^5.0.12",
         "@fontsource/roboto-mono": "^5.0.17",
-        "@jooby-dev/jooby-codec": "^2024.212.1140",
         "@mui/icons-material": "^5.15.12",
         "@mui/lab": "^5.0.0-alpha.167",
         "@mui/material": "^5.15.12",
@@ -29,10 +28,12 @@
         "ace-builds": "^1.32.7",
         "eslint": "^8.56.0",
         "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-plugin-custom-rules": "file:./eslint-custom-rules",
         "eslint-plugin-import": "^2.29.1",
         "eslint-plugin-react": "^7.33.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.5",
+        "jooby-codec": "^3.13.0",
         "lz-string": "^1.5.0",
         "react": "^18.2.0",
         "react-beautiful-dnd": "^13.1.1",
@@ -40,7 +41,6 @@
         "react-json-tree": "^0.18.0",
         "sass": "^1.71.1",
         "uuid": "^9.0.1",
-        "vite": "^5.1.4",
-        "eslint-plugin-custom-rules": "file:./eslint-custom-rules"
+        "vite": "^5.1.4"
     }
 }

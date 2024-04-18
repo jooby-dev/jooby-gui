@@ -1,5 +1,5 @@
 import {Box, Collapse, Link} from '@mui/material';
-import {utils} from '@jooby-dev/jooby-codec';
+import {utils} from 'jooby-codec';
 
 import createCommandDocLink from '../../../utils/createCommandDocLink.js';
 import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.jsx';
@@ -18,7 +18,7 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                             <>
                                 {'id: '}
                                 <HighlightedText isMonospacedFont={true}>
-                                    {utils.getHexFromNumber(logCommand.command.id, {prefix: '0x'})}
+                                    {`0x${utils.getHexFromNumber(logCommand.command.id, {separator: ''})}`}
                                 </HighlightedText>
                                 {'; '}
                             </>
