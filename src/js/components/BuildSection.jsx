@@ -1,8 +1,8 @@
 import {useState, useEffect, useRef, useCallback, useContext} from 'react';
 import PropTypes from 'prop-types';
-import * as joobyCodec from '@jooby-dev/jooby-codec';
-import {frameTypes, accessLevels} from '@jooby-dev/jooby-codec/mtx/constants/index.js';
-import {directions} from '@jooby-dev/jooby-codec/constants/index.js';
+import * as joobyCodec from 'jooby-codec';
+import {frameTypes, accessLevels} from 'jooby-codec/mtx/constants/index.js';
+import {directions} from 'jooby-codec/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
@@ -50,6 +50,8 @@ import isValidHex from '../utils/isValidHex.js';
 import isValidNumber from '../utils/isValidNumber.js';
 import cleanHexString from '../utils/cleanHexString.js';
 import getLogType from '../utils/getLogType.js';
+import convertCommandParametersToCodecFormat from '../utils/convertCommandParametersToCodecFormat.js';
+import normalizeCommandParameters from '../utils/normalizeCommandParameters.js';
 
 
 const incrementMessageId = messageId => (parseInt(messageId, 10) + 1) % BYTE_RANGE_LIMIT;
@@ -210,7 +212,8 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }
 
         if ( newValue.value.parameters ) {
-            setCommandParameters(JSON.stringify(newValue.value.parameters, null, 4));
+            // prepare parameters for editing
+            setCommandParameters(JSON.stringify(normalizeCommandParameters(newValue.value.parameters), null, 4));
         }
 
         if ( newValue.value.config?.hardwareType ) {
@@ -277,7 +280,12 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
                 // eslint-disable-next-line new-cap
                 return new preparedCommand.command.value(
-                    currentCommandParameters,
+                    convertCommandParametersToCodecFormat({
+                        id: preparedCommand.command.value.id,
+                        type: commandType,
+                        direction: preparedCommand.command.value.directionType,
+                        parameters: currentCommandParameters
+                    }),
                     {
                         hardwareType: getHardwareType(hardwareType)
                     }
@@ -304,7 +312,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         {
                             source: parseInt(cleanHexString(parameters.source), 16),
                             destination: parseInt(cleanHexString(parameters.destination), 16),
-                            frameType
+                            type: frameType
                         }
                     ),
                     {separator: ' '}
@@ -326,12 +334,12 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         if ( data ) {
             data.commands = data.commands.map(commandData => ({
                 command: {
-                    hasParameters: commandData.command.constructor.hasParameters,
                     id: commandData.command.constructor.id,
+                    directionType: commandData.command.constructor.directionType,
+                    hasParameters: commandData.command.constructor.hasParameters,
                     length: commandData.command.toBytes().length,
                     name: commandData.command.constructor.name,
-                    directionType: commandData.command.constructor.directionType,
-                    parameters: commandData.command.getParameters(),
+                    parameters: normalizeCommandParameters(commandData.command.getParameters()),
                     hex: commandData.command.toHex()
                 },
                 id: uuidv4(),

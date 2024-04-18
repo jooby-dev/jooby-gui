@@ -1,7 +1,7 @@
 import {useState, useEffect, useContext} from 'react';
 import PropTypes from 'prop-types';
-import * as joobyCodec from '@jooby-dev/jooby-codec';
-import {directions} from '@jooby-dev/jooby-codec/constants/index.js';
+import * as joobyCodec from 'jooby-codec';
+import {directions} from 'jooby-codec/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {
     Box,
@@ -41,6 +41,7 @@ import getHardwareTypeName from '../utils/getHardwareTypeName.js';
 import createCtrlEnterSubmitHandler from '../utils/createCtrlEnterSubmitHandler.js';
 import isValidHex from '../utils/isValidHex.js';
 import getLogType from '../utils/getLogType.js';
+import normalizeCommandParameters from '../utils/normalizeCommandParameters.js';
 
 
 const base64ToHex = base64 => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
@@ -133,7 +134,7 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
                         hex,
                         {
                             hardwareType: getHardwareType(hardwareType),
-                            direction: commandType === COMMAND_TYPE_ANALOG ? parameters.direction : undefined
+                            direction: commandType === COMMAND_TYPE_ANALOG ? Number(parameters.direction) : undefined
                         }
                     );
                 }
@@ -145,12 +146,12 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
         if ( data ) {
             data.commands = data.commands.map(commandData => ({
                 command: {
-                    hasParameters: commandData.command.constructor.hasParameters,
                     id: commandData.command.constructor.id,
+                    hasParameters: commandData.command.constructor.hasParameters,
                     length: commandData.command.toBytes().length,
                     name: commandData.command.constructor.name,
                     directionType: commandData.command.constructor.directionType,
-                    parameters: commandData.command.getParameters(),
+                    parameters: normalizeCommandParameters(commandData.command.getParameters()),
                     hex: commandData.command.toHex()
                 },
                 id: uuidv4(),

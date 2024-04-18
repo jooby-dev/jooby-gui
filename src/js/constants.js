@@ -1,5 +1,5 @@
-import {analog, obisObserver, mtx, utils} from '@jooby-dev/jooby-codec';
-import {directions} from '@jooby-dev/jooby-codec/constants/index.js';
+import {analog, obisObserver, mtx, utils} from 'jooby-codec';
+import {directions} from 'jooby-codec/constants/index.js';
 
 
 const {DOWNLINK, UPLINK} = directions;
