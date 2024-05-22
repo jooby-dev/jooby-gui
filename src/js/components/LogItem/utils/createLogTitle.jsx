@@ -1,38 +1,16 @@
 import {Fragment} from 'react';
 import * as joobyCodec from 'jooby-codec';
 import {Box, Collapse, Tooltip} from '@mui/material';
-import {
-    Close as CloseIcon,
-    QuestionMark as QuestionMarkIcon,
-    SyncAlt as SyncAltIcon
-} from '@mui/icons-material';
+import {Close as CloseIcon} from '@mui/icons-material';
 
-import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.jsx';
+import createDirectionIcon from '../../../utils/createDirectionIcon.jsx';
 import hasLrc from '../../../utils/hasLrc.js';
+import getHexFromNumber from '../../../utils/getHexFromNumber.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
 import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR, LOG_TYPE_FRAME} from '../../../constants.js';
 
-import isAllCommandsUnknown from './isAllCommandsUnknown.js';
-import isAllCommandsHaveSameDirection from './isAllCommandsHaveSameDirection.js';
-
-
-const createMessageDirectionIcon = ( logCommands, commandType ) => {
-    if ( isAllCommandsUnknown(logCommands) ) {
-        return <QuestionMarkIcon sx={{mr: 2, color: 'grey.700'}}/>;
-    }
-
-    // commands have a different direction in the message
-    if ( !isAllCommandsHaveSameDirection(logCommands) ) {
-        return <SyncAltIcon color="error" sx={{mr: 2, transform: 'rotate(90deg)'}}/>;
-    }
-
-    return createCommandDirectionIcon(
-        logCommands.find(logCommand => logCommand.command.directionType !== undefined).command,
-        commandType
-    );
-};
 
 const renderHardwareType = ( hardwareType, commandType ) => {
     if ( !hardwareType ) {
@@ -54,26 +32,29 @@ const renderHardwareType = ( hardwareType, commandType ) => {
 const createLogTitle = log => {
     switch ( log.type ) {
         case LOG_TYPE_MESSAGE:
-        case LOG_TYPE_FRAME:
+        case LOG_TYPE_FRAME: {
+            const actualLrc = log.data.lrc?.actual;
+            const expectedLrc = log.data.lrc?.expected;
+
             return (
                 <>
-                    {createMessageDirectionIcon(log.data.commands, log.commandType)}
+                    {createDirectionIcon(log.data.commands[0].command.directionType)}
                     <Box>
                         <Box sx={{minWidth: 0}}>
                             {'commands: '}
                             <HighlightedText>{log.data.commands.length}</HighlightedText>
                             {'; '}
                             {
-                                hasLrc(log.commandType) && log.data.lrc.expected !== log.data.lrc.actual
+                                hasLrc(log.commandType) && ( !actualLrc || !expectedLrc || actualLrc !== expectedLrc )
                                     ? (
                                         <>
                                             {'LRC expected: '}
                                             <HighlightedText isMonospacedFont={true}>
-                                                {joobyCodec.utils.getHexFromNumber(log.data.lrc.expected, {prefix: '0x'})}
+                                                {expectedLrc ? getHexFromNumber(expectedLrc) : 'n/a'}
                                             </HighlightedText>
                                             {', actual: '}
                                             <HighlightedText isMonospacedFont={true} color="error.main">
-                                                {joobyCodec.utils.getHexFromNumber(log.data.lrc.actual, {prefix: '0x'})}
+                                                {actualLrc ? getHexFromNumber(actualLrc) : 'n/a'}
                                             </HighlightedText>
                                             {'; '}
                                         </>
@@ -118,13 +99,14 @@ const createLogTitle = log => {
                     </Box>
                 </>
             );
+        }
 
         case LOG_TYPE_ERROR:
             return (
                 <>
                     <CloseIcon color="error" sx={{mr: 2}}/>
                     <Box>
-                        {renderHardwareType(log.hardwareType, log.commandType)}
+                        <Box sx={{minWidth: 0}}>error</Box>
                         <Box sx={{
                             fontWeight: 'fontWeightRegular',
                             fontSize: '0.75rem',
@@ -142,7 +124,7 @@ const createLogTitle = log => {
                                 }}
                                 in={!log.isExpanded}
                             >
-                                {log.errorMessage}
+                                {log.error}
                             </Collapse>
                         </Box>
                     </Box>

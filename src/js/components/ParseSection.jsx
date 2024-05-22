@@ -1,7 +1,7 @@
 import {useState, useEffect, useContext} from 'react';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
-import {directions} from 'jooby-codec/constants/index.js';
+import {frameTypes} from 'jooby-codec/mtx/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {
     Box,
@@ -31,9 +31,13 @@ import {
     SEVERITY_TYPE_WARNING,
     COMMAND_TYPE_ANALOG,
     COMMAND_TYPE_MTX,
+    COMMAND_TYPE_OBIS_OBSERVER,
     ACCESS_KEY_LENGTH_BYTES,
     DEFAULT_ACCESS_KEY,
-    directionNames
+    UNKNOWN_COMMAND_NAME,
+    directionNames,
+    directions,
+    commands
 } from '../constants.js';
 
 import getHardwareType from '../utils/getHardwareType.js';
@@ -41,7 +45,6 @@ import getHardwareTypeName from '../utils/getHardwareTypeName.js';
 import createCtrlEnterSubmitHandler from '../utils/createCtrlEnterSubmitHandler.js';
 import isValidHex from '../utils/isValidHex.js';
 import getLogType from '../utils/getLogType.js';
-import normalizeCommandParameters from '../utils/normalizeCommandParameters.js';
 
 
 const base64ToHex = base64 => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
@@ -67,6 +70,8 @@ const parametersState = {
 const parameterErrorsState = {
     accessKey: false
 };
+
+const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.commands.downlink).map(command => command.id);
 
 
 const ParseSection = ( {setLogs, hardwareType} ) => {
@@ -106,9 +111,11 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
             return;
         }
 
-        let hex;
+        const preparedData = {};
+        let hex = dump;
         let data;
         let parseError;
+        let direction;
 
         if ( format === formats.BASE64 ) {
             try {
@@ -121,42 +128,106 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
         }
 
         if ( !parseError ) {
-            try {
-                if ( commandType === COMMAND_TYPE_MTX ) {
-                    data = joobyCodec[commandType].message.fromFrame(
-                        joobyCodec.utils.getBytesFromHex(hex),
-                        {
-                            aesKey: joobyCodec.utils.getBytesFromHex(parameters.accessKey)
+            const bytes = joobyCodec.utils.getBytesFromHex(hex);
+            const codec = joobyCodec[commandType];
+
+            switch ( commandType ) {
+                case COMMAND_TYPE_MTX: {
+                    const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
+
+                    try {
+                        direction = directions.DOWNLINK;
+                        data = codec.message[directionNames[direction]].fromFrame(bytes, {aesKey});
+                    } catch ( error ) {
+                        parseError = error;
+                    }
+
+                    if ( parseError || data.type !== frameTypes.DATA_REQUEST ) {
+                        parseError = null;
+                        data = null;
+
+                        try {
+                            direction = directions.UPLINK;
+                            data = codec.message[directionNames[direction]].fromFrame(bytes, {aesKey});
+                        } catch ( error ) {
+                            parseError = error;
                         }
-                    );
-                } else {
-                    data = joobyCodec[commandType].message.fromHex(
-                        hex,
-                        {
-                            hardwareType: getHardwareType(hardwareType),
-                            direction: commandType === COMMAND_TYPE_ANALOG ? Number(parameters.direction) : undefined
-                        }
-                    );
+                    }
+
+                    break;
                 }
-            } catch ( error ) {
-                parseError = error;
+
+                case COMMAND_TYPE_ANALOG:
+                    try {
+                        direction = Number(parameters.direction);
+                        data = codec.message[directionNames[direction]].fromBytes(
+                            bytes,
+                            {
+                                hardwareType: getHardwareType(hardwareType)
+                            }
+                        );
+                    } catch ( error ) {
+                        parseError = error;
+                    }
+
+                    break;
+
+                case COMMAND_TYPE_OBIS_OBSERVER:
+                    try {
+                        direction = directions.DOWNLINK;
+                        data = codec.message[directionNames[direction]].fromBytes(bytes);
+                    } catch ( error ) {
+                        parseError = error;
+                    }
+
+                    if (
+                        parseError
+                        || !data.commands
+                            .map(({error, command, id}) => (error ? command.id : id))
+                            .some(id => obisObserverDownlinkCommandIds.includes(id))
+                    ) {
+                        parseError = null;
+                        data = null;
+
+                        try {
+                            direction = directions.UPLINK;
+                            data = codec.message[directionNames[direction]].fromBytes(bytes);
+                        } catch ( error ) {
+                            parseError = error;
+                        }
+                    }
+
+                    break;
             }
         }
 
-        if ( data ) {
-            data.commands = data.commands.map(commandData => ({
-                command: {
-                    id: commandData.command.constructor.id,
-                    hasParameters: commandData.command.constructor.hasParameters,
-                    length: commandData.command.toBytes().length,
-                    name: commandData.command.constructor.name,
-                    directionType: commandData.command.constructor.directionType,
-                    parameters: normalizeCommandParameters(commandData.command.getParameters()),
-                    hex: commandData.command.toHex()
-                },
-                id: uuidv4(),
-                isExpanded: false
-            }));
+        if ( data && !parseError ) {
+            const messageError = data.error;
+            const message = messageError ? data.message : data;
+
+            preparedData.commands = message.commands.map(commandData => {
+                const {error} = commandData;
+                const command = error ? commandData.command : commandData;
+                const commandDetails = error ? null : commands[commandType][directionNames[direction]][commandData.name];
+
+                return {
+                    command: {
+                        error,
+                        id: command.id,
+                        name: command.name || UNKNOWN_COMMAND_NAME,
+                        hex: joobyCodec.utils.getHexFromBytes(command.bytes),
+                        length: command.bytes.length,
+                        directionType: direction,
+                        hasParameters: error ? null : commandDetails.hasParameters,
+                        parameters: command.parameters || null
+                    },
+                    id: uuidv4(),
+                    isExpanded: false
+                };
+            });
+
+            preparedData.lrc = message.lrc;
+            preparedData.error = messageError;
         }
 
         const logType = getLogType(commandType, parseError);
@@ -165,9 +236,9 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
             commandType,
             hex,
             hardwareType: getHardwareTypeName(hardwareType),
-            data: parseError ? null : data,
+            data: parseError ? null : preparedData,
             date: new Date().toLocaleString(),
-            errorMessage: parseError?.message,
+            error: parseError?.message,
             type: logType,
             id: uuidv4(),
             isExpanded: false,
@@ -179,8 +250,8 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
                 type: data.type,
                 destination: data.destination,
                 source: data.source,
-                accessLevel: data.accessLevel,
-                messageId: data.messageId
+                accessLevel: data.error ? data.message.accessLevel : data.accessLevel,
+                messageId: data.error ? data.message.messageId : data.messageId
             };
         }
 
@@ -327,7 +398,7 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
 
 ParseSection.propTypes = {
     setLogs: PropTypes.func.isRequired,
-    hardwareType: PropTypes.string
+    hardwareType: PropTypes.object
 };
 
 

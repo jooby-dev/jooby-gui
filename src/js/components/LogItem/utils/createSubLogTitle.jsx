@@ -1,15 +1,17 @@
 import {Box, Collapse, Link} from '@mui/material';
-import {utils} from 'jooby-codec';
 
 import createCommandDocLink from '../../../utils/createCommandDocLink.js';
-import createCommandDirectionIcon from '../../../utils/createCommandDirectionIcon.jsx';
+import createDirectionIcon from '../../../utils/createDirectionIcon.jsx';
+import getHexFromNumber from '../../../utils/getHexFromNumber.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
+
+import {UNKNOWN_COMMAND_NAME} from '../../../constants.js';
 
 
 const createSubLogTitle = ( logCommand, commandType ) => (
     <>
-        {createCommandDirectionIcon(logCommand.command, commandType)}
+        {createDirectionIcon(logCommand.command.directionType)}
         <Box>
             <Box sx={{minWidth: 0}}>
                 {
@@ -17,9 +19,7 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                         ? (
                             <>
                                 {'id: '}
-                                <HighlightedText isMonospacedFont={true}>
-                                    {`0x${utils.getHexFromNumber(logCommand.command.id, {separator: ''})}`}
-                                </HighlightedText>
+                                <HighlightedText isMonospacedFont={true}>{getHexFromNumber(logCommand.command.id)}</HighlightedText>
                                 {'; '}
                             </>
                         )
@@ -27,7 +27,7 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                 }
                 {'name: '}
                 {
-                    logCommand.command.id !== undefined
+                    logCommand.command.name !== UNKNOWN_COMMAND_NAME
                         ? (
                             <Link
                                 href={createCommandDocLink(logCommand.command, commandType)}
@@ -45,7 +45,7 @@ const createSubLogTitle = ( logCommand, commandType ) => (
             </Box>
 
             {
-                logCommand.command.id && logCommand.command.hasParameters && (
+                logCommand.command.parameters && logCommand.command.hasParameters && (
                     <Box sx={{
                         fontWeight: 'fontWeightRegular',
                         fontSize: '0.75rem',
