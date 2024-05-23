@@ -27,6 +27,7 @@ import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 import TextField from './TextField.jsx';
 import Button from './Button.jsx';
 
+import {commands} from '../joobyCodec.js';
 import {
     SEVERITY_TYPE_WARNING,
     COMMAND_TYPE_ANALOG,
@@ -36,8 +37,7 @@ import {
     DEFAULT_ACCESS_KEY,
     UNKNOWN_COMMAND_NAME,
     directionNames,
-    directions,
-    commands
+    directions
 } from '../constants.js';
 
 import getHardwareType from '../utils/getHardwareType.js';
@@ -45,6 +45,7 @@ import getHardwareTypeName from '../utils/getHardwareTypeName.js';
 import createCtrlEnterSubmitHandler from '../utils/createCtrlEnterSubmitHandler.js';
 import isValidHex from '../utils/isValidHex.js';
 import getLogType from '../utils/getLogType.js';
+import isByteArray from '../utils/isByteArray.js';
 
 
 const base64ToHex = base64 => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
@@ -162,9 +163,7 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
                         direction = Number(parameters.direction);
                         data = codec.message[directionNames[direction]].fromBytes(
                             bytes,
-                            {
-                                hardwareType: getHardwareType(hardwareType)
-                            }
+                            {hardwareType: getHardwareType(hardwareType)}
                         );
                     } catch ( error ) {
                         parseError = error;
@@ -208,18 +207,19 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
             preparedData.commands = message.commands.map(commandData => {
                 const {error} = commandData;
                 const command = error ? commandData.command : commandData;
-                const commandDetails = error ? null : commands[commandType][directionNames[direction]][commandData.name];
+                const commandDetails = error ? null : commands[commandType][directionNames[direction]][command.name];
+                const isByteArrayValid = isByteArray(command.bytes);
 
                 return {
                     command: {
                         error,
                         id: command.id,
                         name: command.name || UNKNOWN_COMMAND_NAME,
-                        hex: joobyCodec.utils.getHexFromBytes(command.bytes),
-                        length: command.bytes.length,
+                        hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(command.bytes) : undefined,
+                        length: isByteArrayValid ? command.bytes.length : undefined,
                         directionType: direction,
-                        hasParameters: error ? null : commandDetails.hasParameters,
-                        parameters: command.parameters || null
+                        hasParameters: error ? undefined : commandDetails.hasParameters,
+                        parameters: command.parameters || undefined
                     },
                     id: uuidv4(),
                     isExpanded: false
@@ -236,7 +236,7 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
             commandType,
             hex,
             hardwareType: getHardwareTypeName(hardwareType),
-            data: parseError ? null : preparedData,
+            data: parseError ? undefined : preparedData,
             date: new Date().toLocaleString(),
             error: parseError?.message,
             type: logType,

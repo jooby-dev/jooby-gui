@@ -1,0 +1,14 @@
+{
+    "cSpell.words": [
+        "uuidv4",
+        "clickaway",
+        "jooby",
+        "fontsource",
+        "roboto",
+        "noconflict",
+        "rulesdir"
+    ],
+
+    "javascript.preferences.importModuleSpecifierEnding": "js",
+    "javascript.preferences.importModuleSpecifier": "relative",
+}

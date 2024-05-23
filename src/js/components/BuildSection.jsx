@@ -35,15 +35,14 @@ import CommandParametersEditor from './CommandParametersEditor/CommandParameters
 import Button from './Button.jsx';
 import TextField from './TextField.jsx';
 
+import {commands, commandTypeConfigMap} from '../joobyCodec.js';
 import {
     SEVERITY_TYPE_WARNING,
     COMMAND_TYPE_MTX,
     ACCESS_KEY_LENGTH_BYTES,
     DEFAULT_ACCESS_KEY,
-    commandTypeConfigMap,
     directionNames,
-    directions,
-    commands
+    directions
 } from '../constants.js';
 
 import getHardwareType from '../utils/getHardwareType.js';
@@ -52,6 +51,7 @@ import isValidHex from '../utils/isValidHex.js';
 import isValidNumber from '../utils/isValidNumber.js';
 import cleanHexString from '../utils/cleanHexString.js';
 import getLogType from '../utils/getLogType.js';
+import isByteArray from '../utils/isByteArray.js';
 
 
 const incrementMessageId = messageId => (parseInt(messageId, 10) + 1) % BYTE_RANGE_LIMIT;
@@ -328,6 +328,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         if ( data ) {
             data.commands = data.commands.map(commandData => {
                 const commandDetails = commands[commandType][directionName][commandData.name];
+                const isByteArrayValid = isByteArray(commandData.bytes);
 
                 return {
                     command: {
@@ -335,9 +336,9 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         name: commandData.name,
                         directionType: commandDetails.directionType,
                         hasParameters: commandDetails.hasParameters,
-                        length: commandData.bytes.length,
+                        length: isByteArrayValid ? commandData.bytes.length : undefined,
                         parameters: commandData.parameters,
-                        hex: joobyCodec.utils.getHexFromBytes(commandData.bytes)
+                        hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(commandData.bytes) : undefined
                     },
                     id: uuidv4(),
                     isExpanded: false
@@ -346,12 +347,13 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }
 
         const logType = getLogType(commandType, buildError);
+        const bytes = commandType === COMMAND_TYPE_MTX ? frameBytes : messageBytes;
 
         const log = {
             commandType,
             hardwareType: getHardwareTypeName(hardwareType),
-            hex: buildError ? null : joobyCodec.utils.getHexFromBytes(commandType === COMMAND_TYPE_MTX ? frameBytes : messageBytes),
-            data: buildError ? null : data,
+            hex: !buildError && isByteArray(bytes) ? joobyCodec.utils.getHexFromBytes(bytes) : undefined,
+            data: buildError ? undefined : data,
             date: new Date().toLocaleString(),
             error: buildError?.message,
             type: logType,

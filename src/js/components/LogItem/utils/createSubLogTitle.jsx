@@ -40,8 +40,16 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                         )
                         : <HighlightedText>{logCommand.command.name}</HighlightedText>
                 }
-                {'; size: '}
-                <HighlightedText>{logCommand.command.length}</HighlightedText>
+                {
+                    logCommand.command.length
+                        ? (
+                            <>
+                                {'; size: '}
+                                <HighlightedText>{logCommand.command.length}</HighlightedText>
+                            </>
+                        )
+                        : null
+                }
             </Box>
 
             {

@@ -66,7 +66,6 @@ const CommandParameterEditor = ({
             editor.setTheme('ace/theme/xcode');
             editor.getSession().setMode('ace/mode/json');
             editor.setOptions({
-                placeholder: 'Parameters',
                 enableBasicAutocompletion: true,
                 enableLiveAutocompletion: true,
                 showLineNumbers: true,
@@ -126,13 +125,10 @@ const CommandParameterEditor = ({
     useEffect(
         () => {
             if ( inputRef && inputRef.current ) {
-                const {placeholderNode} = inputRef.current.renderer;
-
-                if ( placeholderNode ) {
-                    placeholderNode.textContent = command.value.hasParameters
-                        ? 'Parameters'
-                        : 'This command has no parameters';
-                }
+                inputRef.current.setOption(
+                    'placeholder',
+                    command.value.hasParameters ? 'Parameters' : 'This command has no parameters'
+                );
             }
         },
         [command, inputRef]

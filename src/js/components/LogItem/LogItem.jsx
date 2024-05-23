@@ -46,7 +46,7 @@ import modifyTime2000Properties from './utils/modifyTime2000Properties.js';
 import {JSONTreeTheme} from './constants.js';
 
 
-const isNullOrUndefined = value => value === null || value === undefined;
+const isUndefined = value => value === undefined;
 
 const frameNamesByType = invertObject(frameTypes);
 const accessLevelNames = invertObject(accessLevels);
@@ -335,23 +335,27 @@ const LogItem = ({
                             rowGap: 1,
                             mb: 1
                         }}>
-                            <TypographyBold>
-                                {'dump '}
-                                <IconButtonWithTooltip
-                                    title="Copy dump"
-                                    onClick={() => copyToClipboard(
-                                        hex,
-                                        {message: 'Message dump copied to clipboard'}
-                                    )}
-                                >
-                                    <ContentCopyIcon/>
-                                </IconButtonWithTooltip>
-                            </TypographyBold>
-                            <TypographyMono>{hex}</TypographyMono>
+                            {hex && (
+                                <>
+                                    <TypographyBold>
+                                        {'dump '}
+                                        <IconButtonWithTooltip
+                                            title="Copy dump"
+                                            onClick={() => copyToClipboard(
+                                                hex,
+                                                {message: 'Message dump copied to clipboard'}
+                                            )}
+                                        >
+                                            <ContentCopyIcon/>
+                                        </IconButtonWithTooltip>
+                                    </TypographyBold>
+                                    <TypographyMono>{hex}</TypographyMono>
+                                </>
+                            )}
 
                             {type === LOG_TYPE_FRAME && (
                                 <>
-                                    {!isNullOrUndefined(frameParameters.type) && (
+                                    {frameParameters.type && (
                                         <>
                                             <TypographyBold>frame type</TypographyBold>
                                             <TypographyMono>
@@ -359,7 +363,7 @@ const LogItem = ({
                                             </TypographyMono>
                                         </>
                                     )}
-                                    {!isNullOrUndefined(frameParameters.accessLevel) && (
+                                    {!isUndefined(frameParameters.accessLevel) && (
                                         <>
                                             <TypographyBold>access level</TypographyBold>
                                             <TypographyMono>
@@ -368,25 +372,25 @@ const LogItem = ({
                                             </TypographyMono>
                                         </>
                                     )}
-                                    {!isNullOrUndefined(frameParameters.destination) && (
+                                    {!isUndefined(frameParameters.destination) && (
                                         <>
                                             <TypographyBold>destination address</TypographyBold>
                                             <TypographyMono>{getHexFromNumber(frameParameters.destination)}</TypographyMono>
                                         </>
                                     )}
-                                    {!isNullOrUndefined(frameParameters.source) && (
+                                    {!isUndefined(frameParameters.source) && (
                                         <>
                                             <TypographyBold>source address</TypographyBold>
                                             <TypographyMono>{getHexFromNumber(frameParameters.source)}</TypographyMono>
                                         </>
                                     )}
-                                    {!isNullOrUndefined(frameParameters.messageId) && (
+                                    {!isUndefined(frameParameters.messageId) && (
                                         <>
                                             <TypographyBold>message ID</TypographyBold>
                                             <TypographyMono>{frameParameters.messageId}</TypographyMono>
                                         </>
                                     )}
-                                    {!isNullOrUndefined(data.error) && (
+                                    {data.error && (
                                         <>
                                             <TypographyBold>error</TypographyBold>
                                             <TypographyMono>{data.error}</TypographyMono>
@@ -440,20 +444,24 @@ const LogItem = ({
                                                     rowGap: 1,
                                                     mb: 1
                                                 }}>
-                                                    <TypographyBold>
-                                                        {'dump '}
-                                                        <IconButtonWithTooltip
-                                                            title="Copy dump"
-                                                            onClick={() => copyToClipboard(
-                                                                command.hex,
-                                                                {message: 'Command dump copied to clipboard'}
-                                                            )}
-                                                        >
-                                                            <ContentCopyIcon/>
-                                                        </IconButtonWithTooltip>
-                                                    </TypographyBold>
-                                                    <TypographyMono>{command.hex}</TypographyMono>
-                                                    {!isNullOrUndefined(command.error) && (
+                                                    {command.hex && (
+                                                        <>
+                                                            <TypographyBold>
+                                                                {'dump '}
+                                                                <IconButtonWithTooltip
+                                                                    title="Copy dump"
+                                                                    onClick={() => copyToClipboard(
+                                                                        command.hex,
+                                                                        {message: 'Command dump copied to clipboard'}
+                                                                    )}
+                                                                >
+                                                                    <ContentCopyIcon/>
+                                                                </IconButtonWithTooltip>
+                                                            </TypographyBold>
+                                                            <TypographyMono>{command.hex}</TypographyMono>
+                                                        </>
+                                                    )}
+                                                    {command.error && (
                                                         <>
                                                             <TypographyBold>error</TypographyBold>
                                                             <TypographyMono>{command.error}</TypographyMono>
