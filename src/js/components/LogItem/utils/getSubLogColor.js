@@ -1,9 +1,13 @@
 import {yellow} from '@mui/material/colors';
-import {directions} from 'jooby-codec/constants/index.js';
+import {directions} from '../../../constants.js';
 
 
-export default logCommand => {
-    switch ( logCommand.command.directionType ) {
+export default ( direction, error ) => {
+    if ( error ) {
+        return 'error.light';
+    }
+
+    switch ( direction ) {
         case directions.UPLINK:
             return yellow[50];
 

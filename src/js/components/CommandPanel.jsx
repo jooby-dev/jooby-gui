@@ -16,11 +16,11 @@ import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
 import BuildSection from './BuildSection.jsx';
 import ParseSection from './ParseSection.jsx';
 
+import {commandTypeConfigMap} from '../joobyCodec.js';
 import {
     COMMAND_TYPE_ANALOG,
     COMMAND_TYPE_OBIS_OBSERVER,
-    COMMAND_TYPE_MTX,
-    commandTypeConfigMap
+    COMMAND_TYPE_MTX
 } from '../constants.js';
 
 import hasHardwareTypeInCommandType from '../utils/hasHardwareTypeInCommandType.js';

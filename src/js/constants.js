@@ -1,21 +1,15 @@
-import {analog, obisObserver, mtx, utils} from 'jooby-codec';
-import {directions} from 'jooby-codec/constants/index.js';
+import * as joobyCodec from 'jooby-codec';
 
 
-const {DOWNLINK, UPLINK} = directions;
-
-export const directionNames = {
-    [DOWNLINK]: 'downlink',
-    [UPLINK]: 'uplink'
+export const directions = {
+    DOWNLINK: 1,
+    UPLINK: 2
 };
 
-const prepareCommandList = commands => [...Object.values(commands.uplink), ...Object.values(commands.downlink)]
-    .filter(item => item.id)
-    .map(item => ({
-        label: item.name,
-        value: item,
-        direction: directionNames[item.directionType]
-    }));
+export const directionNames = {
+    [directions.DOWNLINK]: 'downlink',
+    [directions.UPLINK]: 'uplink'
+};
 
 export const LOG_TYPE_ERROR = 'error';
 
@@ -43,32 +37,6 @@ export const COMMAND_TYPE_MTX = 'mtx';
 
 export const ACCESS_KEY_LENGTH_BYTES = 16;
 
-export const DEFAULT_ACCESS_KEY = utils.getHexFromBytes(new Uint8Array([...Array(16).keys()]), {separator: ' '});
+export const DEFAULT_ACCESS_KEY = joobyCodec.utils.getHexFromBytes([...Array(16).keys()], {separator: ' '});
 
-export const commandTypeConfigMap = {
-    [COMMAND_TYPE_ANALOG]: {
-        hasLrc: true,
-        hasHardwareType: true,
-        preparedCommandList: prepareCommandList(analog.commands),
-        hardwareTypeList: Object.entries(analog.constants.hardwareTypes).map(
-            ([key, value]) => ({
-                label: key,
-                value
-            })
-        )
-    },
-
-    [COMMAND_TYPE_OBIS_OBSERVER]: {
-        hasLrc: false,
-        hasHardwareType: false,
-        preparedCommandList: prepareCommandList(obisObserver.commands),
-        hardwareTypeList: null
-    },
-
-    [COMMAND_TYPE_MTX]: {
-        hasLrc: false,
-        hasHardwareType: false,
-        preparedCommandList: prepareCommandList(mtx.commands),
-        hardwareTypeList: null
-    }
-};
+export const UNKNOWN_COMMAND_NAME = 'Unknown';

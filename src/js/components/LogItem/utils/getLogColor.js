@@ -1,22 +1,13 @@
 import {LOG_TYPE_ERROR} from '../../../constants.js';
 
-import isAllCommandsHaveSameDirection from './isAllCommandsHaveSameDirection.js';
-import isAllCommandsUnknown from './isAllCommandsUnknown.js';
 import getSubLogColor from './getSubLogColor.js';
 
 
 export default log => {
-    if ( log.type === LOG_TYPE_ERROR ) {
-        return 'error.light';
-    }
+    const direction = log.data?.commands?.[0].command?.directionType;
+    const error = log.type === LOG_TYPE_ERROR
+        || log.data.error
+        || log.data.commands.some(command => command.command.error);
 
-    if ( isAllCommandsUnknown(log.data.commands) ) {
-        return 'grey.100';
-    }
-
-    if ( !isAllCommandsHaveSameDirection(log.data.commands) ) {
-        return 'error.light';
-    }
-
-    return getSubLogColor(log.data.commands.find(logCommand => logCommand.command.directionType !== undefined));
+    return getSubLogColor(direction, error);
 };

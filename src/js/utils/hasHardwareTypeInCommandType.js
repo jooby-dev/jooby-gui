@@ -1,4 +1,4 @@
-import {commandTypeConfigMap} from '../constants.js';
+import {commandTypeConfigMap} from '../joobyCodec.js';
 
 
 export default commandType => commandTypeConfigMap[commandType].hasHardwareType;

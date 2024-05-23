@@ -2,7 +2,6 @@ import {useState, useEffect, useRef, useCallback, useContext} from 'react';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
 import {frameTypes, accessLevels} from 'jooby-codec/mtx/constants/index.js';
-import {directions} from 'jooby-codec/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
@@ -25,7 +24,7 @@ import {
     Edit as EditIcon
 } from '@mui/icons-material';
 
-import createCommandDirectionIcon from '../utils/createCommandDirectionIcon.jsx';
+import createDirectionIcon from '../utils/createDirectionIcon.jsx';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
 import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
@@ -36,12 +35,14 @@ import CommandParametersEditor from './CommandParametersEditor/CommandParameters
 import Button from './Button.jsx';
 import TextField from './TextField.jsx';
 
+import {commands, commandTypeConfigMap} from '../joobyCodec.js';
 import {
     SEVERITY_TYPE_WARNING,
     COMMAND_TYPE_MTX,
     ACCESS_KEY_LENGTH_BYTES,
     DEFAULT_ACCESS_KEY,
-    commandTypeConfigMap
+    directionNames,
+    directions
 } from '../constants.js';
 
 import getHardwareType from '../utils/getHardwareType.js';
@@ -50,8 +51,7 @@ import isValidHex from '../utils/isValidHex.js';
 import isValidNumber from '../utils/isValidNumber.js';
 import cleanHexString from '../utils/cleanHexString.js';
 import getLogType from '../utils/getLogType.js';
-import convertCommandParametersToCodecFormat from '../utils/convertCommandParametersToCodecFormat.js';
-import normalizeCommandParameters from '../utils/normalizeCommandParameters.js';
+import isByteArray from '../utils/isByteArray.js';
 
 
 const incrementMessageId = messageId => (parseInt(messageId, 10) + 1) % BYTE_RANGE_LIMIT;
@@ -211,9 +211,9 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             return;
         }
 
-        if ( newValue.value.parameters ) {
+        if ( command.value.hasParameters ) {
             // prepare parameters for editing
-            setCommandParameters(JSON.stringify(normalizeCommandParameters(newValue.value.parameters), null, 4));
+            setCommandParameters(JSON.stringify(newValue.value.parameters, null, 4));
         }
 
         if ( newValue.value.config?.hardwareType ) {
@@ -243,9 +243,9 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         setCommandExample(null);
         setCommandExampleList(
             newValue?.value?.examples
-                ? newValue.value.examples.map(example => ({
-                    value: example,
-                    label: example.name
+                ? Object.entries(newValue.value.examples).map(([key, value]) => ({
+                    value,
+                    label: key
                 }))
                 : []
         );
@@ -262,12 +262,12 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
     const onBuildClick = () => {
         let data;
-        let messageHex;
-        let frameHex;
+        let messageBytes;
+        let frameBytes;
         let frameType;
         let currentCommandParameters;
         let buildError;
-        let direction;
+        let directionName;
 
         try {
             const messageCommands = preparedCommands.map(preparedCommand => {
@@ -278,24 +278,21 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     eval(`currentCommandParameters = ${preparedCommand.parameters}`);
                 }
 
-                // eslint-disable-next-line new-cap
-                return new preparedCommand.command.value(
-                    convertCommandParametersToCodecFormat({
-                        id: preparedCommand.command.value.id,
-                        type: commandType,
-                        direction: preparedCommand.command.value.directionType,
-                        parameters: currentCommandParameters
-                    }),
-                    {
+                return {
+                    id: preparedCommand.command.value.id,
+                    parameters: currentCommandParameters,
+                    config: {
                         hardwareType: getHardwareType(hardwareType)
                     }
-                );
+                };
             });
 
             // all commands in the message must be of the same direction
-            direction = messageCommands[0].constructor.directionType;
+            const direction = preparedCommands[0].command.value.directionType;
 
-            messageHex = joobyCodec[commandType].message.toHex(
+            directionName = directionNames[direction];
+
+            messageBytes = joobyCodec[commandType].message[directionName].toBytes(
                 messageCommands,
                 {
                     accessLevel: Number(parameters.accessLevel),
@@ -306,56 +303,59 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             if ( commandType === COMMAND_TYPE_MTX ) {
                 frameType = direction === directions.DOWNLINK ? frameTypes.DATA_REQUEST : frameTypes.DATA_RESPONSE;
-                frameHex = joobyCodec.utils.getHexFromBytes(
-                    joobyCodec[commandType].message.toFrame(
-                        joobyCodec.utils.getBytesFromHex(messageHex),
-                        {
-                            source: parseInt(cleanHexString(parameters.source), 16),
-                            destination: parseInt(cleanHexString(parameters.destination), 16),
-                            type: frameType
-                        }
-                    ),
-                    {separator: ' '}
+                frameBytes = joobyCodec[commandType].message[directionName].toFrame(
+                    messageBytes,
+                    {
+                        source: parseInt(cleanHexString(parameters.source), 16),
+                        destination: parseInt(cleanHexString(parameters.destination), 16),
+                        type: frameType
+                    }
                 );
             }
 
-            data = joobyCodec[commandType].message.fromHex(
-                messageHex,
+            data = joobyCodec[commandType].message[directionName].fromBytes(
+                messageBytes,
                 {
-                    direction,
                     hardwareType: getHardwareType(hardwareType),
                     aesKey: joobyCodec.utils.getBytesFromHex(parameters.accessKey)
                 }
+
             );
         } catch ( error ) {
             buildError = error;
         }
 
         if ( data ) {
-            data.commands = data.commands.map(commandData => ({
-                command: {
-                    id: commandData.command.constructor.id,
-                    directionType: commandData.command.constructor.directionType,
-                    hasParameters: commandData.command.constructor.hasParameters,
-                    length: commandData.command.toBytes().length,
-                    name: commandData.command.constructor.name,
-                    parameters: normalizeCommandParameters(commandData.command.getParameters()),
-                    hex: commandData.command.toHex()
-                },
-                id: uuidv4(),
-                isExpanded: false
-            }));
+            data.commands = data.commands.map(commandData => {
+                const commandDetails = commands[commandType][directionName][commandData.name];
+                const isByteArrayValid = isByteArray(commandData.bytes);
+
+                return {
+                    command: {
+                        id: commandData.id,
+                        name: commandData.name,
+                        directionType: commandDetails.directionType,
+                        hasParameters: commandDetails.hasParameters,
+                        length: isByteArrayValid ? commandData.bytes.length : undefined,
+                        parameters: commandData.parameters,
+                        hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(commandData.bytes) : undefined
+                    },
+                    id: uuidv4(),
+                    isExpanded: false
+                };
+            });
         }
 
         const logType = getLogType(commandType, buildError);
+        const bytes = commandType === COMMAND_TYPE_MTX ? frameBytes : messageBytes;
 
         const log = {
             commandType,
             hardwareType: getHardwareTypeName(hardwareType),
-            hex: commandType === COMMAND_TYPE_MTX ? frameHex : messageHex,
-            data: buildError ? null : data,
+            hex: !buildError && isByteArray(bytes) ? joobyCodec.utils.getHexFromBytes(bytes) : undefined,
+            data: buildError ? undefined : data,
             date: new Date().toLocaleString(),
-            errorMessage: buildError?.message,
+            error: buildError?.message,
             type: logType,
             id: uuidv4(),
             isExpanded: false,
@@ -573,12 +573,8 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             {preparedCommands.length > 0 && (
                 <>
                     <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center'}}>
-                        {createCommandDirectionIcon(preparedCommands[0].command.value, commandType)}
-                        {
-                            commandType === COMMAND_TYPE_MTX
-                                ? 'Frame'
-                                : 'Message command list'
-                        }
+                        {createDirectionIcon(preparedCommands[0].command.value.directionType)}
+                        {commandType === COMMAND_TYPE_MTX ? 'Frame' : 'Message command list'}
                     </Typography>
 
                     {
@@ -784,7 +780,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
 BuildSection.propTypes = {
     setLogs: PropTypes.func.isRequired,
-    hardwareType: PropTypes.string,
+    hardwareType: PropTypes.object,
     setHardwareType: PropTypes.func.isRequired
 };
 

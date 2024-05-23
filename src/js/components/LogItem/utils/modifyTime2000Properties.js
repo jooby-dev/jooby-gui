@@ -1,4 +1,4 @@
-import {utils} from 'jooby-codec';
+import {analog} from 'jooby-codec';
 import formatUTCDate from './formatUTCDate.js';
 
 
@@ -26,7 +26,7 @@ const modifyTime2000Properties = source => {
 
     return Object.keys(copy).reduce((result, key) => {
         if ( key.toLowerCase().includes(TIME2000_KEY) ) {
-            result[key] = `${copy[key]} (${formatUTCDate(utils.time.getDateFromTime2000(copy[key]))})`;
+            result[key] = `${copy[key]} (${formatUTCDate(analog.utils.time.getDateFromTime2000(copy[key]))})`;
         } else {
             result[key] = modifyTime2000Properties(copy[key]);
         }
