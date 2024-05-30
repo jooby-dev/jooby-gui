@@ -20,10 +20,19 @@ import {commandTypeConfigMap} from '../joobyCodec.js';
 import {
     COMMAND_TYPE_ANALOG,
     COMMAND_TYPE_OBIS_OBSERVER,
-    COMMAND_TYPE_MTX
+    COMMAND_TYPE_MTX,
+    COMMAND_TYPE_MTX_LORA
 } from '../constants.js';
 
 import hasHardwareTypeInCommandType from '../utils/hasHardwareTypeInCommandType.js';
+
+
+const commandTypes = [
+    COMMAND_TYPE_ANALOG,
+    COMMAND_TYPE_OBIS_OBSERVER,
+    COMMAND_TYPE_MTX,
+    COMMAND_TYPE_MTX_LORA
+];
 
 
 const CommandPanel = ( {setLogs} ) => {
@@ -71,9 +80,7 @@ const CommandPanel = ( {setLogs} ) => {
                             value={commandType}
                             onChange={onCommandTypeChange}
                         >
-                            <MenuItem value={COMMAND_TYPE_ANALOG}>{COMMAND_TYPE_ANALOG}</MenuItem>
-                            <MenuItem value={COMMAND_TYPE_OBIS_OBSERVER}>{COMMAND_TYPE_OBIS_OBSERVER}</MenuItem>
-                            <MenuItem value={COMMAND_TYPE_MTX}>{COMMAND_TYPE_MTX}</MenuItem>
+                            {commandTypes.map(type => <MenuItem key={type} value={type}>{type}</MenuItem>)}
                         </Select>
                     </FormControl>
 

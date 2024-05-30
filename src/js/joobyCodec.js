@@ -4,7 +4,8 @@ import {
     directionNames,
     COMMAND_TYPE_ANALOG,
     COMMAND_TYPE_OBIS_OBSERVER,
-    COMMAND_TYPE_MTX
+    COMMAND_TYPE_MTX,
+    COMMAND_TYPE_MTX_LORA
 } from './constants.js';
 
 
@@ -25,13 +26,13 @@ const prepareCommandMap = ( commandMap, direction ) => {
     return result;
 };
 
-const prepareCommandList = CommandMap => [
-    ...Object.values(CommandMap.uplink),
-    ...Object.values(CommandMap.downlink)
+const prepareCommandList = commandMap => [
+    ...Object.values(commandMap.uplink),
+    ...Object.values(commandMap.downlink)
 ]
     .map(item => ({
         value: item,
-        label: item.name,
+        label: item.isLoraOnly ? `${item.name} (LoRa only)` : item.name,
         direction: directionNames[item.directionType]
     }));
 
@@ -74,6 +75,13 @@ export const commandTypeConfigMap = {
         hasLrc: true,
         hasHardwareType: false,
         preparedCommandList: prepareCommandList(commands.mtx),
+        hardwareTypeList: null
+    },
+
+    [COMMAND_TYPE_MTX_LORA]: {
+        hasLrc: false,
+        hasHardwareType: false,
+        preparedCommandList: null,
         hardwareTypeList: null
     }
 };

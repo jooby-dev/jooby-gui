@@ -1,7 +1,10 @@
 import {useState, useEffect, useRef, useCallback, useContext} from 'react';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
+import * as frame from 'jooby-codec/mtx/utils/frame.js';
+import {splitBytesToDataSegments} from 'jooby-codec/analog/utils/splitBytesToDataSegments.js';
 import {frameTypes, accessLevels} from 'jooby-codec/mtx/constants/index.js';
+import {hardwareTypes} from 'jooby-codec/analog/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
@@ -39,6 +42,8 @@ import {commands, commandTypeConfigMap} from '../joobyCodec.js';
 import {
     SEVERITY_TYPE_WARNING,
     COMMAND_TYPE_MTX,
+    COMMAND_TYPE_MTX_LORA,
+    COMMAND_TYPE_ANALOG,
     ACCESS_KEY_LENGTH_BYTES,
     DEFAULT_ACCESS_KEY,
     directionNames,
@@ -54,13 +59,39 @@ import getLogType from '../utils/getLogType.js';
 import isByteArray from '../utils/isByteArray.js';
 
 
+const resolveCommandType = commandType => (commandType === COMMAND_TYPE_MTX_LORA ? COMMAND_TYPE_MTX : commandType);
+
+const resolveParameters = ( parameters, commandType ) => {
+    const resolvedParameters = {
+        accessLevel: parameters.accessLevel,
+        messageId: parameters.messageId
+    };
+
+    if ( commandType === COMMAND_TYPE_MTX_LORA ) {
+        return resolvedParameters;
+    }
+
+    if ( commandType === COMMAND_TYPE_MTX ) {
+        return {
+            ...resolvedParameters,
+            source: parameters.source,
+            destination: parameters.destination
+        };
+    }
+
+    return {};
+};
+
 const incrementMessageId = messageId => (parseInt(messageId, 10) + 1) % BYTE_RANGE_LIMIT;
+
+const validateMessageId = value => isValidNumber(value, MESSAGE_ID_MIN_VALUE, MESSAGE_ID_MAX_VALUE);
 
 const validators = {
     source: hex => isValidNumber(parseInt(cleanHexString(hex), 16), SOURCE_ADDRESS_MIN_VALUE, SOURCE_ADDRESS_MAX_VALUE),
     destination: hex => isValidNumber(parseInt(cleanHexString(hex), 16), DESTINATION_ADDRESS_MIN_VALUE, DESTINATION_ADDRESS_MAX_VALUE),
     accessKey: hex => isValidHex(hex, ACCESS_KEY_LENGTH_BYTES),
-    messageId: value => isValidNumber(value, MESSAGE_ID_MIN_VALUE, MESSAGE_ID_MAX_VALUE)
+    messageId: validateMessageId,
+    segmentationSessionId: validateMessageId
 };
 
 const getBackgroundColor = ( preparedCommand, editingCommandId, recentlyEditedCommandId ) => {
@@ -73,6 +104,69 @@ const getBackgroundColor = ( preparedCommand, editingCommandId, recentlyEditedCo
     }
 
     return 'background.filled';
+};
+
+const processDataAndCreateLog = ({
+    data,
+    bytes,
+    parameters,
+    directionName,
+    commandType,
+    hardwareType,
+    frameType,
+    buildError,
+    logType
+}) => {
+    if ( data ) {
+        data.commands = data.commands.map(commandData => {
+            const commandDetails = commands[commandType][directionName][commandData.name];
+            const isByteArrayValid = isByteArray(commandData.bytes);
+
+            return {
+                command: {
+                    id: commandData.id,
+                    name: commandData.name,
+                    directionType: commandDetails.directionType,
+                    hasParameters: commandDetails.hasParameters,
+                    length: isByteArrayValid ? commandData.bytes.length : undefined,
+                    parameters: commandData.parameters,
+                    hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(commandData.bytes) : undefined
+                },
+                id: uuidv4(),
+                isExpanded: false
+            };
+        });
+    }
+
+    const log = {
+        commandType,
+        hardwareType: getHardwareTypeName(hardwareType),
+        hex: !buildError && isByteArray(bytes) ? joobyCodec.utils.getHexFromBytes(bytes) : undefined,
+        data: buildError ? undefined : data,
+        date: new Date().toLocaleString(),
+        error: buildError?.message,
+        type: logType,
+        id: uuidv4(),
+        isExpanded: false,
+        tags: ['build', commandType, logType],
+        frameParameters: {},
+        messageParameters: {}
+    };
+
+    if ( commandType === COMMAND_TYPE_MTX && !buildError ) {
+        log.frameParameters = {
+            type: frameType,
+            destination: parameters.destination ? parseInt(cleanHexString(parameters.destination), 16) : undefined,
+            source: parameters.source ? parseInt(cleanHexString(parameters.source), 16) : undefined
+        };
+
+        log.messageParameters = {
+            accessLevel: Number(parameters.accessLevel),
+            messageId: Number(parameters.messageId)
+        };
+    }
+
+    return log;
 };
 
 const accessLevelNames = {
@@ -89,13 +183,15 @@ const SOURCE_ADDRESS_MAX_VALUE = 0xffff;
 const DESTINATION_ADDRESS_MIN_VALUE = 0;
 const DESTINATION_ADDRESS_MAX_VALUE = 0xffff;
 const BYTE_RANGE_LIMIT = 256;
+const MAX_SEGMENT_SIZE = 40;
 
 const defaults = {
     source: 'ff fe',
     destination: 'ff ff',
     accessLevel: accessLevels.UNENCRYPTED,
     accessKey: DEFAULT_ACCESS_KEY,
-    messageId: 0
+    messageId: 0,
+    segmentationSessionId: 0
 };
 
 const parametersState = {
@@ -103,14 +199,16 @@ const parametersState = {
     destination: defaults.destination,
     accessLevel: defaults.accessLevel,
     accessKey: defaults.accessKey,
-    messageId: defaults.messageId
+    messageId: defaults.messageId,
+    segmentationSessionId: defaults.segmentationSessionId
 };
 
 const parameterErrorsState = {
     source: false,
     destination: false,
     accessKey: false,
-    messageId: false
+    messageId: false,
+    segmentationSessionId: false
 };
 
 
@@ -118,7 +216,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     const {commandType} = useContext(CommandTypeContext);
 
     const [commandList, setCommandList] = useState(
-        commandTypeConfigMap[commandType].preparedCommandList
+        commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList
     );
     const [preparedCommands, setPreparedCommands] = useState([]);
     const [command, setCommand] = useState(null);
@@ -138,7 +236,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     // reset state when command type changes
     useEffect(
         () => {
-            setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
+            setCommandList(commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList);
             setCommand(null);
             setEditingCommandId(null);
             setCommandParameters('');
@@ -180,7 +278,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
     const onClearCommandListClick = () => {
         setPreparedCommands([]);
-        setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
+        setCommandList(commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList);
     };
 
     const onAddToMessageClick = () => {
@@ -201,7 +299,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         });
 
         setPreparedCommands(newPreparedCommands);
-        setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
+        setCommandList(commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList);
     };
 
     const onCommandExampleChange = ( event, newValue ) => {
@@ -217,7 +315,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }
 
         if ( newValue.value.config?.hardwareType ) {
-            const hardwareTypeData = commandTypeConfigMap[commandType].hardwareTypeList
+            const hardwareTypeData = commandTypeConfigMap[resolveCommandType(commandType)].hardwareTypeList
                 .find(type => type.value === newValue.value.config.hardwareType);
 
             setHardwareType(hardwareTypeData);
@@ -261,6 +359,8 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     };
 
     const onBuildClick = () => {
+        const resolvedCommandType = resolveCommandType(commandType);
+        const newLogs = [];
         let data;
         let messageBytes;
         let frameBytes;
@@ -292,7 +392,7 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             directionName = directionNames[direction];
 
-            messageBytes = joobyCodec[commandType].message[directionName].toBytes(
+            messageBytes = joobyCodec[resolvedCommandType].message[directionName].toBytes(
                 messageCommands,
                 {
                     accessLevel: Number(parameters.accessLevel),
@@ -301,9 +401,18 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 }
             );
 
+            data = joobyCodec[resolvedCommandType].message[directionName].fromBytes(
+                messageBytes,
+                {
+                    hardwareType: getHardwareType(hardwareType),
+                    aesKey: joobyCodec.utils.getBytesFromHex(parameters.accessKey)
+                }
+
+            );
+
             if ( commandType === COMMAND_TYPE_MTX ) {
                 frameType = direction === directions.DOWNLINK ? frameTypes.DATA_REQUEST : frameTypes.DATA_RESPONSE;
-                frameBytes = joobyCodec[commandType].message[directionName].toFrame(
+                frameBytes = frame.toBytes(
                     messageBytes,
                     {
                         source: parseInt(cleanHexString(parameters.source), 16),
@@ -312,70 +421,118 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     }
                 );
             }
-
-            data = joobyCodec[commandType].message[directionName].fromBytes(
-                messageBytes,
-                {
-                    hardwareType: getHardwareType(hardwareType),
-                    aesKey: joobyCodec.utils.getBytesFromHex(parameters.accessKey)
-                }
-
-            );
         } catch ( error ) {
             buildError = error;
+            console.error(error);
         }
 
-        if ( data ) {
-            data.commands = data.commands.map(commandData => {
-                const commandDetails = commands[commandType][directionName][commandData.name];
-                const isByteArrayValid = isByteArray(commandData.bytes);
-
-                return {
-                    command: {
-                        id: commandData.id,
-                        name: commandData.name,
-                        directionType: commandDetails.directionType,
-                        hasParameters: commandDetails.hasParameters,
-                        length: isByteArrayValid ? commandData.bytes.length : undefined,
-                        parameters: commandData.parameters,
-                        hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(commandData.bytes) : undefined
-                    },
-                    id: uuidv4(),
-                    isExpanded: false
-                };
-            });
-        }
-
-        const logType = getLogType(commandType, buildError);
         const bytes = commandType === COMMAND_TYPE_MTX ? frameBytes : messageBytes;
 
-        const log = {
-            commandType,
-            hardwareType: getHardwareTypeName(hardwareType),
-            hex: !buildError && isByteArray(bytes) ? joobyCodec.utils.getHexFromBytes(bytes) : undefined,
-            data: buildError ? undefined : data,
-            date: new Date().toLocaleString(),
-            error: buildError?.message,
-            type: logType,
-            id: uuidv4(),
-            isExpanded: false,
-            tags: ['build', commandType, logType]
-        };
+        newLogs.push(
+            processDataAndCreateLog({
+                data,
+                bytes,
+                directionName,
+                hardwareType,
+                frameType,
+                buildError,
+                commandType: resolvedCommandType,
+                parameters: resolveParameters(parameters, commandType),
+                logType: getLogType(commandType, buildError)
+            })
+        );
 
-        if ( commandType === COMMAND_TYPE_MTX && !buildError ) {
-            log.frameParameters = {
-                type: frameType,
-                destination: parseInt(cleanHexString(parameters.destination), 16),
-                source: parseInt(cleanHexString(parameters.source), 16),
-                accessLevel: Number(parameters.accessLevel),
-                messageId: Number(parameters.messageId)
-            };
+        if ( !buildError && commandType === COMMAND_TYPE_MTX_LORA ) {
+            let segments;
+
+            try {
+                segments = splitBytesToDataSegments(
+                    bytes,
+                    {
+                        segmentationSessionId: Number(parameters.segmentationSessionId),
+                        maxSegmentSize: MAX_SEGMENT_SIZE
+                    }
+                );
+            } catch ( error ) {
+                buildError = error;
+                console.error(error);
+
+                newLogs.push(
+                    processDataAndCreateLog({
+                        parameters,
+                        directionName,
+                        frameType,
+                        buildError,
+                        bytes,
+                        data: undefined,
+                        commandType: COMMAND_TYPE_ANALOG,
+                        hardwareType: hardwareTypes.MTXLORA,
+                        logType: getLogType(commandType, buildError)
+                    })
+                );
+            }
+
+            if ( !buildError ) {
+                segments.forEach(segmentParameters => {
+                    const segmentCommand = {
+                        id: commands.analog[directionName].dataSegment.id,
+                        parameters: segmentParameters
+                    };
+
+                    try {
+                        messageBytes = joobyCodec.analog.message[directionName].toBytes([segmentCommand]);
+                        data = joobyCodec.analog.message[directionName].fromBytes(
+                            messageBytes,
+                            {hardwareType: hardwareTypes.MTXLORA}
+                        );
+                    } catch ( error ) {
+                        buildError = error;
+                        console.error(error);
+                    }
+
+                    newLogs.push(
+                        processDataAndCreateLog({
+                            data,
+                            parameters,
+                            directionName,
+                            frameType,
+                            buildError,
+                            bytes: messageBytes,
+                            commandType: COMMAND_TYPE_ANALOG,
+                            hardwareType: hardwareTypes.MTXLORA,
+                            logType: getLogType(commandType, buildError)
+                        })
+                    );
+                });
+
+                if (
+                    preparedCommands.some(preparedCommand => preparedCommand.command.value.isLoraOnly)
+                    && parameters.accessLevel !== accessLevels.UNENCRYPTED
+                ) {
+                    const loraOnlyCommandNames = preparedCommands
+                        .filter(preparedCommand => preparedCommand.command.value.isLoraOnly)
+                        .map(preparedCommand => preparedCommand.command.value.name);
+
+                    showSnackbar({
+                        message: (
+                            <Stack spacing={1}>
+                                <div>LoRa only commands should be sent with unencrypted access level.</div>
+                                <div>Current access level: {accessLevelNames[parameters.accessLevel]}.</div>
+                                <div>LoRa only commands in the message: {loraOnlyCommandNames.join(', ')}.</div>
+                            </Stack>
+                        ),
+                        severity: SEVERITY_TYPE_WARNING,
+                        duration: 15000
+                    });
+                }
+            }
         }
 
-        setLogs(prevLogs => [log, ...prevLogs]);
+        setLogs(prevLogs => [...newLogs, ...prevLogs]);
         setParameters(prevParameters => ({
             ...prevParameters,
-            messageId: incrementMessageId(prevParameters.messageId)
+            messageId: incrementMessageId(prevParameters.messageId),
+            segmentationSessionId: incrementMessageId(prevParameters.segmentationSessionId)
         }));
     };
 
@@ -479,8 +636,8 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             <Typography variant="h5">
                 {
                     commandType === COMMAND_TYPE_MTX
-                        ? 'Frame creation'
-                        : 'Message creation'
+                        ? 'Create frame'
+                        : 'Create message'
                 }
             </Typography>
 
@@ -574,75 +731,97 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 <>
                     <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center'}}>
                         {createDirectionIcon(preparedCommands[0].command.value.directionType)}
-                        {commandType === COMMAND_TYPE_MTX ? 'Frame' : 'Message command list'}
+                        {commandType === COMMAND_TYPE_MTX ? 'Frame' : 'Message'}
                     </Typography>
 
                     {
-                        commandType === COMMAND_TYPE_MTX && (
+                        (commandType === COMMAND_TYPE_MTX || commandType === COMMAND_TYPE_MTX_LORA) && (
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: 2
                             }}>
-                                <TextField
-                                    type="text"
-                                    label="Source address"
-                                    value={parameters.source}
-                                    error={parameterErrors.source}
-                                    name="source"
-                                    helperText="2-byte in hex format (0000-FFFF)"
-                                    onChange={onControlChange}
-                                    onBlur={onControlBlur}
-                                />
+                                {commandType === COMMAND_TYPE_MTX && (
+                                    <>
+                                        <TextField
+                                            type="text"
+                                            label="Source address"
+                                            value={parameters.source}
+                                            error={parameterErrors.source}
+                                            name="source"
+                                            helperText="2-byte in hex format (0000-FFFF)"
+                                            onChange={onControlChange}
+                                            onBlur={onControlBlur}
+                                        />
 
-                                <TextField
-                                    type="text"
-                                    label="Destination address"
-                                    value={parameters.destination}
-                                    error={parameterErrors.destination}
-                                    name="destination"
-                                    helperText="2-byte in hex format (0000-FFFF)"
-                                    onChange={onControlChange}
-                                    onBlur={onControlBlur}
-                                />
+                                        <TextField
+                                            type="text"
+                                            label="Destination address"
+                                            value={parameters.destination}
+                                            error={parameterErrors.destination}
+                                            name="destination"
+                                            helperText="2-byte in hex format (0000-FFFF)"
+                                            onChange={onControlChange}
+                                            onBlur={onControlBlur}
+                                        />
+                                    </>
+                                )}
 
-                                <FormControl variant="standard" fullWidth={true}>
-                                    <InputLabel id="select-access-level-label">Access level</InputLabel>
-                                    <Select
-                                        labelId="select-access-level-label"
-                                        id="select-access-level"
-                                        value={parameters.accessLevel}
-                                        name="accessLevel"
+                                {(commandType === COMMAND_TYPE_MTX || commandType === COMMAND_TYPE_MTX_LORA) && (
+                                    <>
+                                        <FormControl variant="standard" fullWidth={true}>
+                                            <InputLabel id="select-access-level-label">Access level</InputLabel>
+                                            <Select
+                                                labelId="select-access-level-label"
+                                                id="select-access-level"
+                                                value={parameters.accessLevel}
+                                                name="accessLevel"
+                                                onChange={onControlChange}
+                                            >
+                                                {Object.entries(accessLevels).map(([key, value]) => (
+                                                    <MenuItem key={key} value={value}>{accessLevelNames[value]}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+
+                                        <TextField
+                                            label="Access key"
+                                            type="text"
+                                            value={parameters.accessKey}
+                                            error={parameterErrors.accessKey}
+                                            name="accessKey"
+                                            helperText="16-byte in hex format"
+                                            onChange={onControlChange}
+                                            onBlur={onControlBlur}
+                                        />
+
+                                        <TextField
+                                            label="Message ID"
+                                            value={parameters.messageId}
+                                            error={parameterErrors.messageId}
+                                            name="messageId"
+                                            helperText="1-byte in decimal format (0-255)"
+                                            onChange={onControlChange}
+                                            onBlur={onControlBlur}
+                                            min={MESSAGE_ID_MIN_VALUE}
+                                            max={MESSAGE_ID_MAX_VALUE}
+                                        />
+                                    </>
+                                )}
+
+                                {commandType === COMMAND_TYPE_MTX_LORA && (
+                                    <TextField
+                                        label="Segmentation session ID"
+                                        value={parameters.segmentationSessionId}
+                                        error={parameterErrors.segmentationSessionId}
+                                        name="segmentationSessionId"
+                                        helperText="1-byte in decimal format (0-255)"
                                         onChange={onControlChange}
-                                    >
-                                        {Object.entries(accessLevels).map(([key, value]) => (
-                                            <MenuItem key={key} value={value}>{accessLevelNames[value]}</MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-
-                                <TextField
-                                    label="Access key"
-                                    type="text"
-                                    value={parameters.accessKey}
-                                    error={parameterErrors.accessKey}
-                                    name="accessKey"
-                                    helperText="16-byte in hex format"
-                                    onChange={onControlChange}
-                                    onBlur={onControlBlur}
-                                />
-
-                                <TextField
-                                    label="Message ID"
-                                    value={parameters.messageId}
-                                    error={parameterErrors.messageId}
-                                    name="messageId"
-                                    helperText="1-byte in decimal format (0-255)"
-                                    onChange={onControlChange}
-                                    onBlur={onControlBlur}
-                                    min={MESSAGE_ID_MIN_VALUE}
-                                    max={MESSAGE_ID_MAX_VALUE}
-                                />
+                                        onBlur={onControlBlur}
+                                        min={MESSAGE_ID_MIN_VALUE}
+                                        max={MESSAGE_ID_MAX_VALUE}
+                                    />
+                                )}
                             </Box>
                         )
                     }

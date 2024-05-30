@@ -27,12 +27,14 @@ import {
 import useCopyToClipboard from '../../hooks/useCopyToClipboard.js';
 
 import getHexFromNumber from '../../utils/getHexFromNumber.js';
+import isUndefined from '../../utils/isUndefined.js';
+import hasLrc from '../../utils/hasLrc.js';
 
 import IconButtonWithTooltip from '../IconButtonWithTooltip.jsx';
+import HighlightedText from '../HighlightedText.jsx';
 
 import {
     LOG_TYPE_ERROR,
-    LOG_TYPE_FRAME,
     PARAMETERS_TAB_VIEW_TYPE_JSON,
     PARAMETERS_TAB_VIEW_TYPE_TREE
 } from '../../constants.js';
@@ -46,10 +48,21 @@ import modifyTime2000Properties from './utils/modifyTime2000Properties.js';
 import {JSONTreeTheme} from './constants.js';
 
 
-const isUndefined = value => value === undefined;
-
 const frameNamesByType = invertObject(frameTypes);
 const accessLevelNames = invertObject(accessLevels);
+
+const renderLrc = lrc => {
+    let {expected, actual} = lrc;
+
+    actual = isUndefined(actual) ? 'n/a' : getHexFromNumber(actual);
+    expected = isUndefined(expected) ? 'n/a' : getHexFromNumber(expected);
+
+    if ( actual === expected ) {
+        return actual;
+    }
+
+    return `actual: ${actual}, expected: ${expected}`;
+};
 
 const TypographyBold = ( {children, ...props} ) => (
     <Typography {...props} sx={{fontWeight: '500', ...props.sx}}>
@@ -81,7 +94,7 @@ const LogItem = ({
     handleShareLogsClick
 }) => {
     const {
-        hex, data, date, error, type, id, isExpanded, frameParameters
+        hex, data, date, error, type, id, isExpanded, frameParameters, messageParameters
     } = log;
 
     const copyToClipboard = useCopyToClipboard();
@@ -249,7 +262,7 @@ const LogItem = ({
                                     </>
                                 )}
                                 <TypographyBold>error</TypographyBold>
-                                <TypographyMono>{error}</TypographyMono>
+                                <HighlightedText fontWeight="normal" isMonospacedFont={true} color="error.main">{error}</HighlightedText>
                             </Box>
                         </AccordionDetails>
                     )
@@ -353,49 +366,57 @@ const LogItem = ({
                                 </>
                             )}
 
-                            {type === LOG_TYPE_FRAME && (
+                            {frameParameters.type && (
                                 <>
-                                    {frameParameters.type && (
-                                        <>
-                                            <TypographyBold>frame type</TypographyBold>
-                                            <TypographyMono>
-                                                {`${frameNamesByType[frameParameters.type]} (${getHexFromNumber(frameParameters.type)})`}
-                                            </TypographyMono>
-                                        </>
-                                    )}
-                                    {!isUndefined(frameParameters.accessLevel) && (
-                                        <>
-                                            <TypographyBold>access level</TypographyBold>
-                                            <TypographyMono>
-                                                {`${accessLevelNames[frameParameters.accessLevel]}`}
-                                                {` (${getHexFromNumber(frameParameters.accessLevel)})`}
-                                            </TypographyMono>
-                                        </>
-                                    )}
-                                    {!isUndefined(frameParameters.destination) && (
-                                        <>
-                                            <TypographyBold>destination address</TypographyBold>
-                                            <TypographyMono>{getHexFromNumber(frameParameters.destination)}</TypographyMono>
-                                        </>
-                                    )}
-                                    {!isUndefined(frameParameters.source) && (
-                                        <>
-                                            <TypographyBold>source address</TypographyBold>
-                                            <TypographyMono>{getHexFromNumber(frameParameters.source)}</TypographyMono>
-                                        </>
-                                    )}
-                                    {!isUndefined(frameParameters.messageId) && (
-                                        <>
-                                            <TypographyBold>message ID</TypographyBold>
-                                            <TypographyMono>{frameParameters.messageId}</TypographyMono>
-                                        </>
-                                    )}
-                                    {data.error && (
-                                        <>
-                                            <TypographyBold>error</TypographyBold>
-                                            <TypographyMono>{data.error}</TypographyMono>
-                                        </>
-                                    )}
+                                    <TypographyBold>frame type</TypographyBold>
+                                    <TypographyMono>
+                                        {`${frameNamesByType[frameParameters.type]} (${getHexFromNumber(frameParameters.type)})`}
+                                    </TypographyMono>
+                                </>
+                            )}
+
+                            {!isUndefined(messageParameters.accessLevel) && (
+                                <>
+                                    <TypographyBold>access level</TypographyBold>
+                                    <TypographyMono>
+                                        {`${accessLevelNames[messageParameters.accessLevel]}`}
+                                        {` (${getHexFromNumber(messageParameters.accessLevel)})`}
+                                    </TypographyMono>
+                                </>
+                            )}
+
+                            {!isUndefined(frameParameters.destination) && (
+                                <>
+                                    <TypographyBold>destination address</TypographyBold>
+                                    <TypographyMono>{getHexFromNumber(frameParameters.destination)}</TypographyMono>
+                                </>
+                            )}
+
+                            {!isUndefined(frameParameters.source) && (
+                                <>
+                                    <TypographyBold>source address</TypographyBold>
+                                    <TypographyMono>{getHexFromNumber(frameParameters.source)}</TypographyMono>
+                                </>
+                            )}
+
+                            {!isUndefined(messageParameters.messageId) && (
+                                <>
+                                    <TypographyBold>message ID</TypographyBold>
+                                    <TypographyMono>{messageParameters.messageId}</TypographyMono>
+                                </>
+                            )}
+
+                            {hasLrc(log.commandType) && (
+                                <>
+                                    <TypographyBold>lrc</TypographyBold>
+                                    <TypographyMono>{renderLrc(data.lrc)}</TypographyMono>
+                                </>
+                            )}
+
+                            {data.error && (
+                                <>
+                                    <TypographyBold>error</TypographyBold>
+                                    <HighlightedText fontWeight="normal" isMonospacedFont={true} color="error.main">{data.error}</HighlightedText>
                                 </>
                             )}
                         </Box>
@@ -464,7 +485,9 @@ const LogItem = ({
                                                     {command.error && (
                                                         <>
                                                             <TypographyBold>error</TypographyBold>
-                                                            <TypographyMono>{command.error}</TypographyMono>
+                                                            <HighlightedText fontWeight="normal" isMonospacedFont={true} color="error.main">
+                                                                {command.error}
+                                                            </HighlightedText>
                                                         </>
                                                     )}
                                                 </Box>

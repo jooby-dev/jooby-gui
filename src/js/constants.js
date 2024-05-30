@@ -35,6 +35,9 @@ export const COMMAND_TYPE_OBIS_OBSERVER = 'obisObserver';
 
 export const COMMAND_TYPE_MTX = 'mtx';
 
+// mtxLora is not a codec, but it is added because the UI should function as if it is one
+export const COMMAND_TYPE_MTX_LORA = 'mtxLora';
+
 export const ACCESS_KEY_LENGTH_BYTES = 16;
 
 export const DEFAULT_ACCESS_KEY = joobyCodec.utils.getHexFromBytes([...Array(16).keys()], {separator: ' '});
