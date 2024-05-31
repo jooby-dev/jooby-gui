@@ -6,15 +6,11 @@ import {splitBytesToDataSegments} from 'jooby-codec/analog/utils/splitBytesToDat
 import {frameTypes, accessLevels} from 'jooby-codec/mtx/constants/index.js';
 import {hardwareTypes} from 'jooby-codec/analog/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
-import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import {
     Autocomplete,
     Box,
     Typography,
     MenuItem,
-    List,
-    ListItem,
-    ListItemText,
     Stack,
     Select,
     FormControl,
@@ -22,21 +18,15 @@ import {
     TextField as MuiTextField
 } from '@mui/material';
 
-import {
-    Delete as DeleteIcon,
-    Edit as EditIcon
-} from '@mui/icons-material';
-
 import createDirectionIcon from '../utils/createDirectionIcon.jsx';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
 import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
 
-import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
-import HighlightedText from './HighlightedText.jsx';
 import CommandParametersEditor from './CommandParametersEditor/CommandParametersEditor.jsx';
 import Button from './Button.jsx';
 import TextField from './TextField.jsx';
+import CommandList from './CommandList.jsx';
 
 import {commands, commandTypeConfigMap} from '../joobyCodec.js';
 import {
@@ -92,18 +82,6 @@ const validators = {
     accessKey: hex => isValidHex(hex, ACCESS_KEY_LENGTH_BYTES),
     messageId: validateMessageId,
     segmentationSessionId: validateMessageId
-};
-
-const getBackgroundColor = ( preparedCommand, editingCommandId, recentlyEditedCommandId ) => {
-    if ( editingCommandId === preparedCommand.id ) {
-        return 'background.filledHover';
-    }
-
-    if ( recentlyEditedCommandId === preparedCommand.id ) {
-        return 'success.light';
-    }
-
-    return 'background.filled';
 };
 
 const processDataAndCreateLog = ({
@@ -269,12 +247,6 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         },
         []
     );
-
-    const onDeletePreparedCommandClick = index => {
-        const newPreparedCommands = preparedCommands.filter(preparedCommand => preparedCommand.id !== index);
-
-        setPreparedCommands(newPreparedCommands);
-    };
 
     const onClearCommandListClick = () => {
         setPreparedCommands([]);
@@ -534,39 +506,6 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             messageId: incrementMessageId(prevParameters.messageId),
             segmentationSessionId: incrementMessageId(prevParameters.segmentationSessionId)
         }));
-    };
-
-    const onPreparedCommandDragEnd = result => {
-        if ( !result.destination ) {
-            return;
-        }
-
-        const startIndex = result.source.index;
-        const endIndex = result.destination.index;
-
-        const updatedCommands = [...preparedCommands];
-        const [removed] = updatedCommands.splice(startIndex, 1);
-        updatedCommands.splice(endIndex, 0, removed);
-
-        setPreparedCommands(updatedCommands);
-    };
-
-    const onEditPreparedCommandClick = index => {
-        const commandToEdit = preparedCommands.find(preparedCommand => preparedCommand.id === index);
-
-        if ( commandToEdit ) {
-            onCommandChange(null, commandToEdit.command);
-            setCommandParameters(commandToEdit.parameters);
-            setEditingCommandId(index);
-            setTimeout(
-                () => {
-                    if ( commandParametersRef.current ) {
-                        commandParametersRef.current.focus();
-                    }
-                },
-                0
-            );
-        }
     };
 
     const onSaveEditedCommandClick = () => {
@@ -833,99 +772,16 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         flexDirection: 'column',
                         gap: 2
                     }}>
-                        <DragDropContext onDragEnd={onPreparedCommandDragEnd}>
-                            <Droppable droppableId="preparedCommandList">
-                                {droppableProvided => (
-                                    <List
-                                        dense
-                                        ref={droppableProvided.innerRef}
-                                        {...droppableProvided.droppableProps}
-                                        sx={{
-                                            maxHeight: '100%',
-                                            overflow: 'auto',
-                                            p: 0,
-                                            borderWidth: '1px',
-                                            borderStyle: 'solid',
-                                            borderColor: 'divider'
-                                        }}
-                                    >
-                                        {preparedCommands.map((preparedCommand, index) => (
-                                            <Draggable key={preparedCommand.id} draggableId={preparedCommand.id} index={index}>
-                                                {draggableProvided => (
-                                                    <ListItem
-                                                        ref={draggableProvided.innerRef}
-                                                        {...draggableProvided.draggableProps}
-                                                        {...draggableProvided.dragHandleProps}
-                                                        sx={{
-                                                            '&:not(:last-child)': {
-                                                                borderBottomWidth: '1px',
-                                                                borderBottomStyle: 'solid',
-                                                                borderBottomColor: 'divider'
-                                                            },
-                                                            '&:hover': {backgroundColor: 'background.filledHover'},
-                                                            '&:focus': {outline: 'none', backgroundColor: 'background.filledHover'},
-                                                            backgroundColor: getBackgroundColor(
-                                                                preparedCommand,
-                                                                editingCommandId,
-                                                                recentlyEditedCommandId
-                                                            ),
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: 1,
-                                                            transition: 'background-color 0.3s'
-                                                        }}
-                                                    >
-                                                        <ListItemText
-                                                            primary={
-                                                                <Box component="span" sx={{wordBreak: 'break-word'}}>
-                                                                    <HighlightedText>{preparedCommand.command.value.name}</HighlightedText>
-                                                                </Box>
-                                                            }
-                                                            secondary={
-                                                                <Box component="span" sx={{wordBreak: 'break-word'}}>
-                                                                    <HighlightedText
-                                                                        isMonospacedFont={true}
-                                                                        fontWeight="fontWeightRegular"
-                                                                        fontSize="0.75rem"
-                                                                    >
-                                                                        {
-                                                                            preparedCommand.parameters.trim() === ''
-                                                                                ? ''
-                                                                                : JSON.stringify(JSON.parse(preparedCommand.parameters))
-                                                                        }
-                                                                    </HighlightedText>
-                                                                </Box>
-                                                            }
-                                                            sx={{flexGrow: 1}}
-                                                        />
-                                                        <Stack direction="row">
-                                                            <IconButtonWithTooltip
-                                                                title="Edit parameters"
-                                                                onClick={() => onEditPreparedCommandClick(preparedCommand.id)}
-                                                                disabled={editingCommandId === preparedCommand.id}
-                                                                sx={{marginRight: 0}}
-                                                            >
-                                                                <EditIcon/>
-                                                            </IconButtonWithTooltip>
-
-                                                            <IconButtonWithTooltip
-                                                                title="Delete command from message"
-                                                                onClick={() => onDeletePreparedCommandClick(preparedCommand.id)}
-                                                                disabled={editingCommandId === preparedCommand.id}
-                                                                sx={{marginRight: 0}}
-                                                            >
-                                                                <DeleteIcon/>
-                                                            </IconButtonWithTooltip>
-                                                        </Stack>
-                                                    </ListItem>
-                                                )}
-                                            </Draggable>
-                                        ))}
-                                        {droppableProvided.placeholder}
-                                    </List>
-                                )}
-                            </Droppable>
-                        </DragDropContext>
+                        <CommandList
+                            setCommands={setPreparedCommands}
+                            setCommandParameters={setCommandParameters}
+                            setEditingId={setEditingCommandId}
+                            onChange={onCommandChange}
+                            commandParametersRef={commandParametersRef}
+                            commands={preparedCommands}
+                            editingId={editingCommandId}
+                            recentlyEditedId={recentlyEditedCommandId}
+                        />
 
                         <Box sx={{
                             display: 'flex',
