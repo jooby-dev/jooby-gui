@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {Box} from '@mui/material';
 
 import LogsPanel from './LogsPanel/LogsPanel.jsx';
-import CommandPanel from './CommandPanel.jsx';
+import CodecPanel from './CodecPanel.jsx';
 
 
 const App = () => {
@@ -10,7 +10,7 @@ const App = () => {
 
     return (
         <Box sx={{display: 'flex', flexGrow: 1, '& > *': {minWidth: 0}}}>
-            <CommandPanel setLogs={setLogs}/>
+            <CodecPanel setLogs={setLogs}/>
             <LogsPanel logs={logs} setLogs={setLogs}/>
         </Box>
     );

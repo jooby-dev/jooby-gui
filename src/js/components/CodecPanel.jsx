@@ -13,8 +13,8 @@ import {
 
 import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
 
-import BuildSection from './BuildSection.jsx';
-import ParseSection from './ParseSection.jsx';
+import CodecBuildSection from './CodecBuildSection.jsx';
+import CodecParseSection from './CodecParseSection.jsx';
 
 import {commandTypeConfigMap} from '../joobyCodec.js';
 import {
@@ -35,7 +35,7 @@ const commandTypes = [
 ];
 
 
-const CommandPanel = ( {setLogs} ) => {
+const CodecPanel = ( {setLogs} ) => {
     const {commandType, setCommandType} = useContext(CommandTypeContext);
     const [hardwareType, setHardwareType] = useState(null);
 
@@ -104,8 +104,8 @@ const CommandPanel = ( {setLogs} ) => {
                     )}
                 </Box>
 
-                <ParseSection setLogs={setLogs} hardwareType={hardwareType}/>
-                <BuildSection setLogs={setLogs} hardwareType={hardwareType} setHardwareType={setHardwareType}/>
+                <CodecParseSection setLogs={setLogs} hardwareType={hardwareType}/>
+                <CodecBuildSection setLogs={setLogs} hardwareType={hardwareType} setHardwareType={setHardwareType}/>
 
                 <Box sx={{
                     display: 'flex',
@@ -129,9 +129,9 @@ const CommandPanel = ( {setLogs} ) => {
     );
 };
 
-CommandPanel.propTypes = {
+CodecPanel.propTypes = {
     setLogs: PropTypes.func.isRequired
 };
 
 
-export default CommandPanel;
+export default CodecPanel;

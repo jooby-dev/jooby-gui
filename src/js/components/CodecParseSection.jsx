@@ -176,7 +176,7 @@ const parameterErrorsState = {
 const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.commands.downlink).map(command => command.id);
 
 
-const ParseSection = ( {setLogs, hardwareType} ) => {
+const CodecParseSection = ( {setLogs, hardwareType} ) => {
     const {commandType} = useContext(CommandTypeContext);
 
     const [dump, setDump] = useState('');
@@ -509,10 +509,10 @@ const ParseSection = ( {setLogs, hardwareType} ) => {
     );
 };
 
-ParseSection.propTypes = {
+CodecParseSection.propTypes = {
     setLogs: PropTypes.func.isRequired,
     hardwareType: PropTypes.object
 };
 
 
-export default ParseSection;
+export default CodecParseSection;

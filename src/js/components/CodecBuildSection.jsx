@@ -212,7 +212,7 @@ const parameterErrorsState = {
 };
 
 
-const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
+const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     const {commandType} = useContext(CommandTypeContext);
 
     const [commandList, setCommandList] = useState(
@@ -957,11 +957,11 @@ const BuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     );
 };
 
-BuildSection.propTypes = {
+CodecBuildSection.propTypes = {
     setLogs: PropTypes.func.isRequired,
     hardwareType: PropTypes.object,
     setHardwareType: PropTypes.func.isRequired
 };
 
 
-export default BuildSection;
+export default CodecBuildSection;
