@@ -8,7 +8,7 @@ import removeQuotes from '../../../utils/removeQuotes.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
-import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR, LOG_TYPE_FRAME} from '../../../constants.js';
+import {logTypes} from '../../../constants/index.js';
 
 
 const renderHardwareType = ( hardwareType, commandType ) => {
@@ -30,8 +30,8 @@ const renderHardwareType = ( hardwareType, commandType ) => {
 
 const createLogTitle = log => {
     switch ( log.type ) {
-        case LOG_TYPE_MESSAGE:
-        case LOG_TYPE_FRAME: {
+        case logTypes.MESSAGE:
+        case logTypes.FRAME: {
             const hardwareTypeContent = renderHardwareType(log.hardwareType, log.commandType);
 
             return (
@@ -89,7 +89,7 @@ const createLogTitle = log => {
             );
         }
 
-        case LOG_TYPE_ERROR:
+        case logTypes.ERROR:
             return (
                 <>
                     <CloseIcon color="error" sx={{mr: 2}}/>

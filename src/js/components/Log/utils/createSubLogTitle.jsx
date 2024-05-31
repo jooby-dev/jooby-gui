@@ -7,7 +7,7 @@ import removeQuotes from '../../../utils/removeQuotes.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
-import {UNKNOWN_COMMAND_NAME} from '../../../constants.js';
+import {unknownCommand} from '../../../constants/index.js';
 
 
 const createSubLogTitle = ( logCommand, commandType ) => (
@@ -28,7 +28,7 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                 }
                 {'name: '}
                 {
-                    logCommand.command.name !== UNKNOWN_COMMAND_NAME
+                    logCommand.command.name !== unknownCommand.NAME
                         ? (
                             <Link
                                 href={createCommandDocLink(logCommand.command, commandType)}

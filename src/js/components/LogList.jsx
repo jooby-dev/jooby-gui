@@ -5,16 +5,16 @@ import {Box} from '@mui/material';
 import Log from './Log/Log.jsx';
 import ErrorLog from './ErrorLog.jsx';
 
-import {PARAMETERS_TAB_VIEW_TYPE_TREE, LOG_TYPE_ERROR} from '../constants.js';
+import {parametersTabViewTypes, logTypes} from '../constants/index.js';
 
 
 const LogList = ( {logs, setLogs, handleShareLogsClick} ) => {
-    const [parametersTab, setParametersTab] = useState(PARAMETERS_TAB_VIEW_TYPE_TREE);
+    const [parametersTab, setParametersTab] = useState(parametersTabViewTypes.TREE);
 
     return (
         <Box sx={{mb: 2, px: 2, '& > *': {minWidth: 0}}}>
             {logs.length > 0 && logs.map(log => (
-                log.type === LOG_TYPE_ERROR
+                log.type === logTypes.ERROR
                     ? (
                         <ErrorLog
                             key={log.id}

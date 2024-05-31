@@ -34,10 +34,7 @@ import HighlightedText from '../HighlightedText.jsx';
 import TypographyBold from '../TypographyBold.jsx';
 import TypographyMono from '../TypographyMono.jsx';
 
-import {
-    PARAMETERS_TAB_VIEW_TYPE_JSON,
-    PARAMETERS_TAB_VIEW_TYPE_TREE
-} from '../../constants.js';
+import {parametersTabViewTypes} from '../../constants/index.js';
 
 import useLogActions from './hooks/useLogActions.js';
 
@@ -323,16 +320,16 @@ const Log = ({
                                                                     aria-label="Display command parameters in tree, JSON view"
                                                                 >
                                                                     <Tab
-                                                                        label={PARAMETERS_TAB_VIEW_TYPE_TREE}
-                                                                        value={PARAMETERS_TAB_VIEW_TYPE_TREE}
+                                                                        label={parametersTabViewTypes.TREE}
+                                                                        value={parametersTabViewTypes.TREE}
                                                                     />
                                                                     <Tab
-                                                                        label={PARAMETERS_TAB_VIEW_TYPE_JSON}
-                                                                        value={PARAMETERS_TAB_VIEW_TYPE_JSON}
+                                                                        label={parametersTabViewTypes.JSON}
+                                                                        value={parametersTabViewTypes.JSON}
                                                                     />
                                                                 </TabList>
                                                             </Box>
-                                                            <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_TREE}>
+                                                            <TabPanel value={parametersTabViewTypes.TREE}>
                                                                 <Box sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
                                                                     <JSONTree
                                                                         data={modifyTime2000Properties(command.parameters)}
@@ -343,7 +340,7 @@ const Log = ({
                                                                     />
                                                                 </Box>
                                                             </TabPanel>
-                                                            <TabPanel value={PARAMETERS_TAB_VIEW_TYPE_JSON}>
+                                                            <TabPanel value={parametersTabViewTypes.JSON}>
                                                                 <TypographyMono component="pre" sx={{whiteSpace: 'pre-wrap'}}>
                                                                     {JSON.stringify(command.parameters, null, 4)}
                                                                 </TypographyMono>
@@ -366,7 +363,7 @@ const Log = ({
 
 Log.propTypes = {
     log: PropTypes.object.isRequired,
-    parametersTab: PropTypes.oneOf([PARAMETERS_TAB_VIEW_TYPE_TREE, PARAMETERS_TAB_VIEW_TYPE_JSON]),
+    parametersTab: PropTypes.oneOf([parametersTabViewTypes.TREE, parametersTabViewTypes.JSON]),
     setParametersTab: PropTypes.func.isRequired,
     setLogs: PropTypes.func.isRequired,
     handleShareLogsClick: PropTypes.func.isRequired

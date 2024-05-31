@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {Snackbar, Alert} from '@mui/material';
 import {v4 as uuidv4} from 'uuid';
 
-import {SEVERITY_TYPE_SUCCESS} from '../constants.js';
+import {severityTypes} from '../constants/index.js';
 
 
 const DEFAULT_SNACKBAR_DURATION = 3000;
@@ -17,7 +17,7 @@ const SnackbarProvider = ( {children} ) => {
         ({
             message,
             duration = DEFAULT_SNACKBAR_DURATION,
-            severity = SEVERITY_TYPE_SUCCESS
+            severity = severityTypes.SUCCESS
         }) => {
             setSnackbar({id: uuidv4(), message, duration, severity});
         },

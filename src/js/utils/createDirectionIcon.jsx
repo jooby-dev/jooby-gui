@@ -1,6 +1,6 @@
 import {ArrowDownward as ArrowDownwardIcon} from '@mui/icons-material';
 import {yellow} from '@mui/material/colors';
-import {directions} from '../constants.js';
+import {directions} from '../constants/index.js';
 
 
 const createDirectionIcon = direction => {

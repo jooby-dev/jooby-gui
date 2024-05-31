@@ -17,22 +17,9 @@ import CodecBuildSection from './CodecBuildSection.jsx';
 import CodecParseSection from './CodecParseSection.jsx';
 
 import {commandTypeConfigMap} from '../joobyCodec.js';
-import {
-    COMMAND_TYPE_ANALOG,
-    COMMAND_TYPE_OBIS_OBSERVER,
-    COMMAND_TYPE_MTX,
-    COMMAND_TYPE_MTX_LORA
-} from '../constants.js';
+import {commandTypes} from '../constants/index.js';
 
 import hasHardwareTypeInCommandType from '../utils/hasHardwareTypeInCommandType.js';
-
-
-const commandTypes = [
-    COMMAND_TYPE_ANALOG,
-    COMMAND_TYPE_OBIS_OBSERVER,
-    COMMAND_TYPE_MTX,
-    COMMAND_TYPE_MTX_LORA
-];
 
 
 const CodecPanel = ( {setLogs} ) => {
@@ -80,7 +67,7 @@ const CodecPanel = ( {setLogs} ) => {
                             value={commandType}
                             onChange={onCommandTypeChange}
                         >
-                            {commandTypes.map(type => <MenuItem key={type} value={type}>{type}</MenuItem>)}
+                            {Object.values(commandTypes).map(type => <MenuItem key={type} value={type}>{type}</MenuItem>)}
                         </Select>
                     </FormControl>
 

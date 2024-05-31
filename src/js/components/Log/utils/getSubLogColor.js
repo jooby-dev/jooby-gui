@@ -1,5 +1,5 @@
 import {yellow} from '@mui/material/colors';
-import {directions} from '../../../constants.js';
+import {directions} from '../../../constants/index.js';
 
 
 export default ( direction, error ) => {

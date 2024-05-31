@@ -32,18 +32,14 @@ import Button from './Button.jsx';
 
 import {commands} from '../joobyCodec.js';
 import {
-    SEVERITY_TYPE_WARNING,
-    COMMAND_TYPE_ANALOG,
-    COMMAND_TYPE_MTX,
-    COMMAND_TYPE_MTX_LORA,
-    COMMAND_TYPE_OBIS_OBSERVER,
-    ACCESS_KEY_LENGTH_BYTES,
-    DEFAULT_ACCESS_KEY,
-    UNKNOWN_COMMAND_NAME,
-    LOG_TYPE_ERROR,
     directionNames,
-    directions
-} from '../constants.js';
+    directions,
+    commandTypes,
+    severityTypes,
+    accessKey,
+    unknownCommand,
+    logTypes
+} from '../constants/index.js';
 
 import getHardwareType from '../utils/getHardwareType.js';
 import getHardwareTypeName from '../utils/getHardwareTypeName.js';
@@ -56,7 +52,7 @@ import isByteArray from '../utils/isByteArray.js';
 const base64ToHex = base64 => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
 
 const validators = {
-    accessKey: hex => isValidHex(hex, ACCESS_KEY_LENGTH_BYTES)
+    accessKey: hex => isValidHex(hex, accessKey.LENGTH_BYTES)
 };
 
 const getDirectionFromFrame = parsedFrame => {
@@ -93,7 +89,7 @@ const processDataAndCreateLog = ({
 
         if ( !message.commands.length ) {
             logErrorMessage = 'No commands found.';
-            logType = LOG_TYPE_ERROR;
+            logType = logTypes.ERROR;
         }
 
         preparedData.commands = message.commands.map(commandData => {
@@ -106,7 +102,7 @@ const processDataAndCreateLog = ({
                 command: {
                     error,
                     id: command.id,
-                    name: command.name || UNKNOWN_COMMAND_NAME,
+                    name: command.name || unknownCommand.NAME,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(command.bytes) : undefined,
                     length: isByteArrayValid ? command.bytes.length : undefined,
                     directionType: direction,
@@ -137,7 +133,7 @@ const processDataAndCreateLog = ({
         messageParameters: {}
     };
 
-    if ( commandType === COMMAND_TYPE_MTX && data && !logErrorMessage ) {
+    if ( commandType === commandTypes.MTX && data && !logErrorMessage ) {
         const frameData = data.frame?.header;
 
         log.frameParameters = {
@@ -161,7 +157,7 @@ const formats = {
 };
 
 const defaults = {
-    accessKey: DEFAULT_ACCESS_KEY
+    accessKey: accessKey.DEFAULT
 };
 
 const parametersState = {
@@ -238,7 +234,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 const codec = joobyCodec[commandType];
 
                 switch ( commandType ) {
-                    case COMMAND_TYPE_MTX: {
+                    case commandTypes.MTX: {
                         try {
                             const parsedFrame = frame.fromBytes(bytes);
 
@@ -262,7 +258,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                         break;
                     }
 
-                    case COMMAND_TYPE_MTX_LORA: {
+                    case commandTypes.MTX_LORA: {
                         try {
                             direction = Number(parameters.direction);
                             data = joobyCodec.analog.message[directionNames[direction]].fromBytes(
@@ -288,7 +284,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                         break;
                     }
 
-                    case COMMAND_TYPE_ANALOG:
+                    case commandTypes.ANALOG:
                         try {
                             direction = Number(parameters.direction);
                             data = codec.message[directionNames[direction]].fromBytes(
@@ -301,7 +297,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
 
                         break;
 
-                    case COMMAND_TYPE_OBIS_OBSERVER:
+                    case commandTypes.OBIS_OBSERVER:
                         try {
                             direction = directions.DOWNLINK;
                             data = codec.message[directionNames[direction]].fromBytes(bytes);
@@ -337,13 +333,13 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     direction,
                     hardwareType,
                     parseError,
-                    commandType: commandType === COMMAND_TYPE_MTX_LORA ? COMMAND_TYPE_ANALOG : commandType,
+                    commandType: commandType === commandTypes.MTX_LORA ? commandTypes.ANALOG : commandType,
                     logType: getLogType(commandType, parseError)
                 })
             );
         });
 
-        if ( commandType === COMMAND_TYPE_MTX_LORA ) {
+        if ( commandType === commandTypes.MTX_LORA ) {
             const isByteArrayValid = isByteArray(mtxBuffer);
             let data;
             let parseError;
@@ -361,7 +357,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     hardwareType,
                     parseError,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(mtxBuffer) : undefined,
-                    commandType: COMMAND_TYPE_MTX,
+                    commandType: commandTypes.MTX,
                     logType: getLogType(commandType, parseError)
                 })
             );
@@ -386,7 +382,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
 
             showSnackbar({
                 message: `"${name}" set to default of "${defaults[name]}".`,
-                severity: SEVERITY_TYPE_WARNING
+                severity: severityTypes.WARNING
             });
 
             return;
@@ -413,7 +409,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
         <>
             <Typography variant="h5">
                 {
-                    commandType === COMMAND_TYPE_MTX
+                    commandType === commandTypes.MTX
                         ? 'Parse frames'
                         : 'Parse messages'
                 }
@@ -436,7 +432,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                         </RadioGroup>
                     </FormControl>
 
-                    {(commandType === COMMAND_TYPE_ANALOG || commandType === COMMAND_TYPE_MTX_LORA) && (
+                    {(commandType === commandTypes.ANALOG || commandType === commandTypes.MTX_LORA) && (
                         <FormControl sx={{display: 'contents'}}>
                             <FormLabel id="dump-input-direction" sx={{pr: 2}}>Direction</FormLabel>
                             <RadioGroup
@@ -455,7 +451,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 </Box>
             </div>
 
-            {(commandType === COMMAND_TYPE_MTX || commandType === COMMAND_TYPE_MTX_LORA) && (
+            {(commandType === commandTypes.MTX || commandType === commandTypes.MTX_LORA) && (
                 <div>
                     <TextField
                         type="text"

@@ -1,14 +1,14 @@
-import {LOG_TYPE_ERROR, LOG_TYPE_FRAME, LOG_TYPE_MESSAGE, COMMAND_TYPE_MTX} from '../constants.js';
+import {logTypes, commandTypes} from '../constants/index.js';
 
 
 export default ( commandType, error ) => {
     if ( error ) {
-        return LOG_TYPE_ERROR;
+        return logTypes.ERROR;
     }
 
-    if ( commandType === COMMAND_TYPE_MTX ) {
-        return LOG_TYPE_FRAME;
+    if ( commandType === commandTypes.MTX ) {
+        return logTypes.FRAME;
     }
 
-    return LOG_TYPE_MESSAGE;
+    return logTypes.MESSAGE;
 };

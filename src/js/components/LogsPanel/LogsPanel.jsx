@@ -24,10 +24,11 @@ import useCopyToClipboard from '../../hooks/useCopyToClipboard.js';
 import LogList from '../LogList.jsx';
 import IconButtonWithTooltip from '../IconButtonWithTooltip.jsx';
 
-import {LOG_COUNT_LIMIT} from '../../constants.js';
-
 import createShareableLogsLink from './utils/createShareableLogsLink.js';
 import extractLogsFromUrl from './utils/extractLogsFromUrl.js';
+
+
+const LOG_COUNT_LIMIT = 30;
 
 
 const LogsPanel = ( {logs, setLogs} ) => {

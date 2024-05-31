@@ -1,4 +1,4 @@
-import {directionNames} from '../constants.js';
+import {directionNames} from '../constants/index.js';
 
 
 export default (command, commandType) => (

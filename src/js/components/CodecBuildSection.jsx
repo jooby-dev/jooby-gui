@@ -30,15 +30,12 @@ import CommandList from './CommandList.jsx';
 
 import {commands, commandTypeConfigMap} from '../joobyCodec.js';
 import {
-    SEVERITY_TYPE_WARNING,
-    COMMAND_TYPE_MTX,
-    COMMAND_TYPE_MTX_LORA,
-    COMMAND_TYPE_ANALOG,
-    ACCESS_KEY_LENGTH_BYTES,
-    DEFAULT_ACCESS_KEY,
     directionNames,
-    directions
-} from '../constants.js';
+    directions,
+    severityTypes,
+    commandTypes,
+    accessKey
+} from '../constants/index.js';
 
 import getHardwareType from '../utils/getHardwareType.js';
 import getHardwareTypeName from '../utils/getHardwareTypeName.js';
@@ -49,7 +46,7 @@ import getLogType from '../utils/getLogType.js';
 import isByteArray from '../utils/isByteArray.js';
 
 
-const resolveCommandType = commandType => (commandType === COMMAND_TYPE_MTX_LORA ? COMMAND_TYPE_MTX : commandType);
+const resolveCommandType = commandType => (commandType === commandTypes.MTX_LORA ? commandTypes.MTX : commandType);
 
 const resolveParameters = ( parameters, commandType ) => {
     const resolvedParameters = {
@@ -57,11 +54,11 @@ const resolveParameters = ( parameters, commandType ) => {
         messageId: parameters.messageId
     };
 
-    if ( commandType === COMMAND_TYPE_MTX_LORA ) {
+    if ( commandType === commandTypes.MTX_LORA ) {
         return resolvedParameters;
     }
 
-    if ( commandType === COMMAND_TYPE_MTX ) {
+    if ( commandType === commandTypes.MTX ) {
         return {
             ...resolvedParameters,
             source: parameters.source,
@@ -79,7 +76,7 @@ const validateMessageId = value => isValidNumber(value, MESSAGE_ID_MIN_VALUE, ME
 const validators = {
     source: hex => isValidNumber(parseInt(cleanHexString(hex), 16), SOURCE_ADDRESS_MIN_VALUE, SOURCE_ADDRESS_MAX_VALUE),
     destination: hex => isValidNumber(parseInt(cleanHexString(hex), 16), DESTINATION_ADDRESS_MIN_VALUE, DESTINATION_ADDRESS_MAX_VALUE),
-    accessKey: hex => isValidHex(hex, ACCESS_KEY_LENGTH_BYTES),
+    accessKey: hex => isValidHex(hex, accessKey.LENGTH_BYTES),
     messageId: validateMessageId,
     segmentationSessionId: validateMessageId
 };
@@ -131,7 +128,7 @@ const processDataAndCreateLog = ({
         messageParameters: {}
     };
 
-    if ( commandType === COMMAND_TYPE_MTX && !buildError ) {
+    if ( commandType === commandTypes.MTX && !buildError ) {
         log.frameParameters = {
             type: frameType,
             destination: parameters.destination ? parseInt(cleanHexString(parameters.destination), 16) : undefined,
@@ -167,7 +164,7 @@ const defaults = {
     source: 'ff fe',
     destination: 'ff ff',
     accessLevel: accessLevels.UNENCRYPTED,
-    accessKey: DEFAULT_ACCESS_KEY,
+    accessKey: accessKey.DEFAULT,
     messageId: 0,
     segmentationSessionId: 0
 };
@@ -293,7 +290,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             setHardwareType(hardwareTypeData);
             showSnackbar({
                 message: `Hardware type has been changed to "${hardwareTypeData.label}"`,
-                severity: SEVERITY_TYPE_WARNING
+                severity: severityTypes.WARNING
             });
         }
 
@@ -382,7 +379,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             );
 
-            if ( commandType === COMMAND_TYPE_MTX ) {
+            if ( commandType === commandTypes.MTX ) {
                 frameType = direction === directions.DOWNLINK ? frameTypes.DATA_REQUEST : frameTypes.DATA_RESPONSE;
                 frameBytes = frame.toBytes(
                     messageBytes,
@@ -398,7 +395,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             console.error(error);
         }
 
-        const bytes = commandType === COMMAND_TYPE_MTX ? frameBytes : messageBytes;
+        const bytes = commandType === commandTypes.MTX ? frameBytes : messageBytes;
 
         newLogs.push(
             processDataAndCreateLog({
@@ -414,7 +411,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             })
         );
 
-        if ( !buildError && commandType === COMMAND_TYPE_MTX_LORA ) {
+        if ( !buildError && commandType === commandTypes.MTX_LORA ) {
             let segments;
 
             try {
@@ -437,7 +434,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         buildError,
                         bytes,
                         data: undefined,
-                        commandType: COMMAND_TYPE_ANALOG,
+                        commandType: commandTypes.ANALOG,
                         hardwareType: hardwareTypes.MTXLORA,
                         logType: getLogType(commandType, buildError)
                     })
@@ -470,7 +467,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                             frameType,
                             buildError,
                             bytes: messageBytes,
-                            commandType: COMMAND_TYPE_ANALOG,
+                            commandType: commandTypes.ANALOG,
                             hardwareType: hardwareTypes.MTXLORA,
                             logType: getLogType(commandType, buildError)
                         })
@@ -493,7 +490,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                 <div>LoRa only commands in the message: {loraOnlyCommandNames.join(', ')}.</div>
                             </Stack>
                         ),
-                        severity: SEVERITY_TYPE_WARNING,
+                        severity: severityTypes.WARNING,
                         duration: 15000
                     });
                 }
@@ -547,7 +544,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             showSnackbar({
                 message: `"${name}" set to default of "${defaults[name]}".`,
-                severity: SEVERITY_TYPE_WARNING
+                severity: severityTypes.WARNING
             });
 
             return;
@@ -574,7 +571,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         <>
             <Typography variant="h5">
                 {
-                    commandType === COMMAND_TYPE_MTX
+                    commandType === commandTypes.MTX
                         ? 'Create frame'
                         : 'Create message'
                 }
@@ -670,17 +667,17 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 <>
                     <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center'}}>
                         {createDirectionIcon(preparedCommands[0].command.value.directionType)}
-                        {commandType === COMMAND_TYPE_MTX ? 'Frame' : 'Message'}
+                        {commandType === commandTypes.MTX ? 'Frame' : 'Message'}
                     </Typography>
 
                     {
-                        (commandType === COMMAND_TYPE_MTX || commandType === COMMAND_TYPE_MTX_LORA) && (
+                        (commandType === commandTypes.MTX || commandType === commandTypes.MTX_LORA) && (
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: 2
                             }}>
-                                {commandType === COMMAND_TYPE_MTX && (
+                                {commandType === commandTypes.MTX && (
                                     <>
                                         <TextField
                                             type="text"
@@ -706,7 +703,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                     </>
                                 )}
 
-                                {(commandType === COMMAND_TYPE_MTX || commandType === COMMAND_TYPE_MTX_LORA) && (
+                                {(commandType === commandTypes.MTX || commandType === commandTypes.MTX_LORA) && (
                                     <>
                                         <FormControl variant="standard" fullWidth={true}>
                                             <InputLabel id="select-access-level-label">Access level</InputLabel>
@@ -748,7 +745,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                     </>
                                 )}
 
-                                {commandType === COMMAND_TYPE_MTX_LORA && (
+                                {commandType === commandTypes.MTX_LORA && (
                                     <TextField
                                         label="Segmentation session ID"
                                         value={parameters.segmentationSessionId}
@@ -798,7 +795,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                 }
                             >
                                 {
-                                    commandType === COMMAND_TYPE_MTX
+                                    commandType === commandTypes.MTX
                                         ? 'Build frame'
                                         : 'Build message'
                                 }
