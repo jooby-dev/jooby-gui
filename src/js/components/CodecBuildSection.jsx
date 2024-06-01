@@ -164,7 +164,7 @@ const defaults = {
     source: 'ff fe',
     destination: 'ff ff',
     accessLevel: accessLevels.UNENCRYPTED,
-    accessKey: accessKey.DEFAULT,
+    accessKey: accessKey.DEFAULT_HEX,
     messageId: 0,
     segmentationSessionId: 0
 };

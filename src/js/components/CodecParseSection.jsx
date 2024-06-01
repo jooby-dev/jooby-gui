@@ -157,7 +157,7 @@ const formats = {
 };
 
 const defaults = {
-    accessKey: accessKey.DEFAULT
+    accessKey: accessKey.DEFAULT_HEX
 };
 
 const parametersState = {
