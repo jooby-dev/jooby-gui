@@ -2,10 +2,8 @@ import * as joobyCodec from 'jooby-codec';
 import {
     directions,
     directionNames,
-    COMMAND_TYPE_ANALOG,
-    COMMAND_TYPE_OBIS_OBSERVER,
-    COMMAND_TYPE_MTX
-} from './constants.js';
+    commandTypes
+} from './constants/index.js';
 
 
 const prepareCommandMap = ( commandMap, direction ) => {
@@ -25,13 +23,13 @@ const prepareCommandMap = ( commandMap, direction ) => {
     return result;
 };
 
-const prepareCommandList = CommandMap => [
-    ...Object.values(CommandMap.uplink),
-    ...Object.values(CommandMap.downlink)
+const prepareCommandList = commandMap => [
+    ...Object.values(commandMap.uplink),
+    ...Object.values(commandMap.downlink)
 ]
     .map(item => ({
         value: item,
-        label: item.name,
+        label: item.isLoraOnly ? `${item.name} (LoRa only)` : item.name,
         direction: directionNames[item.directionType]
     }));
 
@@ -51,7 +49,7 @@ export const commands = {
 };
 
 export const commandTypeConfigMap = {
-    [COMMAND_TYPE_ANALOG]: {
+    [commandTypes.ANALOG]: {
         hasLrc: true,
         hasHardwareType: true,
         preparedCommandList: prepareCommandList(commands.analog),
@@ -63,17 +61,24 @@ export const commandTypeConfigMap = {
         )
     },
 
-    [COMMAND_TYPE_OBIS_OBSERVER]: {
+    [commandTypes.OBIS_OBSERVER]: {
         hasLrc: false,
         hasHardwareType: false,
         preparedCommandList: prepareCommandList(commands.obisObserver),
         hardwareTypeList: null
     },
 
-    [COMMAND_TYPE_MTX]: {
+    [commandTypes.MTX]: {
         hasLrc: true,
         hasHardwareType: false,
         preparedCommandList: prepareCommandList(commands.mtx),
+        hardwareTypeList: null
+    },
+
+    [commandTypes.MTX_LORA]: {
+        hasLrc: false,
+        hasHardwareType: false,
+        preparedCommandList: null,
         hardwareTypeList: null
     }
 };

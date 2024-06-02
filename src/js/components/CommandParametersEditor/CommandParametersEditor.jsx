@@ -20,7 +20,7 @@ import IconButtonWithTooltip from '../IconButtonWithTooltip.jsx';
 import isValidJson from './utils/isValidJson.js';
 import formatJson from './utils/formatJson.js';
 
-import {COMMAND_TYPE_ANALOG, COMMAND_TYPE_OBIS_OBSERVER, COMMAND_TYPE_MTX} from '../../constants.js';
+import {commandTypes} from '../../constants/index.js';
 
 const workerJsonUrl = new URL('ace-builds/src-noconflict/worker-json.js', import.meta.url).toString();
 
@@ -189,12 +189,15 @@ const CommandParameterEditor = ({
                 <>
                     {'JSON with command parameters (see '}
                     <Link
-                        href={createCommandDocLink(command.value, commandType)}
+                        href={createCommandDocLink(
+                            command.value,
+                            commandType === commandTypes.MTX_LORA ? commandTypes.MTX : commandType
+                        )}
                         target="_blank"
                         rel="noreferrer"
                         onClick={event => event.stopPropagation()}
                     >
-                        {command.label}
+                        {command.value.name}
                     </Link>
                     {' documentation)'}
                 </>
@@ -210,7 +213,7 @@ CommandParameterEditor.propTypes = {
     inputRef: PropTypes.object.isRequired,
     command: PropTypes.object.isRequired,
     onSubmit: PropTypes.func.isRequired,
-    commandType: PropTypes.oneOf([COMMAND_TYPE_ANALOG, COMMAND_TYPE_OBIS_OBSERVER, COMMAND_TYPE_MTX]).isRequired
+    commandType: PropTypes.oneOf(Object.values(commandTypes)).isRequired
 };
 
 

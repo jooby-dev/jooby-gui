@@ -6,7 +6,7 @@
         "fontsource",
         "roboto",
         "noconflict",
-        "rulesdir"
+        "MTXLORA"
     ],
 
     "javascript.preferences.importModuleSpecifierEnding": "js",

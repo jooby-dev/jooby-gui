@@ -3,10 +3,11 @@ import {Box, Collapse, Link} from '@mui/material';
 import createCommandDocLink from '../../../utils/createCommandDocLink.js';
 import createDirectionIcon from '../../../utils/createDirectionIcon.jsx';
 import getHexFromNumber from '../../../utils/getHexFromNumber.js';
+import removeQuotes from '../../../utils/removeQuotes.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
-import {UNKNOWN_COMMAND_NAME} from '../../../constants.js';
+import {unknownCommand} from '../../../constants/index.js';
 
 
 const createSubLogTitle = ( logCommand, commandType ) => (
@@ -27,7 +28,7 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                 }
                 {'name: '}
                 {
-                    logCommand.command.name !== UNKNOWN_COMMAND_NAME
+                    logCommand.command.name !== unknownCommand.NAME
                         ? (
                             <Link
                                 href={createCommandDocLink(logCommand.command, commandType)}
@@ -71,7 +72,7 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                             }}
                             in={!logCommand.isExpanded}
                         >
-                            {JSON.stringify(logCommand.command.parameters)}
+                            {removeQuotes(JSON.stringify(logCommand.command.parameters))}
                         </Collapse>
                     </Box>
                 )

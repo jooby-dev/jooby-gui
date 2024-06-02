@@ -13,20 +13,16 @@ import {
 
 import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
 
-import BuildSection from './BuildSection.jsx';
-import ParseSection from './ParseSection.jsx';
+import CodecBuildSection from './CodecBuildSection.jsx';
+import CodecParseSection from './CodecParseSection.jsx';
 
 import {commandTypeConfigMap} from '../joobyCodec.js';
-import {
-    COMMAND_TYPE_ANALOG,
-    COMMAND_TYPE_OBIS_OBSERVER,
-    COMMAND_TYPE_MTX
-} from '../constants.js';
+import {commandTypes} from '../constants/index.js';
 
 import hasHardwareTypeInCommandType from '../utils/hasHardwareTypeInCommandType.js';
 
 
-const CommandPanel = ( {setLogs} ) => {
+const CodecPanel = ( {setLogs} ) => {
     const {commandType, setCommandType} = useContext(CommandTypeContext);
     const [hardwareType, setHardwareType] = useState(null);
 
@@ -71,9 +67,7 @@ const CommandPanel = ( {setLogs} ) => {
                             value={commandType}
                             onChange={onCommandTypeChange}
                         >
-                            <MenuItem value={COMMAND_TYPE_ANALOG}>{COMMAND_TYPE_ANALOG}</MenuItem>
-                            <MenuItem value={COMMAND_TYPE_OBIS_OBSERVER}>{COMMAND_TYPE_OBIS_OBSERVER}</MenuItem>
-                            <MenuItem value={COMMAND_TYPE_MTX}>{COMMAND_TYPE_MTX}</MenuItem>
+                            {Object.values(commandTypes).map(type => <MenuItem key={type} value={type}>{type}</MenuItem>)}
                         </Select>
                     </FormControl>
 
@@ -97,8 +91,8 @@ const CommandPanel = ( {setLogs} ) => {
                     )}
                 </Box>
 
-                <ParseSection setLogs={setLogs} hardwareType={hardwareType}/>
-                <BuildSection setLogs={setLogs} hardwareType={hardwareType} setHardwareType={setHardwareType}/>
+                <CodecParseSection setLogs={setLogs} hardwareType={hardwareType}/>
+                <CodecBuildSection setLogs={setLogs} hardwareType={hardwareType} setHardwareType={setHardwareType}/>
 
                 <Box sx={{
                     display: 'flex',
@@ -122,9 +116,9 @@ const CommandPanel = ( {setLogs} ) => {
     );
 };
 
-CommandPanel.propTypes = {
+CodecPanel.propTypes = {
     setLogs: PropTypes.func.isRequired
 };
 
 
-export default CommandPanel;
+export default CodecPanel;

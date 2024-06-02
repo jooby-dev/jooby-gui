@@ -4,12 +4,11 @@ import {Box, Collapse, Tooltip} from '@mui/material';
 import {Close as CloseIcon} from '@mui/icons-material';
 
 import createDirectionIcon from '../../../utils/createDirectionIcon.jsx';
-import hasLrc from '../../../utils/hasLrc.js';
-import getHexFromNumber from '../../../utils/getHexFromNumber.js';
+import removeQuotes from '../../../utils/removeQuotes.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
-import {LOG_TYPE_MESSAGE, LOG_TYPE_ERROR, LOG_TYPE_FRAME} from '../../../constants.js';
+import {logTypes} from '../../../constants/index.js';
 
 
 const renderHardwareType = ( hardwareType, commandType ) => {
@@ -22,7 +21,7 @@ const renderHardwareType = ( hardwareType, commandType ) => {
             {'hardware type: '}
             <Tooltip title={`ID: ${joobyCodec[commandType].constants.hardwareTypes[hardwareType]}`}>
                 <Box component="span">
-                    <HighlightedText>{hardwareType}</HighlightedText>
+                    <HighlightedText fontWeight="normal">{hardwareType}</HighlightedText>
                 </Box>
             </Tooltip>
         </>
@@ -31,37 +30,28 @@ const renderHardwareType = ( hardwareType, commandType ) => {
 
 const createLogTitle = log => {
     switch ( log.type ) {
-        case LOG_TYPE_MESSAGE:
-        case LOG_TYPE_FRAME: {
-            const actualLrc = log.data.lrc?.actual;
-            const expectedLrc = log.data.lrc?.expected;
+        case logTypes.MESSAGE:
+        case logTypes.FRAME: {
+            const hardwareTypeContent = renderHardwareType(log.hardwareType, log.commandType);
 
             return (
                 <>
                     {createDirectionIcon(log.data.commands[0].command.directionType)}
                     <Box>
                         <Box sx={{minWidth: 0}}>
-                            {'commands: '}
-                            <HighlightedText>{log.data.commands.length}</HighlightedText>
-                            {'; '}
-                            {
-                                hasLrc(log.commandType) && (!actualLrc || !expectedLrc || actualLrc !== expectedLrc)
-                                    ? (
-                                        <>
-                                            {'LRC expected: '}
-                                            <HighlightedText isMonospacedFont={true}>
-                                                {expectedLrc ? getHexFromNumber(expectedLrc) : 'n/a'}
-                                            </HighlightedText>
-                                            {', actual: '}
-                                            <HighlightedText isMonospacedFont={true} color="error.main">
-                                                {actualLrc ? getHexFromNumber(actualLrc) : 'n/a'}
-                                            </HighlightedText>
-                                            {'; '}
-                                        </>
-                                    )
-                                    : null
+                            <HighlightedText>{log.commandType}</HighlightedText>
+                            {' (commands: '}
+                            <HighlightedText fontWeight="normal">{log.data.commands.length}</HighlightedText>
+                            {hardwareTypeContent
+                                ? (
+                                    <>
+                                        {'; '}
+                                        {hardwareTypeContent}
+                                    </>
+                                )
+                                : ''
                             }
-                            {renderHardwareType(log.hardwareType, log.commandType)}
+                            {')'}
                         </Box>
 
                         <Box sx={{
@@ -81,19 +71,17 @@ const createLogTitle = log => {
                                 }}
                                 in={!log.isExpanded}
                             >
-                                {
-                                    log.data.commands.map((commandData, index) => (
-                                        <Fragment key={index}>
-                                            <Box component="span" sx={{color: 'grey.700'}}>{commandData.command.name}</Box>
-                                            {
-                                                commandData.command.id && commandData.command.hasParameters
-                                                    ? `: ${JSON.stringify(commandData.command.parameters)}`
-                                                    : ''
-                                            }
-                                            {'; '}
-                                        </Fragment>
-                                    ))
-                                }
+                                {log.data.commands.map((commandData, index) => (
+                                    <Fragment key={index}>
+                                        <Box component="span" sx={{color: 'grey.700'}}>{commandData.command.name}</Box>
+                                        {
+                                            commandData.command.id && commandData.command.hasParameters
+                                                ? `: ${removeQuotes(JSON.stringify(commandData.command.parameters))}`
+                                                : ''
+                                        }
+                                        {'; '}
+                                    </Fragment>
+                                ))}
                             </Collapse>
                         </Box>
                     </Box>
@@ -101,12 +89,14 @@ const createLogTitle = log => {
             );
         }
 
-        case LOG_TYPE_ERROR:
+        case logTypes.ERROR:
             return (
                 <>
                     <CloseIcon color="error" sx={{mr: 2}}/>
                     <Box>
-                        <Box sx={{minWidth: 0}}>error</Box>
+                        <Box sx={{minWidth: 0}}>
+                            <HighlightedText>{log.commandType}</HighlightedText>
+                        </Box>
                         <Box sx={{
                             fontWeight: 'fontWeightRegular',
                             fontSize: '0.75rem',
@@ -124,6 +114,7 @@ const createLogTitle = log => {
                                 }}
                                 in={!log.isExpanded}
                             >
+                                <Box component="span" sx={{color: 'grey.700'}}>error: </Box>
                                 {log.error}
                             </Collapse>
                         </Box>

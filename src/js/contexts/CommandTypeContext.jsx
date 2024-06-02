@@ -1,12 +1,12 @@
 import {createContext, useState} from 'react';
 import PropTypes from 'prop-types';
-import {COMMAND_TYPE_ANALOG} from '../constants.js';
+import {commandTypes} from '../constants/index.js';
 
 
 const CommandTypeContext = createContext({});
 
 const CommandTypeProvider = ( {children} ) => {
-    const [commandType, setCommandType] = useState(COMMAND_TYPE_ANALOG);
+    const [commandType, setCommandType] = useState(commandTypes.ANALOG);
 
     return (
         <CommandTypeContext.Provider value={{commandType, setCommandType}}>
