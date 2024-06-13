@@ -248,7 +248,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                                 throw new Error(`Unknown frame type: ${parsedFrame.type}`);
                             }
 
-                            data = codec.message[directionNames[direction]].fromBytes(parsedFrame.bytes, {aesKey});
+                            data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
                             data.frame = parsedFrame;
                         } catch ( error ) {
                             parseError = error;
