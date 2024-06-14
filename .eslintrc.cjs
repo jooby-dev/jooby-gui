@@ -17,7 +17,10 @@ module.exports = {
         'airbnb-base',
 
         // https://github.com/import-js/eslint-plugin-import
-        'plugin:import/recommended'
+        'plugin:import/recommended',
+
+        // https://www.npmjs.com/package/eslint-plugin-playwright
+        'plugin:playwright/recommended'
     ],
 
     settings: {

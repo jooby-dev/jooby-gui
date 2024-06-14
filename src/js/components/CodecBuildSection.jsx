@@ -587,6 +587,8 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
                     return compare;
                 })}
+                labelid="select-command-label"
+                id="select-command"
                 getOptionDisabled={option => (preparedCommands.length !== 0 && option.direction !== preparedCommands[0].command.direction)}
                 groupBy={option => option.direction}
                 size="small"
@@ -643,6 +645,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 {editingCommandId === null
                     ? (
                         <Button
+                            id={'addCommand'}
                             disabled={
                                 !command
                                 || (!commandParameters && command.value.hasParameters)
@@ -655,8 +658,8 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     )
                     : (
                         <>
-                            <Button onClick={onSaveEditedCommandClick} disabled={commandParametersError}>Save</Button>
-                            <Button variant="outlined" onClick={onCancelEditingCommandClick}>Cancel</Button>
+                            <Button id={'saveButton'} onClick={onSaveEditedCommandClick} disabled={commandParametersError}>Save</Button>
+                            <Button id={'cancelButton'} variant="outlined" onClick={onCancelEditingCommandClick}>Cancel</Button>
                         </>
                     )
                 }
