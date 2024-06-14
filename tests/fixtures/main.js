@@ -49,4 +49,4 @@ export default Object.freeze({
             text: 'Logs'
         }
     }
-})
+});
