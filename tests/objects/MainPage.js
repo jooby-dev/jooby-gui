@@ -3,9 +3,8 @@ export class MainPage {
         this.page = page;
     }
 
-    async getAllSelectOption ( selectId, codecSelect = false ) {
-        //await this.page.click(selectId);
-        await this.page.getByLabel(selectId).click();
+    async getAllSelectOption ( label, codecSelect = false ) {
+        await this.page.getByLabel(label).click();
 
         const optionElements = await this.page.locator('li[role="option"]').all();
         const options = [];
