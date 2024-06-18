@@ -1,19 +1,19 @@
 import {test, expect} from '@playwright/test';
-import {Main} from '../pageObjects/Main.js';
+import {MainPage} from '../objects/MainPage.js';
 import fixture from '../fixtures/main.js';
 
 
 test.describe('functional test', () => {
-    test('check visibility of elements', async ({page, baseURL}) => {
+    test('check visibility of elements', async ( {page, baseURL} ) => {
         await page.goto(baseURL);
 
-        const $titles = await page.locator(fixture.parseMessages.title.selector).allInnerTexts();
-        const $descriptions = await page.locator(fixture.parseMessages.description.selector).allInnerTexts();
-        const $codecOptions = await new Main(page).getAllSelectOption(fixture.codecType.id, true);
-        const $hardwareOptions = await new Main(page).getAllSelectOption(fixture.hardwareType.id);
-        const $commandsOptions = await new Main(page).getAllSelectOption(fixture.createMessages.select.id);
-        const $parseButton = page.locator(fixture.parseMessages.parseButton);
-        const $addCommandButton = page.locator(fixture.createMessages.addCommandButton);
+        const $titles = await page.locator('h5').allInnerTexts();
+        const $descriptions = await page.locator('p').allInnerTexts();
+        const $codecOptions = await new MainPage(page).getAllSelectOption(fixture.codecType.label, true);
+        const $hardwareOptions = await new MainPage(page).getAllSelectOption(fixture.hardwareType.label);
+        const $commandsOptions = await new MainPage(page).getAllSelectOption(fixture.createMessages.select.label);
+        const $parseButton = page.getByTestId(fixture.parseMessages.parseButton);
+        const $addCommandButton = page.getByTestId(fixture.createMessages.addCommandButton);
 
         expect($titles).toEqual([fixture.parseMessages.title.text, fixture.createMessages.title.text, fixture.logs.title.text]);
         expect($descriptions).toEqual([

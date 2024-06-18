@@ -77,8 +77,6 @@ const CodecPanel = ( {setLogs} ) => {
                                 (itemA, itemB) => itemA.label.localeCompare(itemB.label)
                             )}
                             size="small"
-                            labelid="select-hardware-type-label"
-                            id="select-hardware-type"
                             value={hardwareType}
                             onChange={onHardwareTypeChange}
                             renderInput={params => (
