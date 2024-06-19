@@ -18,5 +18,9 @@ export default defineConfig({
     plugins: [react()],
     esbuild: {
         keepNames: true
+    },
+    server: {
+        open: true,
+        port: 3000
     }
 });

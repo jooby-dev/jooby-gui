@@ -17,7 +17,10 @@ module.exports = {
         'airbnb-base',
 
         // https://github.com/import-js/eslint-plugin-import
-        'plugin:import/recommended'
+        'plugin:import/recommended',
+
+        // https://www.npmjs.com/package/eslint-plugin-playwright
+        'plugin:playwright/recommended'
     ],
 
     settings: {
@@ -49,7 +52,7 @@ module.exports = {
         'no-multiple-empty-lines': ['error', {max: 2, maxEOF: 0, maxBOF: 0}],
         'no-plusplus': 'off',
         'no-shadow': ['error', {builtinGlobals: false, hoist: 'all', allow: ['error']}],
-        'no-unused-expressions': ['error', {allowShortCircuit: true}],
+        'no-unused-expressions': ['error', {allowShortCircuit: true, allowTernary: true}],
         'no-use-before-define': 'off',
         'object-curly-spacing': ['error', 'never'],
         'space-before-function-paren': ['error', {anonymous: 'always', named: 'always'}],

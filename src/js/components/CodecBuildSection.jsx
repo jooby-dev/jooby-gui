@@ -643,6 +643,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 {editingCommandId === null
                     ? (
                         <Button
+                            data-testid={'add-command-button'}
                             disabled={
                                 !command
                                 || (!commandParameters && command.value.hasParameters)
@@ -655,8 +656,8 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     )
                     : (
                         <>
-                            <Button onClick={onSaveEditedCommandClick} disabled={commandParametersError}>Save</Button>
-                            <Button variant="outlined" onClick={onCancelEditingCommandClick}>Cancel</Button>
+                            <Button data-testid={'save-edited-command-button'} onClick={onSaveEditedCommandClick} disabled={commandParametersError}>Save</Button>
+                            <Button data-testid={'cancel-edited-command-button'} variant="outlined" onClick={onCancelEditingCommandClick}>Cancel</Button>
                         </>
                     )
                 }

@@ -493,6 +493,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
 
             <div>
                 <Button
+                    data-testid={'parse-button'}
                     fullWidth={true}
                     sx={{mb: 2}}
                     disabled={!dump || Object.values(parameterErrors).some(error => error)}
