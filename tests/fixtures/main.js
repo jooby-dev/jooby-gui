@@ -26,6 +26,12 @@ export default Object.freeze({
         description: {
             text: 'Batch processing supported, each dump on a new line'
         },
+        directions: {
+            uplink: 'uplink'
+        },
+        dump: {
+            label: 'Dump'
+        },
         parseButton: 'parse-button'
     },
 
@@ -45,6 +51,10 @@ export default Object.freeze({
     logs: {
         title: {
             text: 'Logs'
+        },
+        buttons: {
+            expandLogs: 'Expand logs',
+            deleteLogs: 'Delete logs'
         }
     }
 });
