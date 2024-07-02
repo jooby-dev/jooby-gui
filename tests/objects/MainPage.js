@@ -21,4 +21,8 @@ export class MainPage {
 
         return options;
     }
+
+    parseParameters ( text ) {
+        return JSON.parse(text.join(''));
+    }
 }
