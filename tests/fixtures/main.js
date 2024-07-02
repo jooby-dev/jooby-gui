@@ -26,6 +26,10 @@ export default Object.freeze({
         description: {
             text: 'Batch processing supported, each dump on a new line'
         },
+        format: {
+            hex: 'hex',
+            base64: 'base64'
+        },
         directions: {
             uplink: 'uplink'
         },
