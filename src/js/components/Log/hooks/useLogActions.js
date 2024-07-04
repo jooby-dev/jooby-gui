@@ -35,13 +35,15 @@ const useLogActions = setLogs => {
                     return {
                         ...prevLog,
                         isExpanded: isLogExpanded,
-                        data: {
-                            ...prevLog.data,
-                            commands: prevLog.data.commands.map(command => ({
-                                ...command,
-                                isExpanded: isLogExpanded
-                            }))
-                        }
+                        data: prevLog.data
+                            ? {
+                                ...prevLog.data,
+                                commands: prevLog.data.commands.map(command => ({
+                                    ...command,
+                                    isExpanded: isLogExpanded
+                                }))
+                            }
+                            : undefined
                     };
                 });
 
@@ -61,19 +63,21 @@ const useLogActions = setLogs => {
 
                     return {
                         ...prevLog,
-                        data: {
-                            ...prevLog.data,
-                            commands: prevLog.data.commands.map(command => {
-                                if ( command.id !== nestedLogId ) {
-                                    return command;
-                                }
+                        data: prevLog.data
+                            ? {
+                                ...prevLog.data,
+                                commands: prevLog.data.commands.map(command => {
+                                    if ( command.id !== nestedLogId ) {
+                                        return command;
+                                    }
 
-                                return {
-                                    ...command,
-                                    isExpanded: !command.isExpanded
-                                };
-                            })
-                        }
+                                    return {
+                                        ...command,
+                                        isExpanded: !command.isExpanded
+                                    };
+                                })
+                            }
+                            : undefined
                     };
                 });
 
