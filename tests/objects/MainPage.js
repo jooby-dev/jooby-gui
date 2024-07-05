@@ -22,7 +22,7 @@ export class MainPage {
         return options;
     }
 
-    parseParameters ( text ) {
-        return JSON.parse(text.join(''));
+    parseParameters ( jsonParts ) {
+        return JSON.parse(jsonParts.join(''));
     }
 }
