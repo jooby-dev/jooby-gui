@@ -108,7 +108,7 @@ export const uplinkComplexCommands = {
             lrc: '0xad'
         },
         base64: 'GAIBHWKcAK0=',
-        config: 'IMP4EU',
+        hardwareType: 'IMP4EU',
         commands: {
             currentMc: {
                 name: 'currentMc',
@@ -145,7 +145,7 @@ export const uplinkComplexCommands = {
             lrc: '0x0f'
         },
         base64: 'Fw0u7PEBmTUAAAAAAAAAYrwADw==',
-        config: 'IMP4EU',
+        hardwareType: 'IMP4EU',
         commands: {
             hourMc: {
                 name: 'hourMc',
@@ -193,7 +193,7 @@ export const uplinkComplexCommands = {
             lrc: '0xaf'
         },
         base64: 'CQVOLEHdXhQNAnYMAeI7l4DCGP28Y68=',
-        config: 'IMP4EU',
+        hardwareType: 'IMP4EU',
         commands: {
             time2000: {
                 name: 'time2000',
@@ -236,7 +236,7 @@ export const uplinkComplexCommands = {
             lrc: '0xe0'
         },
         base64: 'HwICAAsaBC+XDAALAOA=',
-        config: 'IMP4EU',
+        hardwareType: 'IMP4EU',
         commands: {
             getLmicInfo: {
                 name: 'getLmicInfo',
@@ -259,7 +259,7 @@ export const uplinkComplexCommands = {
                 }
             },
             getArchiveEvents: {
-                name: 'getArchiveHoursMc',
+                name: 'getArchiveEvents',
                 dump: '0b 00',
                 parameters: {
                     eventList: []
