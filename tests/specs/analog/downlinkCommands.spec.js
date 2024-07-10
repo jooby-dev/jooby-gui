@@ -5,11 +5,13 @@ import {downlinkCommands} from '../../fixtures/analog/commands.js';
 
 
 test.describe('analog downlink commands - create messages', () => {
-    test.beforeEach(async ( {page, baseURL} ) => await page.goto(baseURL));
+    test.beforeEach(async ( {page, baseURL} ) => {
+        await page.goto(baseURL);
+    });
     test.afterEach(async ({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
-        test(`check ${commandKey}`, async ({ page }) => {
+        test(`check ${commandKey}`, async ({page}) => {
             const mainPage = new MainPage(page);
 
             if ( command.hardwareType ) {
@@ -23,9 +25,7 @@ test.describe('analog downlink commands - create messages', () => {
             await mainPage.buildMessage();
             await mainPage.expandLogs();
 
-            await expect(await page.getByText(command.hex.dump, { exact: true })).toBeVisible();
+            await expect(page.getByText(command.hex.dump, {exact: true})).toBeVisible();
         });
     }
-})
-
-
+});

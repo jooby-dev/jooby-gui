@@ -44,13 +44,12 @@ export class MainPage {
         await this.page.getByLabel('Command', {exact: true}).click();
 
         const option = direction === 'downlink'
-            ? await this.page.getByRole('option', {name: command.name, exact: true}).first()
-            : await this.page.getByRole('option', {name: command.name, exact: true}).last();
+            ? this.page.getByRole('option', {name: command.name, exact: true}).first()
+            : this.page.getByRole('option', {name: command.name, exact: true}).last();
 
-       // await option.scrollIntoViewIfNeeded();
         await option.click();
 
-        if (command.parameters) {
+        if ( command.parameters ) {
             const textarea = await this.page.$('textarea.ace_text-input');
             await textarea.fill(JSON.stringify(command.parameters));
         }
@@ -59,7 +58,7 @@ export class MainPage {
     }
 
     async buildMessage () {
-        await this.page.getByRole('button', { name: 'Build message' }).click()
+        await this.page.getByRole('button', {name: 'Build message'}).click();
     }
 
     formatDump ( dump ) {

@@ -81,7 +81,8 @@ test.describe('analog uplink commands - create messages', () => {
 
             await mainPage.buildMessage();
             await mainPage.expandLogs();
-            await expect(await page.getByText(mainPage.formatDump(command.hex.dump))).toBeVisible();
+
+            await expect(page.getByText(mainPage.formatDump(command.hex.dump))).toBeVisible();
         });
     }
 });
