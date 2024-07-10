@@ -1,107 +1,124 @@
-export const uplinkSimpleCommands = {
+export const uplinkCommands = {
     'new event': {
-        name: 'newEvent',
         hex: {
             dump: '1506081e000973cbe1',
-            command: '15 06 08 1e 00 09 73 cb',
             lrc: '0xe1'
         },
         base64: 'FQYIHgAJc8vh',
-        parameters: {
-            id: 8,
-            sequenceNumber: 30,
-            data: {
-                time2000: 619467
+        commands: {
+            newEvent: {
+                name: 'newEvent',
+                dump: '15 06 08 1e 00 09 73 cb',
+                parameters: {
+                    id: 8,
+                    sequenceNumber: 30,
+                    data: {
+                        time2000: 619467
+                    }
+                }
             }
         }
     },
     currentMc: {
-        name: 'currentMc',
         hex: {
             dump: '1805038ab3097b00',
-            command: '18 05 03 8a b3 09 7b',
             lrc: '0x00'
         },
         base64: 'GAUDirMJewA=',
-        parameters: {
-            channelList: [
-                {
-                    value: 153994,
-                    index: 1
-                },
-                {
-                    value: 123,
-                    index: 2
+        commands: {
+            currentMc: {
+                name: 'currentMc',
+                dump: '18 05 03 8a b3 09 7b',
+                parameters: {
+                    channelList: [
+                        {
+                            value: 153994,
+                            index: 1
+                        },
+                        {
+                            value: 123,
+                            index: 2
+                        }
+                    ]
                 }
-            ]
+            }
         }
     },
     getParameter: {
-        name: 'getParameter',
         hex: {
             dump: '04020d035d',
-            command: '04 02 0d 03',
             lrc: '0x5d'
         },
         base64: 'BAINA10=',
-        parameters: {
-            id: 13,
-            data: {
-                value: 3
+        commands: {
+            getParameter: {
+                name: 'getParameter',
+                dump: '04 02 0d 03',
+                parameters: {
+                    id: 13,
+                    data: {
+                        value: 3
+                    }
+                }
             }
         }
     },
     status: {
-        name: 'status',
         hex: {
             dump: '140d02760c01e25b9481e017fdbc634c',
-            command: '14 0d 02 76 0c 01 e2 5b 94 81 e0 17 fd bc 63',
             lrc: '0x4c'
         },
         base64: 'FA0CdgwB4luUgeAX/bxjTA==',
-        parameters: {
-            software: {
-                type: 2,
-                version: 118
-            },
-            hardware: {
-                type: 12,
-                version: 1
-            },
-            data: {
-                batteryVoltage: {
-                    underLowLoad: 3621,
-                    underHighLoad: 2964
-                },
-                batteryInternalResistance: 33248,
-                temperature: 23,
-                remainingBatteryCapacity: 99.6,
-                lastEventSequenceNumber: 188,
-                downlinkQuality: 99
+        commands: {
+            status: {
+                name: 'status',
+                dump: '14 0d 02 76 0c 01 e2 5b 94 81 e0 17 fd bc 63',
+                parameters: {
+                    software: {
+                        type: 2,
+                        version: 118
+                    },
+                    hardware: {
+                        type: 12,
+                        version: 1
+                    },
+                    data: {
+                        batteryVoltage: {
+                            underLowLoad: 3621,
+                            underHighLoad: 2964
+                        },
+                        batteryInternalResistance: 33248,
+                        temperature: 23,
+                        remainingBatteryCapacity: 99.6,
+                        lastEventSequenceNumber: 188,
+                        downlinkQuality: 99
+                    }
+                }
             }
         }
     },
     getBatteryStatus: {
-        name: 'getBatteryStatus',
         hex: {
             dump: '1f050b0de20b9b72fa17fd00000059',
-            command: '1f 05 0b 0d e2 0b 9b 72 fa 17 fd 00 00 00',
             lrc: '0x59'
         },
         base64: 'HwULDeILm3L6F/0AAABZ',
-        parameters: {
-            voltageUnderLowLoad: 57869,
-            voltageUnderHighLoad: 39691,
-            internalResistance: 64114,
-            temperature: 23,
-            remainingCapacity: 253,
-            isLastDayOverconsumption: false,
-            averageDailyOverconsumptionCounter: 0
+        commands: {
+            getBatteryStatus: {
+                name: 'getBatteryStatus',
+                dump: '1f 05 0b 0d e2 0b 9b 72 fa 17 fd 00 00 00',
+                parameters: {
+                    voltageUnderLowLoad: 57869,
+                    voltageUnderHighLoad: 39691,
+                    internalResistance: 64114,
+                    temperature: 23,
+                    remainingCapacity: 253,
+                    isLastDayOverconsumption: false,
+                    averageDailyOverconsumptionCounter: 0
+                }
+            }
         }
-    }
-};
-
-export const uplinkComplexCommands = {
+    },
     'currentMc + lastEvent': {
         hex: {
             dump: '1802011d629c00ad',
@@ -264,6 +281,139 @@ export const uplinkComplexCommands = {
                 parameters: {
                     eventList: []
                 }
+            }
+        }
+    }
+};
+
+export const downlinkCommands = {
+    getCurrent: {
+        hex: {
+            dump: '07 00 52',
+            lrc: '0x52'
+        },
+        commands: {
+            getCurrent: {
+                name: 'getCurrent',
+                dump: '07 00'
+            }
+        }
+    },
+    getStatus: {
+        hex: {
+            dump: '14 00 41',
+            lrc: '0x41'
+        },
+        commands: {
+            getStatus: {
+                name: 'getStatus',
+                dump: '14 00'
+            }
+        }
+    },
+    getTime2000: {
+        hex: {
+            dump: '09 00 5c',
+            lrc: '0x5c'
+        },
+        commands: {
+            getTime2000: {
+                name: 'getTime2000',
+                dump: '09 00'
+            }
+        }
+    },
+    getBatteryStatus: {
+        hex: {
+            dump: '1f 05 00 4f',
+            lrc: '0x4f'
+        },
+        commands: {
+            getBatteryStatus: {
+                name: 'getBatteryStatus',
+                dump: '1f 05 00'
+            }
+        }
+    },
+    getLmicInfo: {
+        hex: {
+            dump: '1f 02 00 48',
+            lrc: '0x48'
+        },
+        commands: {
+            getLmicInfo: {
+                name: 'getLmicInfo',
+                dump: '1f 02 00'
+            }
+        }
+    },
+    'setParameter + getParameter + setParameter': {
+        hex: {
+            dump: '03 02 18 01 04 01 18 03 05 01 00 00 00 06 51',
+            lrc: '0x5e'
+        },
+        commands: {
+            setParameterAbsoluteData: {
+                name: 'setParameter',
+                dump: '03 02 18 01',
+                parameters: {
+                    id: 24,
+                    data: {
+                        state: 1
+                    }
+                }
+            },
+            getParameter: {
+                name: 'getParameter',
+                dump: '04 01 17',
+                parameters: {
+                    id: 24,
+                    data: null
+                }
+            },
+            setParameterInterval: {
+                name: 'setParameter',
+                dump: '03 05 01 00 00 00 06',
+                parameters: {
+                    id: 1,
+                    data: {
+                        state: 3600
+                    }
+                }
+            }
+        }
+    },
+    'getExAbsArchiveHoursMc + getExAbsArchiveDaysMc + getExAbsArchiveCurrentMc': {
+        hex: {
+            dump: '1f 0c 04 2f 97 0c 01 1f 0d 04 2f 98 01 01 1f 0f 00 46',
+            lrc: '0x46'
+        },
+        commands: {
+            getExAbsArchiveHoursMc: {
+                name: 'getExAbsArchiveHoursMc',
+                dump: '1f 0c 04 2f 97 0c 01',
+                parameters: {
+                    channelList: [
+                        1
+                    ],
+                    hours: 1,
+                    startTime2000: 756648000
+                }
+            },
+            getExAbsArchiveDaysMc: {
+                name: 'getExAbsArchiveDaysMc',
+                dump: '1f 0d 04 2f 98 01 01',
+                parameters: {
+                    startTime2000: 756691200,
+                    days: 1,
+                    channelList: [
+                        1
+                    ]
+                }
+            },
+            getExAbsCurrentMc: {
+                name: 'getExAbsCurrentMc',
+                dump: '1f 0f 00'
             }
         }
     }
