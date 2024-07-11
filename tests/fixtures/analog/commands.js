@@ -2,7 +2,7 @@ export const uplinkCommands = {
     'new event': {
         hex: {
             dump: '1506081e000973cbe1',
-            lrc: '0xe1'
+            lrc: 0xe1
         },
         base64: 'FQYIHgAJc8vh',
         commands: {
