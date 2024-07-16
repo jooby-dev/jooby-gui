@@ -128,6 +128,15 @@ module.exports = {
         'no-await-in-loop': 'off',
         'no-continue': 'off',
         'no-bitwise': 'off',
-        'no-restricted-syntax': 'off'
+        'no-restricted-syntax': 'off',
+
+        //tests
+        'playwright/expect-expect': [
+            "error",
+            {
+                "assertFunctionNames": ['validateMtxLoraMessage', 'validateUplinkCommand']
+            }
+        ],
+        'playwright/no-conditional-in-test': 'off'
     }
 };

@@ -2,7 +2,7 @@ export const uplinkCommands = {
     'new event': {
         hex: {
             dump: '1506081e000973cbe1',
-            lrc: 0xe1
+            lrc: '0xe1'
         },
         base64: 'FQYIHgAJc8vh',
         commands: {
@@ -22,7 +22,7 @@ export const uplinkCommands = {
     currentMc: {
         hex: {
             dump: '1805038ab3097b00',
-            lrc: 0x00
+            lrc: '0x00'
         },
         base64: 'GAUDirMJewA=',
         commands: {
@@ -47,7 +47,7 @@ export const uplinkCommands = {
     getParameter: {
         hex: {
             dump: '04020d035d',
-            lrc: 0x5d
+            lrc: '0x5d'
         },
         base64: 'BAINA10=',
         commands: {
@@ -66,7 +66,7 @@ export const uplinkCommands = {
     status: {
         hex: {
             dump: '140d02760c01e25b9481e017fdbc634c',
-            lrc: 0x4c
+            lrc: '0x4c'
         },
         base64: 'FA0CdgwB4luUgeAX/bxjTA==',
         commands: {
@@ -100,7 +100,7 @@ export const uplinkCommands = {
     getBatteryStatus: {
         hex: {
             dump: '1f050b0de20b9b72fa17fd00000059',
-            lrc: 0x59
+            lrc: '0x59'
         },
         base64: 'HwULDeILm3L6F/0AAABZ',
         commands: {
@@ -122,7 +122,7 @@ export const uplinkCommands = {
     'currentMc + lastEvent': {
         hex: {
             dump: '1802011d629c00ad',
-            lrc: 0xad
+            lrc: '0xad'
         },
         base64: 'GAIBHWKcAK0=',
         hardwareType: 'IMP4EU',
@@ -159,7 +159,7 @@ export const uplinkCommands = {
     'hourMc + lastEvent': {
         hex: {
             dump: '170d2eecf10199350000000000000062bc000f',
-            lrc: 0x0f
+            lrc: '0x0f'
         },
         base64: 'Fw0u7PEBmTUAAAAAAAAAYrwADw==',
         hardwareType: 'IMP4EU',
@@ -207,7 +207,7 @@ export const uplinkCommands = {
     'time2000 + status': {
         hex: {
             dump: '09054e2c41dd5e140d02760c01e23b9780c218fdbc63af',
-            lrc: 0xaf
+            lrc: '0xaf'
         },
         base64: 'CQVOLEHdXhQNAnYMAeI7l4DCGP28Y68=',
         hardwareType: 'IMP4EU',
@@ -250,7 +250,7 @@ export const uplinkCommands = {
     'getLmicInfo + getArchiveHoursMc + getArchiveEvents': {
         hex: {
             dump: '1f0202000b1a042f970c000b00e0',
-            lrc: 0xe0
+            lrc: '0xe0'
         },
         base64: 'HwICAAsaBC+XDAALAOA=',
         hardwareType: 'IMP4EU',
@@ -290,7 +290,7 @@ export const downlinkCommands = {
     getCurrent: {
         hex: {
             dump: '07 00 52',
-            lrc: 0x52
+            lrc: '0x52'
         },
         commands: {
             getCurrent: {
@@ -302,7 +302,7 @@ export const downlinkCommands = {
     getStatus: {
         hex: {
             dump: '14 00 41',
-            lrc: 0x41
+            lrc: '0x41'
         },
         commands: {
             getStatus: {
@@ -314,7 +314,7 @@ export const downlinkCommands = {
     getTime2000: {
         hex: {
             dump: '09 00 5c',
-            lrc: 0x5c
+            lrc: '0x5c'
         },
         commands: {
             getTime2000: {
@@ -326,7 +326,7 @@ export const downlinkCommands = {
     getBatteryStatus: {
         hex: {
             dump: '1f 05 00 4f',
-            lrc: 0x4f
+            lrc: '0x4f'
         },
         commands: {
             getBatteryStatus: {
@@ -338,7 +338,7 @@ export const downlinkCommands = {
     getLmicInfo: {
         hex: {
             dump: '1f 02 00 48',
-            lrc: 0x48
+            lrc: '0x48'
         },
         commands: {
             getLmicInfo: {
@@ -350,7 +350,7 @@ export const downlinkCommands = {
     'setParameter + getParameter + setParameter': {
         hex: {
             dump: '03 02 18 01 04 01 18 03 05 01 00 00 00 06 51',
-            lrc: 0x5e
+            lrc: '0x5e'
         },
         commands: {
             setParameterAbsoluteData: {
@@ -386,7 +386,7 @@ export const downlinkCommands = {
     'getExAbsArchiveHoursMc + getExAbsArchiveDaysMc + getExAbsArchiveCurrentMc': {
         hex: {
             dump: '1f 0c 04 2f 97 0c 01 1f 0d 04 2f 98 01 01 1f 0f 00 46',
-            lrc: 0x46
+            lrc: '0x46'
         },
         commands: {
             getExAbsArchiveHoursMc: {

@@ -1,59 +1,99 @@
 export const uplinkCommands = {
     getDateTime: {
         hex: {
-            dump: '1e116d9101101007080015100f060c07180055e2',
-            lrc: 0xe2
+            dump: '1e11e4910010100708013a321003100718005f6a',
+            lrc: '0x6a'
         },
-        base64: 'HhFskQAQEAcIABgOBQcNAQEAU+I=',
+        base64: 'HhHkkQAQEAcIAToyEAMQBxgAX2o=',
         analog: {
             commands: {
                 dataSegment: {
                     name: 'dataSegment',
-                    dump: '1e 11 6c 91 00 10 10 07 08 00 18 0e 05 07 0d 01 01 00 53',
+                    dump: '1e 11 e4 91 00 10 10 07 08 01 3a 32 10 03 10 07 18 00 5f',
                     parameters: {
-                        segmentationSessionId: 109,
+                        segmentationSessionId: 228,
                         segmentIndex: 1,
                         segmentsNumber: 1,
                         isLast: true,
                         data: [
-                            1,
+                            0,
                             16,
                             16,
                             7,
                             8,
-                            0,
-                            21,
+                            1,
+                            58,
+                            50,
                             16,
-                            15,
-                            6,
-                            12,
+                            3,
+                            16,
                             7,
                             24,
                             0,
-                            85
+                            95
                         ]
                     }
                 }
             }
         },
         mtx: {
-            dump: '01 10 10 07 08 00 15 10 0f 06 0c 07 18 00 55',
+            dump: '00 10 10 07 08 01 3a 32 10 03 10 07 18 00 5f',
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
-            lrc: 0x55,
+            lrc: '0x5f',
             commands: {
                 getDateTime: {
                     name: 'getDateTime',
-                    dump: '07 08 00 15 10 0f 06 0c 07 18',
+                    dump: '07 08 01 3a 32 10 03 10 07 18',
                     parameters: {
-                        isSummerTime: false,
-                        seconds: 21,
-                        minutes: 16,
-                        hours: 15,
-                        day: 6,
-                        date: 12,
+                        isSummerTime: true,
+                        seconds: 58,
+                        minutes: 50,
+                        hours: 16,
+                        day: 3,
+                        date: 16,
                         month: 7,
                         year: 24
+                    }
+                }
+            }
+        }
+    }
+};
+
+export const downlinkCommands = {
+    getDateTime: {
+        mtx: {
+            dump: '00 10 10 07 00 00 42',
+            accessLevel: 'UNENCRYPTED (0x00)',
+            messageId: 0,
+            lrc: '0x42',
+            commands: {
+                getDateTime: {
+                    name: 'getDateTime',
+                    dump: '07 00'
+                }
+            }
+        },
+        analog: {
+            commands: {
+                dataSegment: {
+                    name: 'dataSegment',
+                    dump: '1e 09 00 91 00 10 10 07 00 00 42 96',
+                    parameters: {
+                        segmentationSessionId: 0,
+                        segmentIndex: 1,
+                        segmentsNumber: 1,
+                        isLast: true,
+                        data: [
+                            0,
+                            16,
+                            16,
+                            7,
+                            0,
+                            0,
+                            66
+                        ]
                     }
                 }
             }
