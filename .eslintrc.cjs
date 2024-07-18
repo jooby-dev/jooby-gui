@@ -132,9 +132,9 @@ module.exports = {
 
         //tests
         'playwright/expect-expect': [
-            "error",
+            'error',
             {
-                "assertFunctionNames": ['validateMtxLoraMessage', 'validateUplinkCommand']
+                'assertFunctionNames': ['validateMtxLoraMessage', 'validateUplinkCommand']
             }
         ],
         'playwright/no-conditional-in-test': 'off'

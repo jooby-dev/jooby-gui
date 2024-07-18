@@ -12,7 +12,7 @@ const checkMtxMessage = async ( page, command, mtxCommands, counter ) => {
 const checkAnalogMessage = async ( page, analogCommands, counter ) => {
     await expect(page.getByText(analogCommands[counter].dump, {exact: true})).toBeVisible();
     await expect(page.getByRole('link', {name: analogCommands[counter].name, exact: true}).nth(0)).toBeVisible();
-    expect(JSON.parse(await page.getByLabel('json', {exact: true}).innerText()))
+    expect(JSON.parse(await page.getByLabel('json', {exact: true}).nth(counter).innerText()))
         .toStrictEqual(analogCommands[counter].parameters);
 };
 
