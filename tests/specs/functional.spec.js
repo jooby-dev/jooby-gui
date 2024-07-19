@@ -23,7 +23,7 @@ test.describe('functional test', () => {
             fixture.createMessages.description.text
         ]);
 
-        expect($codecOptions).toEqual(fixture.codecType.options);
+        expect($codecOptions).toEqual(Object.values(fixture.codecType.options));
         expect($commandsOptions.length).toEqual(fixture.hardwareType.analog.commands.length);
 
         $commandsOptions.forEach(command => expect(fixture.hardwareType.analog.commands).toContain(command));

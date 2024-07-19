@@ -5,7 +5,7 @@ import {commandTypeConfigMap} from '../../src/js/joobyCodec.js';
 export default Object.freeze({
     codecType: {
         label: 'Codec',
-        options: Object.values(commandTypes)
+        options: commandTypes
     },
 
     hardwareType: {

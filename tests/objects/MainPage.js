@@ -25,6 +25,11 @@ export class MainPage {
         return options;
     }
 
+    async selectCodec ( type ) {
+        await this.page.getByLabel('Codec').click();
+        await this.page.getByText(type).click();
+    }
+
     async selectHardwareType ( type ) {
         await this.page.getByLabel(fixture.hardwareType.label).click();
         await this.page.getByText(type).click();
@@ -50,7 +55,7 @@ export class MainPage {
         await option.click();
 
         if ( command.parameters ) {
-            const textarea = await this.page.$('textarea.ace_text-input');
+            const textarea = this.page.locator('textarea.ace_text-input');
             await textarea.fill(JSON.stringify(command.parameters));
         }
 
