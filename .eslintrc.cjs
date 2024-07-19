@@ -130,7 +130,7 @@ module.exports = {
         'no-bitwise': 'off',
         'no-restricted-syntax': 'off',
 
-        //tests
+        // tests
         'playwright/expect-expect': [
             'error',
             {

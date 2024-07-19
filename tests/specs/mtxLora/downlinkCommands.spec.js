@@ -10,7 +10,8 @@ test.describe('mtxLora downlink commands - create messages', () => {
         await page.goto(baseURL);
         await new MainPage(page).selectCodec(fixture.codecType.options.MTX_LORA);
     });
-    test.afterEach(async ({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+
+    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ({page}) => {

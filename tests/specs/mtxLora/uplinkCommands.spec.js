@@ -11,7 +11,8 @@ test.describe('mtxLora uplink commands - parse hex dumps', () => {
         await new MainPage(page).selectCodec(fixture.codecType.options.MTX_LORA);
         await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
-    test.afterEach(async ({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+
+    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ({page}) => {
@@ -31,14 +32,14 @@ test.describe('mtxLora uplink commands - parse base64 dumps', () => {
         await page.getByLabel(fixture.parseMessages.format.base64).click();
         await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
-    test.afterEach(async ({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+
+    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ({page}) => {
             const mainPage = await new MainPage(page);
 
             await mainPage.parseDump(command.base64);
-
             await validateMtxLoraMessage(page, fixture.parseMessages.format.base64, command, 'uplink');
         });
     }
