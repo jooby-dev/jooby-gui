@@ -14,7 +14,7 @@ test.describe('mtxLora downlink commands - create messages', () => {
     test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
-        test(`check ${commandKey}`, async ({page}) => {
+        test(`check ${commandKey}`, async ( {page} ) => {
             const mainPage = new MainPage(page);
 
             if ( command.hardwareType ) {
@@ -26,7 +26,6 @@ test.describe('mtxLora downlink commands - create messages', () => {
             }
 
             await mainPage.buildMessage();
-
             await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'downlink');
         });
     }
