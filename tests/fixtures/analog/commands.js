@@ -377,7 +377,7 @@ export const downlinkCommands = {
                 parameters: {
                     id: 1,
                     data: {
-                        state: 3600
+                        value: 3600
                     }
                 }
             }
