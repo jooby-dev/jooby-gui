@@ -52,25 +52,25 @@ const LogsPanel = ( {logs, setLogs} ) => {
 
         const updatedLogs = logs.map(log => {
             let nestedLogChanged = false;
+            let updatedCommands;
 
-            const updatedNestedLogs = log.data.commands.map(command => {
-                if ( command.isExpanded !== expand ) {
-                    nestedLogChanged = true;
+            if ( log.data ) {
+                updatedCommands = log.data.commands.map(command => {
+                    if ( command.isExpanded !== expand ) {
+                        nestedLogChanged = true;
 
-                    return {...command, isExpanded: expand};
-                }
+                        return {...command, isExpanded: expand};
+                    }
 
-                return command;
-            });
+                    return command;
+                });
+            }
 
             if ( log.isExpanded !== expand || nestedLogChanged ) {
                 return {
                     ...log,
                     isExpanded: expand,
-                    data: {
-                        ...log.data,
-                        commands: updatedNestedLogs
-                    }
+                    data: log.data ? {...log.data, commands: updatedCommands} : undefined
                 };
             }
 
