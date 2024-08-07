@@ -27,7 +27,7 @@ export class MainPage {
 
     async selectCodec ( type ) {
         await this.page.getByLabel('Codec').click();
-        await this.page.getByText(type).click();
+        await this.page.getByText(type, {exact: true}).click();
     }
 
     async selectHardwareType ( type ) {
@@ -64,6 +64,10 @@ export class MainPage {
 
     async buildMessage () {
         await this.page.getByRole('button', {name: 'Build message'}).click();
+    }
+
+    async buildFrame () {
+        await this.page.getByRole('button', {name: 'Build frame'}).click();
     }
 
     formatDump ( dump ) {
