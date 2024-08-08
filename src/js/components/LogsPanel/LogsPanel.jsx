@@ -84,12 +84,6 @@ const LogsPanel = ( {logs, setLogs} ) => {
         (event, logsData) => {
             event.stopPropagation();
 
-            if ( logsData.length > LOG_COUNT_LIMIT ) {
-                setLogsLimitExceededDialogOpen(true);
-
-                return;
-            }
-
             copyToClipboard(createShareableLogsLink(logsData), {
                 message: 'Logs sharing link copied to clipboard'
             });

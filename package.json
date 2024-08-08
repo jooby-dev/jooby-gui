@@ -33,7 +33,7 @@
         "eslint-plugin-react": "^7.33.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.5",
-        "jooby-codec": "^4.6.0",
+        "jooby-codec": "^4.8.1",
         "lz-string": "^1.5.0",
         "react": "^18.2.0",
         "react-beautiful-dnd": "^13.1.1",

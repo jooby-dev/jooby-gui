@@ -20,7 +20,8 @@ import {
     Share as ShareIcon,
     UnfoldMore as UnfoldMoreIcon,
     UnfoldLess as UnfoldLessIcon,
-    ContentCopy as ContentCopyIcon
+    ContentCopy as ContentCopyIcon,
+    Edit as EditIcon
 } from '@mui/icons-material';
 
 import useCopyToClipboard from '../../hooks/useCopyToClipboard.js';
@@ -37,12 +38,14 @@ import TypographyMono from '../TypographyMono.jsx';
 import {parametersTabViewTypes} from '../../constants/index.js';
 
 import useLogActions from './hooks/useLogActions.js';
+import {useCodecBuildPrefillData} from '../../contexts/CodecBuildPrefillDataContext.jsx';
 
 import getSubLogColor from './utils/getSubLogColor.js';
 import getLogColor from './utils/getLogColor.js';
 import createSubLogTitle from './utils/createSubLogTitle.jsx';
 import createLogTitle from './utils/createLogTitle.jsx';
 import modifyTime2000Properties from './utils/modifyTime2000Properties.js';
+import isLogError from './utils/isLogError.js';
 
 import {JSONTreeTheme} from './constants.js';
 
@@ -77,6 +80,13 @@ const Log = ({
 
     const {toggleLog, toggleLogAndNested, toggleNestedLog, handleDeleteLogClick} = useLogActions(setLogs);
     const copyToClipboard = useCopyToClipboard();
+    const {setPrefillDataFromLog} = useCodecBuildPrefillData();
+
+    const onEditAsNewClick = event => {
+        event.stopPropagation();
+        setPrefillDataFromLog(log);
+    };
+
 
     return (
         <Accordion
@@ -133,6 +143,10 @@ const Log = ({
 
                     <IconButtonWithTooltip title="Collapse log" onClick={event => toggleLogAndNested(event, id, false)}>
                         <UnfoldLessIcon/>
+                    </IconButtonWithTooltip>
+
+                    <IconButtonWithTooltip title="Edit as new" onClick={onEditAsNewClick} disabled={isLogError(log)}>
+                        <EditIcon/>
                     </IconButtonWithTooltip>
 
                     <IconButtonWithTooltip title="Share log" onClick={event => handleShareLogsClick(event, [log])}>
