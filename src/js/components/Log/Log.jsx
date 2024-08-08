@@ -54,16 +54,16 @@ const frameNamesByType = invertObject(frameTypes);
 const accessLevelNames = invertObject(accessLevels);
 
 const renderLrc = lrc => {
-    let {expected, actual} = lrc;
+    let {received, calculated} = lrc;
 
-    actual = isUndefined(actual) ? 'n/a' : getHexFromNumber(actual);
-    expected = isUndefined(expected) ? 'n/a' : getHexFromNumber(expected);
+    calculated = isUndefined(calculated) ? 'n/a' : getHexFromNumber(calculated);
+    received = isUndefined(received) ? 'n/a' : getHexFromNumber(received);
 
-    if ( actual === expected ) {
-        return actual;
+    if ( calculated === received ) {
+        return calculated;
     }
 
-    return `actual: ${actual}, expected: ${expected}`;
+    return `calculated: ${calculated}, received: ${received}`;
 };
 
 
