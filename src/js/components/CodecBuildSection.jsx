@@ -598,6 +598,24 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }));
     };
 
+    const restoreCommandParameters = useCallback(
+        () => {
+            if ( commandExample ) {
+                setCommandParameters(JSON.stringify(commandExample.value.parameters, null, 4));
+
+                setTimeout(
+                    () => {
+                        if ( commandParametersRef.current ) {
+                            commandParametersRef.current.focus();
+                        }
+                    },
+                    0
+                );
+            }
+        },
+        [commandExample]
+    );
+
     return (
         <>
             <Typography variant="h5">
@@ -661,12 +679,10 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         inputRef={commandParametersRef}
                         command={command}
                         onClear={setCommandExample}
-                        onSubmit={
-                            editingCommandId
-                                ? onSaveEditedCommandClick
-                                : onAddToMessageClick
-                        }
+                        onRestore={restoreCommandParameters}
+                        onSubmit={editingCommandId ? onSaveEditedCommandClick : onAddToMessageClick}
                         commandType={commandType}
+                        isExampleSelected={!!commandExample}
                     />
                 </div>
             )}

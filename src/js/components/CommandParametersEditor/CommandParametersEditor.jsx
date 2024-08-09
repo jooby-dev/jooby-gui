@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import {useTheme, Box, FormHelperText, Link, FormControl} from '@mui/material';
 import {
     Clear as ClearIcon,
-    FormatAlignLeft as FormatAlignLeftIcon
+    FormatAlignLeft as FormatAlignLeftIcon,
+    Restore as RestoreIcon
 } from '@mui/icons-material';
 
 import ace from 'ace-builds';
@@ -33,6 +34,8 @@ const CommandParameterEditor = ({
     command,
     onSubmit,
     onClear,
+    onRestore,
+    isExampleSelected,
     commandType
 }) => {
     const editorRef = useRef(null);
@@ -185,6 +188,13 @@ const CommandParameterEditor = ({
                     >
                         <FormatAlignLeftIcon/>
                     </IconButtonWithTooltip>
+                    <IconButtonWithTooltip
+                        title="Restore example"
+                        onClick={onRestore}
+                        disabled={!isExampleSelected}
+                    >
+                        <RestoreIcon/>
+                    </IconButtonWithTooltip>
                 </Box>
             </Box>
             <FormHelperText>
@@ -216,6 +226,8 @@ CommandParameterEditor.propTypes = {
     command: PropTypes.object.isRequired,
     onSubmit: PropTypes.func.isRequired,
     onClear: PropTypes.func.isRequired,
+    onRestore: PropTypes.func.isRequired,
+    isExampleSelected: PropTypes.bool.isRequired,
     commandType: PropTypes.oneOf(Object.values(commandTypes)).isRequired
 };
 
