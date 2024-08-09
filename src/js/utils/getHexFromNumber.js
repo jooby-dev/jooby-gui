@@ -7,5 +7,11 @@ export default ( number, withPrefix = true, withSpace = false ) => {
         hex = hex.match(/.{2}/g).join(' ');
     }
 
-    return withPrefix ? `0x${hex}` : hex;
+    if ( withPrefix ) {
+        hex = withSpace
+            ? hex.split(' ').map(segment => `0x${segment}`).join(' ')
+            : `0x${hex}`;
+    }
+
+    return hex;
 };
