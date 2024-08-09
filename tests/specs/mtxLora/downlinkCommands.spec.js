@@ -9,7 +9,6 @@ test.describe('mtxLora downlink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
         await new MainPage(page).selectCodec(fixture.codecType.options.MTX_LORA);
-        await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
 
     test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
@@ -18,8 +17,8 @@ test.describe('mtxLora downlink commands - parse hex dumps', () => {
         test(`check ${commandKey}`, async ( {page} ) => {
             const mainPage = await new MainPage(page);
 
-            await mainPage.parseDump(command.hex.dump);
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'uplink');
+            await mainPage.parseDump(command.hex.dump, true);
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'parse');
         });
     }
 });
@@ -45,7 +44,7 @@ test.describe('mtxLora downlink commands - create messages', () => {
             }
 
             await mainPage.buildMessage();
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'downlink');
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'build');
         });
     }
 });

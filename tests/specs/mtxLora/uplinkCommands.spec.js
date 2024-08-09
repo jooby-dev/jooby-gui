@@ -18,8 +18,8 @@ test.describe('mtxLora uplink commands - parse hex dumps', () => {
         test(`check ${commandKey}`, async ( {page} ) => {
             const mainPage = await new MainPage(page);
 
-            await mainPage.parseDump(command.hex.dump);
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'uplink');
+            await mainPage.parseDump(command.hex.dump, true);
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'parse');
         });
     }
 });
@@ -38,8 +38,8 @@ test.describe('mtxLora uplink commands - parse base64 dumps', () => {
         test(`check ${commandKey}`, async ( {page} ) => {
             const mainPage = await new MainPage(page);
 
-            await mainPage.parseDump(command.base64);
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.base64, command, 'uplink');
+            await mainPage.parseDump(command.base64, true);
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.base64, command, 'parse');
         });
     }
 });
@@ -64,8 +64,9 @@ test.describe('mtxLora uplink commands - create messages', () => {
                 await mainPage.createMessage(subCommand, 'uplink');
             }
 
+            await mainPage.createMtxLoraMessage(command.mtx.message);
             await mainPage.buildMessage();
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'uplink');
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'build');
         });
     }
 });

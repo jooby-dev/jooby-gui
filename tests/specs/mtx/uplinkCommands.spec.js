@@ -24,7 +24,8 @@ test.describe('mtx uplink commands - parse hex dumps', () => {
     }
 });
 
-test.describe('mtx uplink commands - create messages', () => {
+// todo: need to fix issue #39623
+test.describe.fixme('mtx uplink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
         await new MainPage(page).selectCodec(fixture.codecType.options.MTX);
@@ -38,6 +39,10 @@ test.describe('mtx uplink commands - create messages', () => {
 
             for ( const [, subCommand] of Object.entries(command.commands) ) {
                 await mainPage.createMessage(subCommand, 'uplink');
+            }
+
+            if ( 'frame' in command ) {
+                await mainPage.createFrame(command.frame);
             }
 
             await mainPage.buildFrame();

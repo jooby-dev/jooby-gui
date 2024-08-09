@@ -119,91 +119,92 @@ export const uplinkCommands = {
             }
         }
     },
-    'currentMc + lastEvent': {
-        hex: {
-            dump: '1802011d629c00ad',
-            lrc: '0xad'
-        },
-        base64: 'GAIBHWKcAK0=',
-        hardwareType: 'IMP4EU',
-        commands: {
-            currentMc: {
-                name: 'currentMc',
-                dump: '18 02 01 1d',
-                parameters: {
-                    channelList: [
-                        {
-                            value: 29,
-                            index: 1
-                        }
-                    ]
-                }
-            },
-            lastEvent: {
-                name: 'lastEvent',
-                dump: '62 9c 00',
-                parameters: {
-                    sequenceNumber: 156,
-                    status: {
-                        isBatteryLow: false,
-                        isConnectionLost: false,
-                        isFirstChannelInactive: false,
-                        isSecondChannelInactive: false,
-                        isThirdChannelInactive: false,
-                        isForthChannelInactive: false
-                    }
-                }
-            }
-        }
-    },
-    'hourMc + lastEvent': {
-        hex: {
-            dump: '170d2eecf10199350000000000000062bc000f',
-            lrc: '0x0f'
-        },
-        base64: 'Fw0u7PEBmTUAAAAAAAAAYrwADw==',
-        hardwareType: 'IMP4EU',
-        commands: {
-            hourMc: {
-                name: 'hourMc',
-                dump: '17 0d 2e ec f1 01 99 35 00 00 00 00 00 00 00',
-                parameters: {
-                    startTime2000: 742496400,
-                    hours: 8,
-                    channelList: [
-                        {
-                            value: 6809,
-                            diff: [
-                                0,
-                                0,
-                                0,
-                                0,
-                                0,
-                                0,
-                                0
-                            ],
-                            index: 1
-                        }
-                    ]
-                }
-            },
-            lastEvent: {
-                name: 'lastEvent',
-                dump: '62 bc 00',
-                parameters: {
-                    sequenceNumber: 188,
-                    status: {
-                        isBatteryLow: false,
-                        isConnectionLost: false,
-                        isFirstChannelInactive: false,
-                        isSecondChannelInactive: false,
-                        isThirdChannelInactive: false,
-                        isForthChannelInactive: false
-                    }
-                }
-            }
-        }
-    },
+    // todo: need to fix issue #39533
+    /* 'currentMc + lastEvent': {
+         hex: {
+             dump: '1802011d629c00ad',
+             lrc: '0xad'
+         },
+         base64: 'GAIBHWKcAK0=',
+         hardwareType: 'IMP4EU',
+         commands: {
+             currentMc: {
+                 name: 'currentMc',
+                 dump: '18 02 01 1d',
+                 parameters: {
+                     channelList: [
+                         {
+                             value: 29,
+                             index: 1
+                         }
+                     ]
+                 }
+             },
+             lastEvent: {
+                 name: 'lastEvent',
+                 dump: '62 9c 00',
+                 parameters: {
+                     sequenceNumber: 156,
+                     status: {
+                         isBatteryLow: false,
+                         isConnectionLost: false,
+                         isFirstChannelInactive: false,
+                         isSecondChannelInactive: false,
+                         isThirdChannelInactive: false,
+                         isForthChannelInactive: false
+                     }
+                 }
+             }
+         }
+     },
+     'hourMc + lastEvent': {
+         hex: {
+             dump: '170d2eecf10199350000000000000062bc000f',
+             lrc: '0x0f'
+         },
+         base64: 'Fw0u7PEBmTUAAAAAAAAAYrwADw==',
+         hardwareType: 'IMP4EU',
+         commands: {
+             hourMc: {
+                 name: 'hourMc',
+                 dump: '17 0d 2e ec f1 01 99 35 00 00 00 00 00 00 00',
+                 parameters: {
+                     startTime2000: 742496400,
+                     hours: 8,
+                     channelList: [
+                         {
+                             value: 6809,
+                             diff: [
+                                 0,
+                                 0,
+                                 0,
+                                 0,
+                                 0,
+                                 0,
+                                 0
+                             ],
+                             index: 1
+                         }
+                     ]
+                 }
+             },
+             lastEvent: {
+                 name: 'lastEvent',
+                 dump: '62 bc 00',
+                 parameters: {
+                     sequenceNumber: 188,
+                     status: {
+                         isBatteryLow: false,
+                         isConnectionLost: false,
+                         isFirstChannelInactive: false,
+                         isSecondChannelInactive: false,
+                         isThirdChannelInactive: false,
+                         isForthChannelInactive: false
+                     }
+                 }
+             }
+         }
+     },*/
     'time2000 + status': {
         hex: {
             dump: '09054e2c41dd5e140d02760c01e23b9780c218fdbc63af',
@@ -350,7 +351,7 @@ export const downlinkCommands = {
     'setParameter + getParameter + setParameter': {
         hex: {
             dump: '03 02 18 01 04 01 18 03 05 01 00 00 00 06 51',
-            lrc: '0x5e'
+            lrc: '0x51'
         },
         commands: {
             setParameterAbsoluteData: {

@@ -9,6 +9,12 @@ export const uplinkCommands = {
             messageId: '7',
             lrc: '0x69'
         },
+        frame: {
+            accessLevel: 'Read only',
+            dstAddress: '0xfffe',
+            srcAddress: '0x1575',
+            messageId: '7'
+        },
         commands: {
             getCurrentStatusMeter: {
                 name: 'getCurrentStatusMeter',
@@ -75,6 +81,9 @@ export const downlinkCommands = {
             srcAddress: '0xfffe',
             messageId: '0',
             lrc: '0x42'
+        },
+        frame: {
+            accessLevel: 'Read only'
         },
         commands: {
             getDateTime: {
