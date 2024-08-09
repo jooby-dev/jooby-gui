@@ -32,6 +32,7 @@ const CommandParameterEditor = ({
     inputRef,
     command,
     onSubmit,
+    onClear,
     commandType
 }) => {
     const editorRef = useRef(null);
@@ -161,6 +162,7 @@ const CommandParameterEditor = ({
         if ( inputRef && inputRef.current ) {
             inputRef.current.setValue('', -1);
             inputRef.current.focus();
+            onClear(null);
         }
     };
 
@@ -213,6 +215,7 @@ CommandParameterEditor.propTypes = {
     inputRef: PropTypes.object.isRequired,
     command: PropTypes.object.isRequired,
     onSubmit: PropTypes.func.isRequired,
+    onClear: PropTypes.func.isRequired,
     commandType: PropTypes.oneOf(Object.values(commandTypes)).isRequired
 };
 
