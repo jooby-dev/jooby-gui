@@ -6,3 +6,4 @@ export * as directions from './directions.js';
 export {directionNames} from './directionNames.js';
 export * as unknownCommand from './unknownCommand.js';
 export * as accessKey from './accessKey.js';
+export {default as codecBuildDefaults} from './codecBuildDefaults.js';

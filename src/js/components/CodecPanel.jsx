@@ -1,4 +1,4 @@
-import {useState, useEffect, useContext} from 'react';
+import {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {
     Autocomplete,
@@ -11,7 +11,8 @@ import {
     Link
 } from '@mui/material';
 
-import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
+import {useCommandType} from '../contexts/CommandTypeContext.jsx';
+import {useCodecBuildPrefillData} from '../contexts/CodecBuildPrefillDataContext.jsx';
 
 import CodecBuildSection from './CodecBuildSection.jsx';
 import CodecParseSection from './CodecParseSection.jsx';
@@ -23,24 +24,28 @@ import hasHardwareTypeInCommandType from '../utils/hasHardwareTypeInCommandType.
 
 
 const CodecPanel = ( {setLogs} ) => {
-    const {commandType, setCommandType} = useContext(CommandTypeContext);
+    const {prefillData} = useCodecBuildPrefillData();
+    const {commandType, setCommandType} = useCommandType();
     const [hardwareType, setHardwareType] = useState(null);
-
-    // reset state when command type changes
-    useEffect(
-        () => {
-            setHardwareType(null);
-        },
-        [commandType]
-    );
 
     const onCommandTypeChange = event => {
         setCommandType(event.target.value);
+        setHardwareType(null);
     };
 
     const onHardwareTypeChange = ( event, newValue ) => {
         setHardwareType(newValue);
     };
+
+    useEffect(
+        () => {
+            if ( prefillData ) {
+                setCommandType(prefillData.commandType);
+                setHardwareType(prefillData.hardwareType);
+            }
+        },
+        [prefillData, setCommandType]
+    );
 
     return (
         <Box sx={{display: 'flex', flex: '0 0 auto'}}>

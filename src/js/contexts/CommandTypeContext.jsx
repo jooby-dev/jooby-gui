@@ -1,11 +1,14 @@
-import {createContext, useState} from 'react';
+import {createContext, useState, useContext} from 'react';
 import PropTypes from 'prop-types';
 import {commandTypes} from '../constants/index.js';
 
 
 const CommandTypeContext = createContext({});
 
-const CommandTypeProvider = ( {children} ) => {
+
+export const useCommandType = () => useContext(CommandTypeContext);
+
+export const CommandTypeProvider = ( {children} ) => {
     const [commandType, setCommandType] = useState(commandTypes.ANALOG);
 
     return (
@@ -18,6 +21,3 @@ const CommandTypeProvider = ( {children} ) => {
 CommandTypeProvider.propTypes = {
     children: PropTypes.node.isRequired
 };
-
-
-export {CommandTypeProvider, CommandTypeContext};

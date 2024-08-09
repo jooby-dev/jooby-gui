@@ -8,9 +8,12 @@ import {severityTypes} from '../constants/index.js';
 
 const DEFAULT_SNACKBAR_DURATION = 3000;
 
-const SnackbarContext = createContext(() => { });
+const SnackbarContext = createContext(() => {});
 
-const SnackbarProvider = ( {children} ) => {
+
+export const useSnackbar = () => useContext(SnackbarContext);
+
+export const SnackbarProvider = ( {children} ) => {
     const [snackbar, setSnackbar] = useState(null);
 
     const showSnackbar = useCallback(
@@ -54,8 +57,3 @@ const SnackbarProvider = ( {children} ) => {
 SnackbarProvider.propTypes = {
     children: PropTypes.node.isRequired
 };
-
-const useSnackbar = () => useContext(SnackbarContext);
-
-
-export {SnackbarProvider, useSnackbar};

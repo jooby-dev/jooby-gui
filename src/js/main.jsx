@@ -5,6 +5,7 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 
 import {SnackbarProvider} from './contexts/SnackbarContext.jsx';
 import {CommandTypeProvider} from './contexts/CommandTypeContext.jsx';
+import {CodecBuildPrefillDataProvider} from './contexts/CodecBuildPrefillDataContext.jsx';
 import App from './components/App.jsx';
 import '../sass/main.scss';
 
@@ -37,7 +38,9 @@ createRoot(document.getElementById('root')).render(
             <CssBaseline/>
             <SnackbarProvider>
                 <CommandTypeProvider>
-                    <App/>
+                    <CodecBuildPrefillDataProvider>
+                        <App/>
+                    </CodecBuildPrefillDataProvider>
                 </CommandTypeProvider>
             </SnackbarProvider>
         </ThemeProvider>
