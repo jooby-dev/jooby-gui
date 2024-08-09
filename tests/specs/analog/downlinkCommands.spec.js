@@ -4,7 +4,7 @@ import fixture from '../../fixtures/main.js';
 import {downlinkCommands} from '../../fixtures/analog/commands.js';
 
 
-test.describe('analog uplink commands - parse hex dumps', () => {
+test.describe('analog downlink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
     });
