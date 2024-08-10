@@ -14,18 +14,16 @@ import {
     Share as ShareIcon,
     UnfoldMore as UnfoldMoreIcon,
     UnfoldLess as UnfoldLessIcon,
-    ContentCopy as ContentCopyIcon,
     Edit as EditIcon
 } from '@mui/icons-material';
-
-import useCopyToClipboard from '../hooks/useCopyToClipboard.js';
 
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 import HighlightedText from './HighlightedText.jsx';
 import TypographyBold from './TypographyBold.jsx';
-import TypographyMono from './TypographyMono.jsx';
 
 import useLogActions from './Log/hooks/useLogActions.js';
+
+import HexDisplay from './HexDisplay.jsx';
 
 import getLogColor from './Log/utils/getLogColor.js';
 import createLogTitle from './Log/utils/createLogTitle.jsx';
@@ -35,7 +33,6 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
     const {hex, date, error, id, isExpanded} = log;
 
     const {toggleLog, toggleLogAndNested, handleDeleteLogClick} = useLogActions(setLogs);
-    const copyToClipboard = useCopyToClipboard();
 
     return (
         <Accordion
@@ -108,19 +105,10 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
                     }}>
                         {hex && (
                             <>
-                                <TypographyBold>
-                                    {'dump '}
-                                    <IconButtonWithTooltip
-                                        title="Copy dump"
-                                        onClick={() => copyToClipboard(
-                                            hex,
-                                            {message: 'Message dump copied to clipboard'}
-                                        )}
-                                    >
-                                        <ContentCopyIcon/>
-                                    </IconButtonWithTooltip>
-                                </TypographyBold>
-                                <TypographyMono>{hex}</TypographyMono>
+                                <TypographyBold>dump</TypographyBold>
+                                <Box>
+                                    <HexDisplay hex={hex}/>
+                                </Box>
                             </>
                         )}
                         <TypographyBold>error</TypographyBold>

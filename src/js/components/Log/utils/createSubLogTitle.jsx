@@ -6,6 +6,7 @@ import getHexFromNumber from '../../../utils/getHexFromNumber.js';
 import removeQuotes from '../../../utils/removeQuotes.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
+import HexDisplay from '../../HexDisplay.jsx';
 
 import {unknownCommand} from '../../../constants/index.js';
 
@@ -20,7 +21,8 @@ const createSubLogTitle = ( logCommand, commandType ) => (
                         ? (
                             <>
                                 {'id: '}
-                                <HighlightedText isMonospacedFont={true}>{getHexFromNumber(logCommand.command.id)}</HighlightedText>
+                                <HexDisplay hex={getHexFromNumber(logCommand.command.id)}/>
+                                <HighlightedText isMonospacedFont={true}>({logCommand.command.id})</HighlightedText>
                                 {'; '}
                             </>
                         )
