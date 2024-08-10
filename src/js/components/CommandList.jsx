@@ -58,6 +58,12 @@ const CommandList = ({
     const onDelete = index => {
         const newPreparedCommands = commands.filter(preparedCommand => preparedCommand.id !== index);
 
+        if ( editingId === index ) {
+            setCommandParameters('');
+            setEditingId(null);
+            onChange(null, null);
+        }
+
         setCommands(newPreparedCommands);
     };
 
@@ -158,7 +164,6 @@ const CommandList = ({
                                             <IconButtonWithTooltip
                                                 title="Delete command from message"
                                                 onClick={() => onDelete(command.id)}
-                                                disabled={editingId === command.id}
                                                 sx={{marginRight: 0}}
                                             >
                                                 <DeleteIcon/>
