@@ -1,22 +1,20 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useEffect, useCallback} from 'react';
 import PropTypes from 'prop-types';
 
 import {
     Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
     Typography
 } from '@mui/material';
+
+import {styled} from '@mui/material/styles';
 
 import {
     UnfoldMore as UnfoldMoreIcon,
     UnfoldLess as UnfoldLessIcon,
     Delete as DeleteIcon,
-    Share as ShareIcon
+    Share as ShareIcon,
+    FileDownload as FileDownloadIcon,
+    FileUpload as FileUploadIcon
 } from '@mui/icons-material';
 
 import useCopyToClipboard from '../../hooks/useCopyToClipboard.js';
@@ -28,12 +26,20 @@ import createShareableLogsLink from './utils/createShareableLogsLink.js';
 import extractLogsFromUrl from './utils/extractLogsFromUrl.js';
 
 
-const LOG_COUNT_LIMIT = 30;
+const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1
+});
 
 
 const LogsPanel = ( {logs, setLogs} ) => {
-    const [logsLimitExceededDialogOpen, setLogsLimitExceededDialogOpen] = useState(false);
-
     const copyToClipboard = useCopyToClipboard();
 
     useEffect(
@@ -91,8 +97,39 @@ const LogsPanel = ( {logs, setLogs} ) => {
         [copyToClipboard]
     );
 
-    const handleLogsLimitExceededDialogClose = () => {
-        setLogsLimitExceededDialogOpen(false);
+    const handleExportLogs = () => {
+        const now = new Date();
+        const formattedDate = now.toISOString().replace(/[:.]/g, '-');
+        const fileName = `logs-${formattedDate}.json`;
+
+        const blob = new Blob([JSON.stringify(logs, null, 4)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleImportLogs = event => {
+        const file = event.target.files[0];
+
+        if ( file ) {
+            const reader = new FileReader();
+
+            reader.onload = readerEvent => {
+                try {
+                    const importedLogs = JSON.parse(readerEvent.target.result);
+
+                    setLogs(importedLogs);
+                } catch ( error ) {
+                    console.error('Error importing logs:', error);
+                }
+            };
+
+            reader.readAsText(file);
+        }
     };
 
     return (
@@ -154,19 +191,21 @@ const LogsPanel = ( {logs, setLogs} ) => {
                     <DeleteIcon/>
                 </IconButtonWithTooltip>
 
-                <Dialog
-                    open={logsLimitExceededDialogOpen}
-                    onClose={handleLogsLimitExceededDialogClose}
-                    aria-labelledby="logs-limit-exceeded-dialog-title"
+                <IconButtonWithTooltip
+                    title="Export logs"
+                    onClick={handleExportLogs}
+                    disabled={!logs.length}
                 >
-                    <DialogTitle id="logs-limit-exceeded-dialog-title">Logs limit exceeded</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>{`You can only share up to ${LOG_COUNT_LIMIT} logs.`}</DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleLogsLimitExceededDialogClose}>Close</Button>
-                    </DialogActions>
-                </Dialog>
+                    <FileDownloadIcon/>
+                </IconButtonWithTooltip>
+
+                <IconButtonWithTooltip
+                    title="Import logs"
+                    component="label"
+                >
+                    <FileUploadIcon/>
+                    <VisuallyHiddenInput type="file" accept=".json" onChange={handleImportLogs}/>
+                </IconButtonWithTooltip>
             </Box>
 
             <LogList
