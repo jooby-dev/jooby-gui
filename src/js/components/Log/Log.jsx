@@ -179,8 +179,7 @@ const Log = ({
                         gridTemplateColumns: 'max-content 1fr',
                         alignItems: 'center',
                         columnGap: 2,
-                        rowGap: 1,
-                        mb: 1
+                        rowGap: 1
                     }}>
                         {hex && (
                             <>
@@ -248,11 +247,12 @@ const Log = ({
                                 <HighlightedText fontWeight="normal" isMonospacedFont={true} color="error.main">{data.error}</HighlightedText>
                             </>
                         )}
+
+                        {data.commands.length > 0 && <TypographyBold>commands</TypographyBold>}
                     </Box>
 
                     {data.commands.length > 0 && (
                         <>
-                            <TypographyBold gutterBottom>commands</TypographyBold>
                             {data.commands.map(commandData => {
                                 const {command} = commandData;
 
@@ -291,8 +291,7 @@ const Log = ({
                                                 gridTemplateColumns: 'max-content 1fr',
                                                 alignItems: 'center',
                                                 columnGap: 2,
-                                                rowGap: 1,
-                                                mb: 1
+                                                rowGap: 1
                                             }}>
                                                 {command.hex && (
                                                     <>
@@ -311,7 +310,7 @@ const Log = ({
                                                     </>
                                                 )}
                                                 {command.parameters && command.hasParameters && (
-                                                    <TypographyBold gutterBottom>
+                                                    <TypographyBold>
                                                         {'parameters '}
                                                         <IconButtonWithTooltip
                                                             title="Copy parameters in JSON format"
