@@ -91,13 +91,23 @@ const Log = ({
         setPrefillDataFromLog(log);
     };
 
+    const onLogToggle = event => {
+        if ( event.ctrlKey ) {
+            toggleLogAndNested(event, id, !isExpanded);
+
+            return;
+        }
+
+        toggleLog(id);
+    };
+
 
     return (
         <Accordion
             sx={{overflow: 'hidden', '& > *': {minWidth: 0}}}
             key={id}
             expanded={isExpanded}
-            onChange={() => toggleLog(id)}
+            onChange={onLogToggle}
         >
             <AccordionSummary
                 content="div"
