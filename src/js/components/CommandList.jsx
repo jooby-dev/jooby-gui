@@ -13,6 +13,8 @@ import {
     Edit as EditIcon
 } from '@mui/icons-material';
 
+import setFocus from '../utils/setFocus.js';
+
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 import HighlightedText from './HighlightedText.jsx';
 
@@ -74,14 +76,7 @@ const CommandList = ({
             onChange(null, commandToEdit.command);
             setCommandParameters(commandToEdit.parameters);
             setEditingId(index);
-            setTimeout(
-                () => {
-                    if ( commandParametersRef.current ) {
-                        commandParametersRef.current.focus();
-                    }
-                },
-                0
-            );
+            setFocus(commandParametersRef);
         }
     };
 

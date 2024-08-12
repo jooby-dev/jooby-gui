@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 
 import createDirectionIcon from '../utils/createDirectionIcon.jsx';
+import setFocus from '../utils/setFocus.js';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
 import {useCommandType} from '../contexts/CommandTypeContext.jsx';
@@ -310,15 +311,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }
 
         resolveCommandParametersAndHardwareType(command, newValue);
-
-        setTimeout(
-            () => {
-                if ( commandParametersRef.current ) {
-                    commandParametersRef.current.focus();
-                }
-            },
-            0
-        );
+        setFocus(commandParametersRef);
     };
 
     const onCommandChange = ( event, newValue ) => {
@@ -344,14 +337,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             setCommandExample(null);
         }
 
-        setTimeout(
-            () => {
-                if ( commandParametersRef.current ) {
-                    commandParametersRef.current.focus();
-                }
-            },
-            0
-        );
+        setFocus(commandParametersRef);
     };
 
     const onBuildClick = () => {
@@ -602,15 +588,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         () => {
             if ( commandExample ) {
                 setCommandParameters(JSON.stringify(commandExample.value.parameters, null, 4));
-
-                setTimeout(
-                    () => {
-                        if ( commandParametersRef.current ) {
-                            commandParametersRef.current.focus();
-                        }
-                    },
-                    0
-                );
+                setFocus(commandParametersRef);
             }
         },
         [commandExample]
