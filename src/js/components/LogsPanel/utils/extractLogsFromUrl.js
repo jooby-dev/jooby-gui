@@ -1,9 +1,14 @@
 import * as lzString from 'lz-string';
 
 
+const HASH_START_INDEX = 1;
+const LOGS_PARAM = 'logs';
+
+
 export default () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const logsData = urlParams.get('logs');
+    const hash = window.location.hash.substring(HASH_START_INDEX);
+    const urlParams = new URLSearchParams(hash);
+    const logsData = urlParams.get(LOGS_PARAM);
 
     if ( logsData ) {
         try {

@@ -1,13 +1,14 @@
 import {Fragment} from 'react';
-import * as joobyCodec from 'jooby-codec';
 import {Box, Collapse, Tooltip} from '@mui/material';
 import {Close as CloseIcon} from '@mui/icons-material';
 
 import createDirectionIcon from '../../../utils/createDirectionIcon.jsx';
 import removeQuotes from '../../../utils/removeQuotes.js';
+import resolveCommandType from '../../../utils/resolveCommandType.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
+import {commandTypeConfigMap} from '../../../joobyCodec.js';
 import {logTypes} from '../../../constants/index.js';
 
 
@@ -16,12 +17,15 @@ const renderHardwareType = ( hardwareType, commandType ) => {
         return null;
     }
 
+    const {hardwareTypeList} = commandTypeConfigMap[resolveCommandType(commandType)];
+    const hardwareTypeName = hardwareTypeList.find(({value}) => value === hardwareType).label;
+
     return (
         <>
             {'hardware type: '}
-            <Tooltip title={`ID: ${joobyCodec[commandType].constants.hardwareTypes[hardwareType]}`}>
+            <Tooltip title={`ID: ${hardwareType}`}>
                 <Box component="span">
-                    <HighlightedText fontWeight="normal">{hardwareType}</HighlightedText>
+                    <HighlightedText fontWeight="normal">{hardwareTypeName}</HighlightedText>
                 </Box>
             </Tooltip>
         </>

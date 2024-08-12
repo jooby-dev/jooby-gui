@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef, useCallback, useContext} from 'react';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
 import * as frame from 'jooby-codec/mtx/utils/frame.js';
@@ -21,7 +21,8 @@ import {
 import createDirectionIcon from '../utils/createDirectionIcon.jsx';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
-import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
+import {useCommandType} from '../contexts/CommandTypeContext.jsx';
+import {useCodecBuildPrefillData} from '../contexts/CodecBuildPrefillDataContext.jsx';
 
 import CommandParametersEditor from './CommandParametersEditor/CommandParametersEditor.jsx';
 import Button from './Button.jsx';
@@ -34,24 +35,24 @@ import {
     directions,
     severityTypes,
     commandTypes,
-    accessKey
+    accessKey,
+    codecBuildDefaults
 } from '../constants/index.js';
 
-import getHardwareType from '../utils/getHardwareType.js';
-import getHardwareTypeName from '../utils/getHardwareTypeName.js';
 import isValidHex from '../utils/isValidHex.js';
 import isValidNumber from '../utils/isValidNumber.js';
 import cleanHexString from '../utils/cleanHexString.js';
 import getLogType from '../utils/getLogType.js';
 import isByteArray from '../utils/isByteArray.js';
+import resolveCommandType from '../utils/resolveCommandType.js';
 
-
-const resolveCommandType = commandType => (commandType === commandTypes.MTX_LORA ? commandTypes.MTX : commandType);
 
 const resolveParameters = ( parameters, commandType ) => {
     const resolvedParameters = {
         accessLevel: parameters.accessLevel,
-        messageId: parameters.messageId
+        messageId: parameters.messageId,
+        accessKey: parameters.accessKey,
+        segmentationSessionId: parameters.segmentationSessionId
     };
 
     if ( commandType === commandTypes.MTX_LORA ) {
@@ -90,7 +91,8 @@ const processDataAndCreateLog = ({
     hardwareType,
     frameType,
     buildError,
-    logType
+    logType,
+    isMtxLora
 }) => {
     if ( data ) {
         data.commands = data.commands.map(commandData => {
@@ -115,7 +117,9 @@ const processDataAndCreateLog = ({
 
     const log = {
         commandType,
-        hardwareType: getHardwareTypeName(hardwareType),
+        hardwareType,
+        directionName,
+        isMtxLora,
         hex: !buildError && isByteArray(bytes) ? joobyCodec.utils.getHexFromBytes(bytes) : undefined,
         data: buildError ? undefined : data,
         date: new Date().toLocaleString(),
@@ -137,6 +141,8 @@ const processDataAndCreateLog = ({
 
         log.messageParameters = {
             accessLevel: Number(parameters.accessLevel),
+            accessKey: parameters.accessKey,
+            segmentationSessionId: Number(parameters.segmentationSessionId),
             messageId: Number(parameters.messageId)
         };
     }
@@ -160,24 +166,6 @@ const DESTINATION_ADDRESS_MAX_VALUE = 0xffff;
 const BYTE_RANGE_LIMIT = 256;
 const MAX_SEGMENT_SIZE = 40;
 
-const defaults = {
-    source: 'ff fe',
-    destination: 'ff ff',
-    accessLevel: accessLevels.UNENCRYPTED,
-    accessKey: accessKey.DEFAULT_HEX,
-    messageId: 0,
-    segmentationSessionId: 0
-};
-
-const parametersState = {
-    source: defaults.source,
-    destination: defaults.destination,
-    accessLevel: defaults.accessLevel,
-    accessKey: defaults.accessKey,
-    messageId: defaults.messageId,
-    segmentationSessionId: defaults.segmentationSessionId
-};
-
 const parameterErrorsState = {
     source: false,
     destination: false,
@@ -188,7 +176,8 @@ const parameterErrorsState = {
 
 
 const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
-    const {commandType} = useContext(CommandTypeContext);
+    const {commandType} = useCommandType();
+    const {prefillData} = useCodecBuildPrefillData();
 
     const [commandList, setCommandList] = useState(
         commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList
@@ -201,7 +190,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     const [commandParametersError, setCommandParametersError] = useState(false);
     const [editingCommandId, setEditingCommandId] = useState(null);
     const [recentlyEditedCommandId, setRecentlyEditedCommandId] = useState(null);
-    const [parameters, setParameters] = useState({...parametersState});
+    const [parameters, setParameters] = useState({...codecBuildDefaults});
     const [parameterErrors, setParameterErrors] = useState({...parameterErrorsState});
 
     const commandParametersRef = useRef(null);
@@ -218,10 +207,28 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             setCommandExample(null);
             setCommandExampleList([]);
             setPreparedCommands([]);
-            setParameters({...parametersState});
+            setParameters({...codecBuildDefaults});
             setParameterErrors({...parameterErrorsState});
         },
         [commandType]
+    );
+
+    // prefill data from log
+    useEffect(
+        () => {
+            if ( prefillData ) {
+                // use setTimeout to ensure state reset completes before pre-filling the form
+                setTimeout(
+                    () => {
+                        setPreparedCommands(prefillData.preparedCommands);
+                        setParameters(prefillData.parameters);
+                        onCommandChange(null, null);
+                    },
+                    0
+                );
+            }
+        },
+        [prefillData]
     );
 
     const onParametersChange = useCallback(
@@ -329,6 +336,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
     const onBuildClick = () => {
         const resolvedCommandType = resolveCommandType(commandType);
+        const isMtxLora = commandType === commandTypes.MTX_LORA;
         const newLogs = [];
         let data;
         let messageBytes;
@@ -351,7 +359,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     id: preparedCommand.command.value.id,
                     parameters: currentCommandParameters,
                     config: {
-                        hardwareType: getHardwareType(hardwareType)
+                        hardwareType: hardwareType?.value
                     }
                 };
             });
@@ -373,7 +381,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             data = joobyCodec[resolvedCommandType].message[directionName].fromBytes(
                 messageBytes,
                 {
-                    hardwareType: getHardwareType(hardwareType),
+                    hardwareType: hardwareType?.value,
                     aesKey: joobyCodec.utils.getBytesFromHex(parameters.accessKey)
                 }
 
@@ -402,9 +410,10 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 data,
                 bytes,
                 directionName,
-                hardwareType,
                 frameType,
                 buildError,
+                isMtxLora,
+                hardwareType: hardwareType?.value,
                 commandType: resolvedCommandType,
                 parameters: resolveParameters(parameters, commandType),
                 logType: getLogType(commandType, buildError)
@@ -433,6 +442,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         frameType,
                         buildError,
                         bytes,
+                        isMtxLora,
                         data: undefined,
                         commandType: commandTypes.ANALOG,
                         hardwareType: hardwareTypes.MTXLORA,
@@ -466,6 +476,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                             directionName,
                             frameType,
                             buildError,
+                            isMtxLora,
                             bytes: messageBytes,
                             commandType: commandTypes.ANALOG,
                             hardwareType: hardwareTypes.MTXLORA,
@@ -531,10 +542,10 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     const onControlBlur = event => {
         const {name, value} = event.target;
 
-        if ( value.trim() === '' && name in defaults ) {
+        if ( value.trim() === '' && name in codecBuildDefaults ) {
             setParameters(prevParameters => ({
                 ...prevParameters,
-                [name]: defaults[name]
+                [name]: codecBuildDefaults[name]
             }));
 
             setParameterErrors(prevParameterErrors => ({
@@ -543,7 +554,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             }));
 
             showSnackbar({
-                message: `"${name}" set to default of "${defaults[name]}".`,
+                message: `"${name}" set to default of "${codecBuildDefaults[name]}".`,
                 severity: severityTypes.WARNING
             });
 
