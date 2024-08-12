@@ -11,7 +11,7 @@ test.describe('obisObserver downlink commands - parse hex dumps', () => {
         await new MainPage(page).selectCodec(fixture.codecType.options.OBIS_OBSERVER);
     });
 
-    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -30,7 +30,7 @@ test.describe('obisObserver downlink commands - create messages', () => {
         await new MainPage(page).selectCodec(fixture.codecType.options.OBIS_OBSERVER);
     });
 
-    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {

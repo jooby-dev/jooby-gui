@@ -9,7 +9,7 @@ test.describe('analog downlink commands - parse hex dumps', () => {
         await page.goto(baseURL);
     });
 
-    test.afterEach(async ({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -28,7 +28,7 @@ test.describe('analog downlink commands - create messages', () => {
         await page.goto(baseURL);
     });
 
-    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
