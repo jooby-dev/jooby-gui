@@ -1,4 +1,4 @@
-import {useState, useEffect, useContext} from 'react';
+import {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
 import * as frame from 'jooby-codec/mtx/utils/frame.js';
@@ -24,7 +24,7 @@ import {
 import removeComments from '../utils/removeComments.js';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
-import {CommandTypeContext} from '../contexts/CommandTypeContext.jsx';
+import {useCommandType} from '../contexts/CommandTypeContext.jsx';
 
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 import TextField from './TextField.jsx';
@@ -41,8 +41,6 @@ import {
     logTypes
 } from '../constants/index.js';
 
-import getHardwareType from '../utils/getHardwareType.js';
-import getHardwareTypeName from '../utils/getHardwareTypeName.js';
 import createCtrlEnterSubmitHandler from '../utils/createCtrlEnterSubmitHandler.js';
 import isValidHex from '../utils/isValidHex.js';
 import getLogType from '../utils/getLogType.js';
@@ -76,7 +74,8 @@ const processDataAndCreateLog = ({
     commandType,
     hardwareType,
     parseError,
-    logType
+    logType,
+    isMtxLora
 }) => {
     const preparedData = {};
     let logErrorMessage = parseError?.message;
@@ -121,7 +120,9 @@ const processDataAndCreateLog = ({
     const log = {
         commandType,
         hex,
-        hardwareType: getHardwareTypeName(hardwareType),
+        hardwareType,
+        isMtxLora,
+        directionName: directionNames[direction],
         data: logErrorMessage ? undefined : preparedData,
         date: new Date().toLocaleString(),
         error: logErrorMessage,
@@ -173,7 +174,7 @@ const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.com
 
 
 const CodecParseSection = ( {setLogs, hardwareType} ) => {
-    const {commandType} = useContext(CommandTypeContext);
+    const {commandType} = useCommandType();
 
     const [dump, setDump] = useState('');
     const [format, setFormat] = useState(formats.HEX);
@@ -212,6 +213,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
         const hexLines = removeComments(dump).split('\n').map(line => line.trim()).filter(line => line);
         const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
         const collector = new DataSegmentsCollector();
+        const isMtxLora = commandType === commandTypes.MTX_LORA;
         const newLogs = [];
         let mtxBuffer = [];
         let direction;
@@ -289,7 +291,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                             direction = Number(parameters.direction);
                             data = codec.message[directionNames[direction]].fromBytes(
                                 bytes,
-                                {hardwareType: getHardwareType(hardwareType)}
+                                {hardwareType: hardwareType?.value}
                             );
                         } catch ( error ) {
                             parseError = error;
@@ -331,8 +333,9 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     data,
                     hex,
                     direction,
-                    hardwareType,
                     parseError,
+                    isMtxLora,
+                    hardwareType: hardwareType?.value,
                     commandType: commandType === commandTypes.MTX_LORA ? commandTypes.ANALOG : commandType,
                     logType: getLogType(commandType, parseError)
                 })
@@ -354,8 +357,9 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 processDataAndCreateLog({
                     data,
                     direction,
-                    hardwareType,
                     parseError,
+                    isMtxLora,
+                    hardwareType: hardwareType?.value,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(mtxBuffer) : undefined,
                     commandType: commandTypes.MTX,
                     logType: getLogType(commandType, parseError)

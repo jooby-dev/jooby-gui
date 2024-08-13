@@ -14,7 +14,8 @@ import {
     Share as ShareIcon,
     UnfoldMore as UnfoldMoreIcon,
     UnfoldLess as UnfoldLessIcon,
-    ContentCopy as ContentCopyIcon
+    ContentCopy as ContentCopyIcon,
+    Edit as EditIcon
 } from '@mui/icons-material';
 
 import useCopyToClipboard from '../hooks/useCopyToClipboard.js';
@@ -80,6 +81,10 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
 
                     <IconButtonWithTooltip title="Collapse log" onClick={event => toggleLogAndNested(event, id, false)}>
                         <UnfoldLessIcon/>
+                    </IconButtonWithTooltip>
+
+                    <IconButtonWithTooltip title="Edit as new" disabled={true}>
+                        <EditIcon/>
                     </IconButtonWithTooltip>
 
                     <IconButtonWithTooltip title="Share log" onClick={event => handleShareLogsClick(event, [log])}>
