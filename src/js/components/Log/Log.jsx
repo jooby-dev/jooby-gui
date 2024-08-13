@@ -40,7 +40,7 @@ import {parametersTabViewTypes} from '../../constants/index.js';
 import useLogActions from './hooks/useLogActions.js';
 import {useCodecBuildPrefillData} from '../../contexts/CodecBuildPrefillDataContext.jsx';
 
-import HexDisplay from '../HexDisplay.jsx';
+import HexViewer from '../HexViewer.jsx';
 
 import getSubLogColor from './utils/getSubLogColor.js';
 import getLogColor from './utils/getLogColor.js';
@@ -55,7 +55,7 @@ import {JSONTreeTheme} from './constants.js';
 const frameNamesByType = invertObject(frameTypes);
 const accessLevelNames = invertObject(accessLevels);
 
-const renderLrcValue = value => (value === 'n/a' ? value : <HexDisplay hex={value}/>);
+const renderLrcValue = value => (value === 'n/a' ? value : <HexViewer hex={value}/>);
 
 const renderLrc = lrc => {
     let {received, calculated} = lrc;
@@ -185,7 +185,7 @@ const Log = ({
                             <>
                                 <TypographyBold>dump</TypographyBold>
                                 <Box>
-                                    <HexDisplay hex={hex}/>
+                                    <HexViewer hex={hex}/>
                                 </Box>
                             </>
                         )}
@@ -194,7 +194,7 @@ const Log = ({
                             <>
                                 <TypographyBold>frame type</TypographyBold>
                                 <Box>
-                                    {frameNamesByType[frameParameters.type]} (<HexDisplay hex={getHexFromNumber(frameParameters.type)}/>)
+                                    {frameNamesByType[frameParameters.type]} (<HexViewer hex={getHexFromNumber(frameParameters.type)}/>)
                                 </Box>
                             </>
                         )}
@@ -204,7 +204,7 @@ const Log = ({
                                 <TypographyBold>access level</TypographyBold>
                                 <Box>
                                     {`${accessLevelNames[messageParameters.accessLevel]} `}
-                                    (<HexDisplay hex={getHexFromNumber(messageParameters.accessLevel)}/>)
+                                    (<HexViewer hex={getHexFromNumber(messageParameters.accessLevel)}/>)
                                 </Box>
                             </>
                         )}
@@ -213,7 +213,7 @@ const Log = ({
                             <>
                                 <TypographyBold>destination address</TypographyBold>
                                 <Box>
-                                    <HexDisplay hex={getHexFromNumber(frameParameters.destination)}/>
+                                    <HexViewer hex={getHexFromNumber(frameParameters.destination)}/>
                                 </Box>
                             </>
                         )}
@@ -222,7 +222,7 @@ const Log = ({
                             <>
                                 <TypographyBold>source address</TypographyBold>
                                 <Box>
-                                    <HexDisplay hex={getHexFromNumber(frameParameters.source)}/>
+                                    <HexViewer hex={getHexFromNumber(frameParameters.source)}/>
                                 </Box>
                             </>
                         )}
@@ -297,7 +297,7 @@ const Log = ({
                                                     <>
                                                         <TypographyBold>dump</TypographyBold>
                                                         <Box>
-                                                            <HexDisplay hex={command.hex}/>
+                                                            <HexViewer hex={command.hex}/>
                                                         </Box>
                                                     </>
                                                 )}

@@ -99,7 +99,7 @@ const LogsPanel = ( {logs, setLogs} ) => {
 
     const handleExportLogs = () => {
         const now = new Date();
-        const formattedDate = now.toISOString().replace(/[:.]/g, '-');
+        const formattedDate = now.toLocaleString('en-GB', {hour12: false}).replace(/[/:]/g, '-').replace(/,\s*/g, '_');
         const fileName = `logs-${formattedDate}.json`;
 
         const blob = new Blob([JSON.stringify(logs, null, 4)], {type: 'application/json'});

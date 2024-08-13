@@ -6,7 +6,7 @@ import {CheckCircle as CheckCircleIcon, ContentCopy as ContentCopyIcon} from '@m
 import useCopyToClipboard from '../hooks/useCopyToClipboard.js';
 
 
-const HexDisplay = ( {hex, ...props} ) => {
+const HexViewer = ( {hex, ...props} ) => {
     const [copied, setCopied] = useState(false);
     const copyToClipboard = useCopyToClipboard();
 
@@ -52,9 +52,9 @@ const HexDisplay = ( {hex, ...props} ) => {
     );
 };
 
-HexDisplay.propTypes = {
+HexViewer.propTypes = {
     hex: PropTypes.string.isRequired,
     sx: PropTypes.object
 };
 
-export default HexDisplay;
+export default HexViewer;

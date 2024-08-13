@@ -12,7 +12,18 @@ export default () => {
 
     if ( logsData ) {
         try {
-            return JSON.parse(lzString.decompressFromEncodedURIComponent(logsData));
+            const parsedLogs = JSON.parse(lzString.decompressFromEncodedURIComponent(logsData));
+
+            urlParams.delete(LOGS_PARAM);
+
+            const newHash = urlParams.toString();
+            const newUrl = newHash
+                ? `${window.location.pathname}${window.location.search}#${newHash}`
+                : `${window.location.pathname}${window.location.search}`;
+
+            window.history.replaceState(null, '', newUrl);
+
+            return parsedLogs;
         } catch ( error ) {
             console.error('Error parsing logs from URL:', error);
         }

@@ -23,7 +23,7 @@ import TypographyBold from './TypographyBold.jsx';
 
 import useLogActions from './Log/hooks/useLogActions.js';
 
-import HexDisplay from './HexDisplay.jsx';
+import HexViewer from './HexViewer.jsx';
 
 import getLogColor from './Log/utils/getLogColor.js';
 import createLogTitle from './Log/utils/createLogTitle.jsx';
@@ -107,7 +107,7 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
                             <>
                                 <TypographyBold>dump</TypographyBold>
                                 <Box>
-                                    <HexDisplay hex={hex}/>
+                                    <HexViewer hex={hex}/>
                                 </Box>
                             </>
                         )}
