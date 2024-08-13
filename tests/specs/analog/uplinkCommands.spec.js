@@ -29,7 +29,7 @@ test.describe('analog uplink commands - parse hex dumps', () => {
         await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
 
-    test.afterEach(( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -49,7 +49,7 @@ test.describe('analog uplink commands - parse base64 dumps', () => {
         await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
 
-    test.afterEach(( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -68,7 +68,7 @@ test.describe('analog uplink commands - create messages', () => {
         await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
 
-    test.afterEach(( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
