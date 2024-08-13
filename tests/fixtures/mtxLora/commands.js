@@ -1,7 +1,7 @@
 export const uplinkCommands = {
     getDateTime: {
         hex: {
-            dump: '1e11e4910010100708013a321003100718005f6a',
+            dump: '1e 11 e4 91 00 10 10 07 08 01 3a 32 10 03 10 07 18 00 5f 6a',
             lrc: '0x6a'
         },
         base64: 'HhHkkQAQEAcIAToyEAMQBxgAX2o=',
@@ -41,6 +41,9 @@ export const uplinkCommands = {
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
             lrc: '0x5f',
+            message: {
+                segmentationSessionId: '228'
+            },
             commands: {
                 getDateTime: {
                     name: 'getDateTime',
@@ -61,7 +64,7 @@ export const uplinkCommands = {
     },
     getEnergyDayPrevious: {
         hex: {
-            dump: '1e1cef9166101003131807100000ddd0000063f5000062da0000d39200380a',
+            dump: '1e 1c ef 91 66 10 10 03 13 18 07 10 00 00 dd d0 00 00 63 f5 00 00 62 da 00 00 d3 92 00 38 0a',
             lrc: '0x0a'
         },
         base64: 'HhzvkWYQEAMTGAcQAADd0AAAY/UAAGLaAADTkgA4Cg==',
@@ -112,6 +115,10 @@ export const uplinkCommands = {
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
             lrc: '0x38',
+            message: {
+                segmentationSessionId: '239',
+                messageId: '102'
+            },
             commands: {
                 getDateTime: {
                     name: 'getEnergyDayPrevious',
@@ -133,9 +140,10 @@ export const uplinkCommands = {
             }
         }
     },
-    getHalfhoursEnergies: {
+    // todo: should fix issue #39565
+    /*getHalfhoursEnergies: {
         hex: {
-            dump: '1e105491b710106f0730f1011c0100000000631e5900b8',
+            dump: '1e 10 54 91 b7 10 10 6f 07 30 f1 01 1c 01 00 00 00 00 63 1e 59 00 b8',
             lrc: '0xb8'
         },
         base64: 'HhBUkbcQEG8HMPEBHAEAAAAAYx5ZALg=',
@@ -217,10 +225,10 @@ export const uplinkCommands = {
                 }
             }
         }
-    },
+    },*/
     getMonthDemand: {
         hex: {
-            dump: '1e1bf591081010171218070000ddd0000063f5000062da0000d392003d79',
+            dump: '1e 1b f5 91 08 10 10 17 12 18 07 00 00 dd d0 00 00 63 f5 00 00 62 da 00 00 d3 92 00 3d 79',
             lrc: '0x79'
         },
         base64: 'Hhv1kQgQEBcSGAcAAN3QAABj9QAAYtoAANOSAD15',
@@ -270,6 +278,10 @@ export const uplinkCommands = {
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
             lrc: '0x3d',
+            message: {
+                segmentationSessionId: '245',
+                messageId: '8'
+            },
             commands: {
                 getDateTime: {
                     name: 'getMonthDemand',
@@ -290,7 +302,7 @@ export const uplinkCommands = {
     },
     getCurrentValues: {
         hex: {
-            dump: '1e29f6910910100d20000000000000000000035c410000000003e800000000000000000000000003e8007649',
+            dump: '1e 29 f6 91 09 10 10 0d 20 00 00 00 00 00 00 00 00 00 03 5c 41 00 00 00 00 03 e8 00 00 00 00 00 00 00 00 00 00 00 00 03 e8 00 76 49',
             lrc: '0x49'
         },
         base64: 'Hin2kQkQEA0gAAAAAAAAAAAAA1xBAAAAAAPoAAAAAAAAAAAAAAAAA+gAdkk=',
@@ -355,6 +367,10 @@ export const uplinkCommands = {
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
             lrc: '0x76',
+            message: {
+                segmentationSessionId: '246',
+                messageId: '9'
+            },
             commands: {
                 getDateTime: {
                     name: 'getCurrentValues',
@@ -364,11 +380,11 @@ export const uplinkCommands = {
                         iaRms: 0,
                         vavbRms: 220225,
                         varA: 0,
-                        pfA: 1000,
+                        pfA: 1,
                         ibRms: 0,
                         powerB: 0,
                         varB: 0,
-                        pfB: 1000
+                        pfB: 1
                     }
                 }
             }
@@ -378,6 +394,9 @@ export const uplinkCommands = {
 
 export const downlinkCommands = {
     getDateTime: {
+        hex: {
+            dump: '1e 09 00 91 00 10 10 07 00 00 42 96'
+        },
         mtx: {
             dump: '00 10 10 07 00 00 42',
             accessLevel: 'UNENCRYPTED (0x00)',
@@ -394,7 +413,7 @@ export const downlinkCommands = {
             commands: {
                 dataSegment: {
                     name: 'dataSegment',
-                    dump: '1e 09 00 91 00 10 10 07 00 00 42 96',
+                    dump: '1e 09 00 91 00 10 10 07 00 00 42',
                     parameters: {
                         segmentationSessionId: 0,
                         segmentIndex: 1,
@@ -414,7 +433,10 @@ export const downlinkCommands = {
             }
         }
     },
-    getOpParams: {
+    getOperatorParameters: {
+        hex: {
+            dump: '1e 09 00 91 00 10 10 1e 00 00 5b 96'
+        },
         mtx: {
             dump: '00 10 10 1e 00 00 5b',
             accessLevel: 'UNENCRYPTED (0x00)',
@@ -422,7 +444,7 @@ export const downlinkCommands = {
             lrc: '0x5b',
             commands: {
                 getDateTime: {
-                    name: 'getOpParams',
+                    name: 'getOperatorParameters',
                     dump: '1e 00'
                 }
             }
@@ -452,8 +474,11 @@ export const downlinkCommands = {
         }
     },
     getSaldoParameters: {
+        hex: {
+            dump: '1e 09 00 91 00 10 10 2e 00 00 6b 96'
+        },
         mtx: {
-            dump: '01 10 10 2e 00 00 6b',
+            dump: '00 10 10 2e 00 00 6b',
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
             lrc: '0x6b',
@@ -468,7 +493,7 @@ export const downlinkCommands = {
             commands: {
                 dataSegment: {
                     name: 'dataSegment',
-                    dump: '1e 09 00 91 00 10 10 2e 00 00 6b 96',
+                    dump: '1e 09 00 91 00 10 10 2e 00 00 6b',
                     parameters: {
                         segmentationSessionId: 0,
                         segmentIndex: 1,
@@ -489,8 +514,11 @@ export const downlinkCommands = {
         }
     },
     getBuildVersion: {
+        hex: {
+            dump: '1e 09 00 91 00 10 10 70 00 00 35 96'
+        },
         mtx: {
-            dump: '02 10 10 70 00 00 35',
+            dump: '00 10 10 70 00 00 35',
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
             lrc: '0x35',
@@ -526,8 +554,11 @@ export const downlinkCommands = {
         }
     },
     getEventStatus: {
+        hex: {
+            dump: '1e 09 00 91 00 10 10 01 00 00 44 96'
+        },
         mtx: {
-            dump: '03 10 10 01 00 00 44',
+            dump: '00 10 10 01 00 00 44',
             accessLevel: 'UNENCRYPTED (0x00)',
             messageId: 0,
             lrc: '0x44',

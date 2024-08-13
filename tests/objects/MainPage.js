@@ -35,8 +35,11 @@ export class MainPage {
         await this.page.getByText(type).click();
     }
 
-    async parseDump ( dump ) {
-        await this.page.getByLabel(fixture.parseMessages.dump.label, {exact: true}).fill(dump);
+    async parseDump ( dump, exact = true ) {
+        exact
+            ? await this.page.getByLabel(fixture.parseMessages.dump.label, {exact: true}).fill(dump)
+            : await this.page.getByLabel(fixture.parseMessages.dump.label).fill(dump);
+
         await this.page.getByTestId(fixture.parseMessages.parseButton).click();
     }
 
@@ -64,6 +67,54 @@ export class MainPage {
 
     async buildMessage () {
         await this.page.getByRole('button', {name: 'Build message'}).click();
+    }
+
+    async createMtxLoraMessage ( message ) {
+        const {accessLevel, messageId, segmentationSessionId} = message;
+
+        if ( accessLevel ) {
+            await this.page.getByLabel('Access level').click();
+            await this.page.getByText(accessLevel, {exact: true}).click();
+        }
+
+        if ( messageId ) {
+            const $messageId = this.page.getByLabel('Message ID');
+            await $messageId.clear();
+            await $messageId.fill(messageId);
+        }
+
+        if ( segmentationSessionId ) {
+            const $segmentationSessionId = this.page.getByLabel('Segmentation session ID');
+            await $segmentationSessionId.clear();
+            await $segmentationSessionId.fill(segmentationSessionId);
+        }
+    }
+
+    async createFrame ( frame ) {
+        const {accessLevel, dstAddress, srcAddress, messageId} = frame;
+
+        if ( accessLevel ) {
+            await this.page.getByLabel('Access level').click();
+            await this.page.getByText(accessLevel, {exact: true}).click();
+        }
+
+        if ( srcAddress ) {
+            const $srcAddress = this.page.getByLabel('Source address');
+            await $srcAddress.clear();
+            await $srcAddress.fill(srcAddress);
+        }
+
+        if ( dstAddress ) {
+            const $dstAddress = this.page.getByLabel('Destination address');
+            await $dstAddress.clear();
+            await $dstAddress.fill(dstAddress);
+        }
+
+        if ( messageId ) {
+            const $messageId = this.page.getByLabel('Message ID');
+            await $messageId.clear();
+            await $messageId.fill(messageId);
+        }
     }
 
     async buildFrame () {

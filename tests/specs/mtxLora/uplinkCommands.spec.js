@@ -12,14 +12,14 @@ test.describe('mtxLora uplink commands - parse hex dumps', () => {
         await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
 
-    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
             const mainPage = await new MainPage(page);
 
-            await mainPage.parseDump(command.hex.dump);
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'uplink');
+            await mainPage.parseDump(command.hex.dump, true);
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'parse');
         });
     }
 });
@@ -32,14 +32,41 @@ test.describe('mtxLora uplink commands - parse base64 dumps', () => {
         await page.getByLabel(fixture.parseMessages.directions.uplink).click();
     });
 
-    test.afterEach(async ( {page} ) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
             const mainPage = await new MainPage(page);
 
-            await mainPage.parseDump(command.base64);
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.base64, command, 'uplink');
+            await mainPage.parseDump(command.base64, true);
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.base64, command, 'parse');
+        });
+    }
+});
+
+test.describe('mtxLora uplink commands - create messages', () => {
+    test.beforeEach(async ( {page, baseURL} ) => {
+        await page.goto(baseURL);
+        await new MainPage(page).selectCodec(fixture.codecType.options.MTX_LORA);
+    });
+
+    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+
+    for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
+        test(`check ${commandKey}`, async ( {page} ) => {
+            const mainPage = new MainPage(page);
+
+            if ( command.hardwareType ) {
+                await mainPage.selectHardwareType(command.hardwareType);
+            }
+
+            for ( const [, subCommand] of Object.entries(command.mtx.commands) ) {
+                await mainPage.createMessage(subCommand, 'uplink');
+            }
+
+            await mainPage.createMtxLoraMessage(command.mtx.message);
+            await mainPage.buildMessage();
+            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'build');
         });
     }
 });
