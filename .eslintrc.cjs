@@ -17,7 +17,10 @@ module.exports = {
         'airbnb-base',
 
         // https://github.com/import-js/eslint-plugin-import
-        'plugin:import/recommended'
+        'plugin:import/recommended',
+
+        // https://www.npmjs.com/package/eslint-plugin-playwright
+        'plugin:playwright/recommended'
     ],
 
     settings: {
@@ -49,7 +52,7 @@ module.exports = {
         'no-multiple-empty-lines': ['error', {max: 2, maxEOF: 0, maxBOF: 0}],
         'no-plusplus': 'off',
         'no-shadow': ['error', {builtinGlobals: false, hoist: 'all', allow: ['error']}],
-        'no-unused-expressions': ['error', {allowShortCircuit: true}],
+        'no-unused-expressions': ['error', {allowShortCircuit: true, allowTernary: true}],
         'no-use-before-define': 'off',
         'object-curly-spacing': ['error', 'never'],
         'space-before-function-paren': ['error', {anonymous: 'always', named: 'always'}],
@@ -125,6 +128,20 @@ module.exports = {
         'no-await-in-loop': 'off',
         'no-continue': 'off',
         'no-bitwise': 'off',
-        'no-restricted-syntax': 'off'
+        'no-restricted-syntax': 'off',
+
+        // tests
+        'playwright/expect-expect': [
+            'error',
+            {
+                'assertFunctionNames': [
+                    'validateMtxLoraMessage',
+                    'validateUplinkCommand',
+                    'validateMtxFrames',
+                    'validateObisObserverMessages'
+                ]
+            }
+        ],
+        'playwright/no-conditional-in-test': 'off'
     }
 };

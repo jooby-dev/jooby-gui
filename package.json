@@ -10,7 +10,9 @@
         "preview": "vite preview",
         "lint": "eslint .",
         "lint-cached": "eslint --cache .",
-        "lint-fix": "eslint --fix ."
+        "lint-fix": "eslint --fix .",
+        "test": "npx playwright test",
+        "postinstall": "npx playwright install --with-deps"
     },
     "dependencies": {
         "@emotion/react": "^11.11.4",
@@ -20,6 +22,8 @@
         "@mui/icons-material": "^5.15.12",
         "@mui/lab": "^5.0.0-alpha.167",
         "@mui/material": "^5.15.12",
+        "@playwright/test": "^1.44.1",
+        "@types/node": "^20.14.5",
         "@types/react": "^18.2.56",
         "@types/react-beautiful-dnd": "^13.1.8",
         "@types/react-dom": "^18.2.19",
@@ -30,6 +34,7 @@
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-plugin-custom-rules": "file:./eslint-custom-rules",
         "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-playwright": "^1.6.2",
         "eslint-plugin-react": "^7.33.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.5",
