@@ -13,6 +13,8 @@ import {
     Edit as EditIcon
 } from '@mui/icons-material';
 
+import setFocus from '../utils/setFocus.js';
+
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 import HighlightedText from './HighlightedText.jsx';
 
@@ -58,6 +60,12 @@ const CommandList = ({
     const onDelete = index => {
         const newPreparedCommands = commands.filter(preparedCommand => preparedCommand.id !== index);
 
+        if ( editingId === index ) {
+            setCommandParameters('');
+            setEditingId(null);
+            onChange(null, null);
+        }
+
         setCommands(newPreparedCommands);
     };
 
@@ -68,14 +76,7 @@ const CommandList = ({
             onChange(null, commandToEdit.command);
             setCommandParameters(commandToEdit.parameters);
             setEditingId(index);
-            setTimeout(
-                () => {
-                    if ( commandParametersRef.current ) {
-                        commandParametersRef.current.focus();
-                    }
-                },
-                0
-            );
+            setFocus(commandParametersRef);
         }
     };
 
@@ -158,7 +159,6 @@ const CommandList = ({
                                             <IconButtonWithTooltip
                                                 title="Delete command from message"
                                                 onClick={() => onDelete(command.id)}
-                                                disabled={editingId === command.id}
                                                 sx={{marginRight: 0}}
                                             >
                                                 <DeleteIcon/>

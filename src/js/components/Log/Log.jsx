@@ -40,6 +40,8 @@ import {parametersTabViewTypes} from '../../constants/index.js';
 import useLogActions from './hooks/useLogActions.js';
 import {useCodecBuildPrefillData} from '../../contexts/CodecBuildPrefillDataContext.jsx';
 
+import HexViewer from '../HexViewer.jsx';
+
 import getSubLogColor from './utils/getSubLogColor.js';
 import getLogColor from './utils/getLogColor.js';
 import createSubLogTitle from './utils/createSubLogTitle.jsx';
@@ -53,6 +55,8 @@ import {JSONTreeTheme} from './constants.js';
 const frameNamesByType = invertObject(frameTypes);
 const accessLevelNames = invertObject(accessLevels);
 
+const renderLrcValue = value => (value === 'n/a' ? value : <HexViewer hex={value}/>);
+
 const renderLrc = lrc => {
     let {received, calculated} = lrc;
 
@@ -60,10 +64,10 @@ const renderLrc = lrc => {
     received = isUndefined(received) ? 'n/a' : getHexFromNumber(received);
 
     if ( calculated === received ) {
-        return calculated;
+        return renderLrcValue(calculated);
     }
 
-    return `calculated: ${calculated}, received: ${received}`;
+    return <>calculated: {renderLrcValue(calculated)}, received: {renderLrcValue(received)}</>;
 };
 
 
@@ -87,13 +91,23 @@ const Log = ({
         setPrefillDataFromLog(log);
     };
 
+    const onLogToggle = event => {
+        if ( event.ctrlKey ) {
+            toggleLogAndNested(event, id, !isExpanded);
+
+            return;
+        }
+
+        toggleLog(id);
+    };
+
 
     return (
         <Accordion
             sx={{overflow: 'hidden', '& > *': {minWidth: 0}}}
             key={id}
             expanded={isExpanded}
-            onChange={() => toggleLog(id)}
+            onChange={onLogToggle}
         >
             <AccordionSummary
                 content="div"
@@ -165,57 +179,51 @@ const Log = ({
                         gridTemplateColumns: 'max-content 1fr',
                         alignItems: 'center',
                         columnGap: 2,
-                        rowGap: 1,
-                        mb: 1
+                        rowGap: 1
                     }}>
                         {hex && (
                             <>
-                                <TypographyBold>
-                                    {'dump '}
-                                    <IconButtonWithTooltip
-                                        title="Copy dump"
-                                        onClick={() => copyToClipboard(
-                                            hex,
-                                            {message: 'Message dump copied to clipboard'}
-                                        )}
-                                    >
-                                        <ContentCopyIcon/>
-                                    </IconButtonWithTooltip>
-                                </TypographyBold>
-                                <TypographyMono>{hex}</TypographyMono>
+                                <TypographyBold>dump</TypographyBold>
+                                <Box>
+                                    <HexViewer hex={hex}/>
+                                </Box>
                             </>
                         )}
 
                         {frameParameters.type && (
                             <>
                                 <TypographyBold>frame type</TypographyBold>
-                                <TypographyMono>
-                                    {`${frameNamesByType[frameParameters.type]} (${getHexFromNumber(frameParameters.type)})`}
-                                </TypographyMono>
+                                <Box>
+                                    {frameNamesByType[frameParameters.type]} (<HexViewer hex={getHexFromNumber(frameParameters.type)}/>)
+                                </Box>
                             </>
                         )}
 
                         {!isUndefined(messageParameters.accessLevel) && (
                             <>
                                 <TypographyBold>access level</TypographyBold>
-                                <TypographyMono>
-                                    {`${accessLevelNames[messageParameters.accessLevel]}`}
-                                    {` (${getHexFromNumber(messageParameters.accessLevel)})`}
-                                </TypographyMono>
+                                <Box>
+                                    {`${accessLevelNames[messageParameters.accessLevel]} `}
+                                    (<HexViewer hex={getHexFromNumber(messageParameters.accessLevel)}/>)
+                                </Box>
                             </>
                         )}
 
                         {!isUndefined(frameParameters.destination) && (
                             <>
                                 <TypographyBold>destination address</TypographyBold>
-                                <TypographyMono>{getHexFromNumber(frameParameters.destination)}</TypographyMono>
+                                <Box>
+                                    <HexViewer hex={getHexFromNumber(frameParameters.destination)}/>
+                                </Box>
                             </>
                         )}
 
                         {!isUndefined(frameParameters.source) && (
                             <>
                                 <TypographyBold>source address</TypographyBold>
-                                <TypographyMono>{getHexFromNumber(frameParameters.source)}</TypographyMono>
+                                <Box>
+                                    <HexViewer hex={getHexFromNumber(frameParameters.source)}/>
+                                </Box>
                             </>
                         )}
 
@@ -229,7 +237,7 @@ const Log = ({
                         {hasLrc(log.commandType) && (
                             <>
                                 <TypographyBold>lrc</TypographyBold>
-                                <TypographyMono>{renderLrc(data.lrc)}</TypographyMono>
+                                <Box>{renderLrc(data.lrc)}</Box>
                             </>
                         )}
 
@@ -239,11 +247,12 @@ const Log = ({
                                 <HighlightedText fontWeight="normal" isMonospacedFont={true} color="error.main">{data.error}</HighlightedText>
                             </>
                         )}
+
+                        {data.commands.length > 0 && <TypographyBold>commands</TypographyBold>}
                     </Box>
 
                     {data.commands.length > 0 && (
                         <>
-                            <TypographyBold gutterBottom>commands</TypographyBold>
                             {data.commands.map(commandData => {
                                 const {command} = commandData;
 
@@ -282,24 +291,14 @@ const Log = ({
                                                 gridTemplateColumns: 'max-content 1fr',
                                                 alignItems: 'center',
                                                 columnGap: 2,
-                                                rowGap: 1,
-                                                mb: 1
+                                                rowGap: 1
                                             }}>
                                                 {command.hex && (
                                                     <>
-                                                        <TypographyBold>
-                                                            {'dump '}
-                                                            <IconButtonWithTooltip
-                                                                title="Copy dump"
-                                                                onClick={() => copyToClipboard(
-                                                                    command.hex,
-                                                                    {message: 'Command dump copied to clipboard'}
-                                                                )}
-                                                            >
-                                                                <ContentCopyIcon/>
-                                                            </IconButtonWithTooltip>
-                                                        </TypographyBold>
-                                                        <TypographyMono>{command.hex}</TypographyMono>
+                                                        <TypographyBold>dump</TypographyBold>
+                                                        <Box>
+                                                            <HexViewer hex={command.hex}/>
+                                                        </Box>
                                                     </>
                                                 )}
                                                 {command.error && (
@@ -310,59 +309,56 @@ const Log = ({
                                                         </HighlightedText>
                                                     </>
                                                 )}
+                                                {command.parameters && command.hasParameters && (
+                                                    <TypographyBold>
+                                                        {'parameters '}
+                                                        <IconButtonWithTooltip
+                                                            title="Copy parameters in JSON format"
+                                                            onClick={() => copyToClipboard(
+                                                                JSON.stringify(command.parameters, null, 4),
+                                                                {message: 'Parameters copied to clipboard'}
+                                                            )}
+                                                        >
+                                                            <ContentCopyIcon/>
+                                                        </IconButtonWithTooltip>
+                                                    </TypographyBold>
+                                                )}
                                             </Box>
-                                            {
-                                                command.parameters && command.hasParameters && (
-                                                    <>
-                                                        <TypographyBold gutterBottom>
-                                                            {'parameters '}
-                                                            <IconButtonWithTooltip
-                                                                title="Copy parameters in JSON format"
-                                                                onClick={() => copyToClipboard(
-                                                                    JSON.stringify(command.parameters, null, 4),
-                                                                    {message: 'Parameters copied to clipboard'}
-                                                                )}
-                                                            >
-                                                                <ContentCopyIcon/>
-                                                            </IconButtonWithTooltip>
-                                                        </TypographyBold>
-
-                                                        <TabContext value={parametersTab}>
-                                                            <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                                                                <TabList
-                                                                    onChange={(event, value) => setParametersTab(value)}
-                                                                    aria-label="Display command parameters in tree, JSON view"
-                                                                >
-                                                                    <Tab
-                                                                        label={parametersTabViewTypes.TREE}
-                                                                        value={parametersTabViewTypes.TREE}
-                                                                    />
-                                                                    <Tab
-                                                                        label={parametersTabViewTypes.JSON}
-                                                                        value={parametersTabViewTypes.JSON}
-                                                                    />
-                                                                </TabList>
-                                                            </Box>
-                                                            <TabPanel value={parametersTabViewTypes.TREE}>
-                                                                <Box sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
-                                                                    <JSONTree
-                                                                        data={modifyTime2000Properties(command.parameters)}
-                                                                        theme={JSONTreeTheme}
-                                                                        invertTheme={false}
-                                                                        hideRoot={true}
-                                                                        shouldExpandNodeInitially={() => true}
-                                                                    />
-                                                                </Box>
-                                                            </TabPanel>
-                                                            <TabPanel value={parametersTabViewTypes.JSON}>
-                                                                <TypographyMono component="pre" sx={{whiteSpace: 'pre-wrap'}}>
-                                                                    {JSON.stringify(command.parameters, null, 4)}
-                                                                </TypographyMono>
-                                                            </TabPanel>
-                                                        </TabContext>
-                                                    </>
-                                                )
-                                            }
+                                            {command.parameters && command.hasParameters && (
+                                                <TabContext value={parametersTab}>
+                                                    <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                                                        <TabList
+                                                            onChange={(event, value) => setParametersTab(value)}
+                                                            aria-label="Display command parameters in tree, JSON view"
+                                                        >
+                                                            <Tab
+                                                                label={parametersTabViewTypes.TREE}
+                                                                value={parametersTabViewTypes.TREE}
+                                                            />
+                                                            <Tab
+                                                                label={parametersTabViewTypes.JSON}
+                                                                value={parametersTabViewTypes.JSON}
+                                                            />
+                                                        </TabList>
+                                                    </Box>
+                                                    <TabPanel value={parametersTabViewTypes.TREE}>
+                                                        <Box sx={{mb: 2, fontFamily: 'Roboto Mono, monospace'}}>
+                                                            <JSONTree
+                                                                data={modifyTime2000Properties(command.parameters)}
+                                                                theme={JSONTreeTheme}
+                                                                invertTheme={false}
+                                                                hideRoot={true}
+                                                                shouldExpandNodeInitially={() => true}
+                                                            />
+                                                        </Box>
+                                                    </TabPanel>
+                                                    <TabPanel value={parametersTabViewTypes.JSON}>
+                                                        <TypographyMono component="pre" sx={{whiteSpace: 'pre-wrap'}}>
+                                                            {JSON.stringify(command.parameters, null, 4)}
+                                                        </TypographyMono>
+                                                    </TabPanel>
+                                                </TabContext>
+                                            )}
                                         </AccordionDetails>
                                     </Accordion>
                                 );

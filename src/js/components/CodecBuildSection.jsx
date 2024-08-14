@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 
 import createDirectionIcon from '../utils/createDirectionIcon.jsx';
+import setFocus from '../utils/setFocus.js';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
 import {useCommandType} from '../contexts/CommandTypeContext.jsx';
@@ -69,6 +70,8 @@ const resolveParameters = ( parameters, commandType ) => {
 
     return {};
 };
+
+const sortCommandExamples = examples => examples.sort((itemA, itemB) => itemA.label.localeCompare(itemB.label));
 
 const incrementMessageId = messageId => (parseInt(messageId, 10) + 1) % BYTE_RANGE_LIMIT;
 
@@ -220,9 +223,14 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 // use setTimeout to ensure state reset completes before pre-filling the form
                 setTimeout(
                     () => {
+                        setCommand(null);
+                        setEditingCommandId(null);
+                        setCommandParameters('');
+                        setCommandExample(null);
+                        setCommandExampleList([]);
                         setPreparedCommands(prefillData.preparedCommands);
                         setParameters(prefillData.parameters);
-                        onCommandChange(null, null);
+                        setParameterErrors({...parameterErrorsState});
                     },
                     0
                 );
@@ -230,6 +238,23 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         },
         [prefillData]
     );
+
+    const resolveCommandParametersAndHardwareType = ( commandData, commandExampleData ) => {
+        if ( commandData.value.hasParameters ) {
+            setCommandParameters(JSON.stringify(commandExampleData.value.parameters, null, 4));
+        }
+
+        if ( commandExampleData.value.config?.hardwareType ) {
+            const hardwareTypeData = commandTypeConfigMap[resolveCommandType(commandType)].hardwareTypeList
+                .find(type => type.value === commandExampleData.value.config.hardwareType);
+
+            setHardwareType(hardwareTypeData);
+            showSnackbar({
+                message: `Hardware type has been changed to "${hardwareTypeData.label}"`,
+                severity: severityTypes.WARNING
+            });
+        }
+    };
 
     const onParametersChange = useCallback(
         event => {
@@ -285,53 +310,34 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             return;
         }
 
-        if ( command.value.hasParameters ) {
-            // prepare parameters for editing
-            setCommandParameters(JSON.stringify(newValue.value.parameters, null, 4));
-        }
-
-        if ( newValue.value.config?.hardwareType ) {
-            const hardwareTypeData = commandTypeConfigMap[resolveCommandType(commandType)].hardwareTypeList
-                .find(type => type.value === newValue.value.config.hardwareType);
-
-            setHardwareType(hardwareTypeData);
-            showSnackbar({
-                message: `Hardware type has been changed to "${hardwareTypeData.label}"`,
-                severity: severityTypes.WARNING
-            });
-        }
-
-        setTimeout(
-            () => {
-                if ( commandParametersRef.current ) {
-                    commandParametersRef.current.focus();
-                }
-            },
-            0
-        );
+        resolveCommandParametersAndHardwareType(command, newValue);
+        setFocus(commandParametersRef);
     };
 
     const onCommandChange = ( event, newValue ) => {
         setCommand(newValue);
         setCommandParameters('');
-        setCommandExample(null);
-        setCommandExampleList(
-            newValue?.value?.examples
-                ? Object.entries(newValue.value.examples).map(([key, value]) => ({
-                    value,
-                    label: key
-                }))
-                : []
-        );
 
-        setTimeout(
-            () => {
-                if ( commandParametersRef.current ) {
-                    commandParametersRef.current.focus();
-                }
-            },
-            0
-        );
+        const newCommandExampleList = newValue?.value?.examples
+            ? Object.entries(newValue.value.examples).map(([key, value]) => ({
+                value,
+                label: key
+            }))
+            : [];
+
+        setCommandExampleList(newCommandExampleList);
+
+        if ( newCommandExampleList.length ) {
+            // select the first example when the command changes
+            const newExample = sortCommandExamples(newCommandExampleList)[0];
+
+            setCommandExample(newExample);
+            resolveCommandParametersAndHardwareType(newValue, newExample);
+        } else {
+            setCommandExample(null);
+        }
+
+        setFocus(commandParametersRef);
     };
 
     const onBuildClick = () => {
@@ -578,6 +584,16 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }));
     };
 
+    const restoreCommandParameters = useCallback(
+        () => {
+            if ( commandExample ) {
+                setCommandParameters(JSON.stringify(commandExample.value.parameters, null, 4));
+                setFocus(commandParametersRef);
+            }
+        },
+        [commandExample]
+    );
+
     return (
         <>
             <Typography variant="h5">
@@ -616,7 +632,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             {commandExampleList.length !== 0 && (
                 <Autocomplete
-                    options={commandExampleList.sort((itemA, itemB) => itemA.label.localeCompare(itemB.label))}
+                    options={sortCommandExamples(commandExampleList)}
                     size="small"
                     value={commandExample}
                     onChange={onCommandExampleChange}
@@ -640,12 +656,11 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         disabled={!command.value.hasParameters}
                         inputRef={commandParametersRef}
                         command={command}
-                        onSubmit={
-                            editingCommandId
-                                ? onSaveEditedCommandClick
-                                : onAddToMessageClick
-                        }
+                        onClear={setCommandExample}
+                        onRestore={restoreCommandParameters}
+                        onSubmit={editingCommandId ? onSaveEditedCommandClick : onAddToMessageClick}
                         commandType={commandType}
+                        isExampleSelected={!!commandExample}
                     />
                 </div>
             )}
