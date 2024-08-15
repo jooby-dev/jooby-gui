@@ -1,9 +1,49 @@
-import fixture from '../fixtures/main.js';
+import {commandTypes} from '../../src/js/constants/index.js';
 
 
 export class MainPage {
+    static codec = 'Codec';
+    static hardwareType = 'Hardware type';
+    static command = 'Command';
+
     constructor ( page ) {
         this.page = page;
+    }
+
+    formatDump ( dump ) {
+        return dump.replace(/(.{2})/g, '$1 ').trim();
+    }
+
+    getDumpInLogs ( dump ) {
+        return this.page.locator('[data-test="hex"]', {hasText: dump}).first();
+    }
+
+    redirectToGithub () {
+        return this.page.getByRole('link', {name: 'GitHub'})
+    }
+
+    async deleteLogs () {
+        await this.page.getByLabel('Delete logs').click();
+    }
+
+    async getParseButtonAndClick ( click = true ) {
+        const $button = await this.page.getByTestId('parse-button');
+
+        if ( click ) {
+            $button.click();
+        } else {
+            return $button;
+        }
+    }
+
+    async getAddCommandButtonAndClick ( click = true ) {
+        const $button = this.page.getByTestId('add-command-button');
+
+        if ( click ) {
+            await $button.click();
+        } else {
+            return $button;
+        }
     }
 
     async getAllSelectOption ( label, codecSelect = false ) {
@@ -30,21 +70,33 @@ export class MainPage {
         await this.page.getByText(type, {exact: true}).click();
     }
 
+    async selectMtxCodec () {
+        await this.selectCodec(commandTypes.MTX);
+    }
+
+    async selectMtxLoraCodec () {
+        await this.selectCodec(commandTypes.MTX_LORA);
+    }
+
+    async selectObisObserverCodec () {
+        await this.selectCodec(commandTypes.OBIS_OBSERVER);
+    }
+
     async selectHardwareType ( type ) {
-        await this.page.getByLabel(fixture.hardwareType.label).click();
+        await this.page.getByLabel('Hardware type').click();
         await this.page.getByText(type).click();
     }
 
     async parseDump ( dump, exact = true ) {
         exact
-            ? await this.page.getByLabel(fixture.parseMessages.dump.label, {exact: true}).fill(dump)
-            : await this.page.getByLabel(fixture.parseMessages.dump.label).fill(dump);
+            ? await this.page.getByLabel('Dump', {exact: true}).fill(dump)
+            : await this.page.getByLabel('Dump').fill(dump);
 
-        await this.page.getByTestId(fixture.parseMessages.parseButton).click();
+        await this.getParseButtonAndClick();
     }
 
     async expandLogs () {
-        await this.page.getByLabel(fixture.logs.buttons.expandLogs).click();
+        await this.page.getByLabel('Expand logs').click();
         await this.page.waitForTimeout(2000);
     }
 
@@ -63,7 +115,7 @@ export class MainPage {
             await textarea.fill(JSON.stringify(command.parameters));
         }
 
-        await this.page.getByTestId('add-command-button').click();
+        await this.getAddCommandButtonAndClick();
     }
 
     async buildMessage () {
@@ -122,11 +174,19 @@ export class MainPage {
         await this.page.getByRole('button', {name: 'Build frame'}).click();
     }
 
-    formatDump ( dump ) {
-        return dump.replace(/(.{2})/g, '$1 ').trim();
+    async chooseUplinkDirection () {
+        await this.page.getByLabel('uplink').click();
     }
 
-    getDumpInLogs ( dump ) {
-        return this.page.locator('[data-test="hex"]', {hasText: dump}).first();
+    async chooseBase64 () {
+        await this.page.getByLabel('base64').click();
+    }
+
+    async getAllTitleTexts () {
+        return await this.page.locator('h5').allInnerTexts();
+    }
+
+    async getAllDescriptionTexts () {
+        return await this.page.locator('p').allInnerTexts();
     }
 }

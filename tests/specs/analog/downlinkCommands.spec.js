@@ -1,6 +1,5 @@
 import {test, expect} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
-import fixture from '../../fixtures/main.js';
 import {downlinkCommands} from '../../fixtures/analog/commands.js';
 
 
@@ -9,7 +8,7 @@ test.describe('analog downlink commands - parse hex dumps', () => {
         await page.goto(baseURL);
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -28,7 +27,7 @@ test.describe('analog downlink commands - create messages', () => {
         await page.goto(baseURL);
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
