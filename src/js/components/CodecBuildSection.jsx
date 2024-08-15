@@ -20,10 +20,13 @@ import {
 
 import createDirectionIcon from '../utils/createDirectionIcon.jsx';
 import setFocus from '../utils/setFocus.js';
+import isMtx from '../utils/isMtx.js';
+import isMtxLora from '../utils/isMtxLora.js';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
 import {useCommandType} from '../contexts/CommandTypeContext.jsx';
 import {useCodecBuildPrefillData} from '../contexts/CodecBuildPrefillDataContext.jsx';
+import {useCodecStore} from '../store/codec.js';
 
 import CommandParametersEditor from './CommandParametersEditor/CommandParametersEditor.jsx';
 import Button from './Button.jsx';
@@ -37,7 +40,8 @@ import {
     severityTypes,
     commandTypes,
     accessKey,
-    codecBuildDefaults
+    codecBuildDefaults,
+    framingFormats
 } from '../constants/index.js';
 
 import isValidHex from '../utils/isValidHex.js';
@@ -45,10 +49,9 @@ import isValidNumber from '../utils/isValidNumber.js';
 import cleanHexString from '../utils/cleanHexString.js';
 import getLogType from '../utils/getLogType.js';
 import isByteArray from '../utils/isByteArray.js';
-import resolveCommandType from '../utils/resolveCommandType.js';
 
 
-const resolveParameters = ( parameters, commandType ) => {
+const resolveParameters = ( parameters, commandType, framingFormat ) => {
     const resolvedParameters = {
         accessLevel: parameters.accessLevel,
         messageId: parameters.messageId,
@@ -56,16 +59,14 @@ const resolveParameters = ( parameters, commandType ) => {
         segmentationSessionId: parameters.segmentationSessionId
     };
 
-    if ( commandType === commandTypes.MTX_LORA ) {
-        return resolvedParameters;
-    }
-
     if ( commandType === commandTypes.MTX ) {
-        return {
-            ...resolvedParameters,
-            source: parameters.source,
-            destination: parameters.destination
-        };
+        return framingFormat === framingFormats.NONE
+            ? resolvedParameters
+            : {
+                ...resolvedParameters,
+                source: parameters.source,
+                destination: parameters.destination
+            };
     }
 
     return {};
@@ -95,7 +96,7 @@ const processDataAndCreateLog = ({
     frameType,
     buildError,
     logType,
-    isMtxLora
+    isMtxLoraCheck
 }) => {
     if ( data ) {
         data.commands = data.commands.map(commandData => {
@@ -122,7 +123,7 @@ const processDataAndCreateLog = ({
         commandType,
         hardwareType,
         directionName,
-        isMtxLora,
+        isMtxLora: isMtxLoraCheck,
         hex: !buildError && isByteArray(bytes) ? joobyCodec.utils.getHexFromBytes(bytes) : undefined,
         data: buildError ? undefined : data,
         date: new Date().toLocaleString(),
@@ -181,10 +182,9 @@ const parameterErrorsState = {
 const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     const {commandType} = useCommandType();
     const {prefillData} = useCodecBuildPrefillData();
+    const [framingFormat] = useCodecStore(state => [state.framingFormat]);
 
-    const [commandList, setCommandList] = useState(
-        commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList
-    );
+    const [commandList, setCommandList] = useState(commandTypeConfigMap[commandType].preparedCommandList);
     const [preparedCommands, setPreparedCommands] = useState([]);
     const [command, setCommand] = useState(null);
     const [commandExampleList, setCommandExampleList] = useState([]);
@@ -203,7 +203,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     // reset state when command type changes
     useEffect(
         () => {
-            setCommandList(commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList);
+            setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
             setCommand(null);
             setEditingCommandId(null);
             setCommandParameters('');
@@ -245,7 +245,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }
 
         if ( commandExampleData.value.config?.hardwareType ) {
-            const hardwareTypeData = commandTypeConfigMap[resolveCommandType(commandType)].hardwareTypeList
+            const hardwareTypeData = commandTypeConfigMap[commandType].hardwareTypeList
                 .find(type => type.value === commandExampleData.value.config.hardwareType);
 
             setHardwareType(hardwareTypeData);
@@ -279,7 +279,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
     const onClearCommandListClick = () => {
         setPreparedCommands([]);
-        setCommandList(commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList);
+        setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
     };
 
     const onAddToMessageClick = () => {
@@ -300,7 +300,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         });
 
         setPreparedCommands(newPreparedCommands);
-        setCommandList(commandTypeConfigMap[resolveCommandType(commandType)].preparedCommandList);
+        setCommandList(commandTypeConfigMap[commandType].preparedCommandList);
     };
 
     const onCommandExampleChange = ( event, newValue ) => {
@@ -341,8 +341,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     };
 
     const onBuildClick = () => {
-        const resolvedCommandType = resolveCommandType(commandType);
-        const isMtxLora = commandType === commandTypes.MTX_LORA;
+        const isMtxLoraCheck = isMtxLora(commandType, framingFormat);
         const newLogs = [];
         let data;
         let messageBytes;
@@ -375,7 +374,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             directionName = directionNames[direction];
 
-            messageBytes = joobyCodec[resolvedCommandType].message[directionName].toBytes(
+            messageBytes = joobyCodec[commandType].message[directionName].toBytes(
                 messageCommands,
                 {
                     accessLevel: Number(parameters.accessLevel),
@@ -384,7 +383,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 }
             );
 
-            data = joobyCodec[resolvedCommandType].message[directionName].fromBytes(
+            data = joobyCodec[commandType].message[directionName].fromBytes(
                 messageBytes,
                 {
                     hardwareType: hardwareType?.value,
@@ -393,7 +392,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             );
 
-            if ( commandType === commandTypes.MTX ) {
+            if ( isMtx(commandType, framingFormat) ) {
                 frameType = direction === directions.DOWNLINK ? frameTypes.DATA_REQUEST : frameTypes.DATA_RESPONSE;
                 frameBytes = frame.toBytes(
                     messageBytes,
@@ -409,7 +408,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             console.error(error);
         }
 
-        const bytes = commandType === commandTypes.MTX ? frameBytes : messageBytes;
+        const bytes = isMtx(commandType, framingFormat) ? frameBytes : messageBytes;
 
         newLogs.push(
             processDataAndCreateLog({
@@ -418,15 +417,15 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 directionName,
                 frameType,
                 buildError,
-                isMtxLora,
+                isMtxLoraCheck,
+                commandType,
                 hardwareType: hardwareType?.value,
-                commandType: resolvedCommandType,
-                parameters: resolveParameters(parameters, commandType),
-                logType: getLogType(commandType, buildError)
+                parameters: resolveParameters(parameters, commandType, framingFormat),
+                logType: getLogType(commandType, buildError, framingFormat)
             })
         );
 
-        if ( !buildError && commandType === commandTypes.MTX_LORA ) {
+        if ( !buildError && isMtxLoraCheck ) {
             let segments;
 
             try {
@@ -448,7 +447,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         frameType,
                         buildError,
                         bytes,
-                        isMtxLora,
+                        isMtxLoraCheck,
                         data: undefined,
                         commandType: commandTypes.ANALOG,
                         hardwareType: hardwareTypes.MTXLORA,
@@ -482,7 +481,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                             directionName,
                             frameType,
                             buildError,
-                            isMtxLora,
+                            isMtxLoraCheck,
                             bytes: messageBytes,
                             commandType: commandTypes.ANALOG,
                             hardwareType: hardwareTypes.MTXLORA,
@@ -597,11 +596,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     return (
         <>
             <Typography variant="h5">
-                {
-                    commandType === commandTypes.MTX
-                        ? 'Create frame'
-                        : 'Create message'
-                }
+                {isMtx(commandType, framingFormat) ? 'Create frame' : 'Create message'}
             </Typography>
 
             <Autocomplete
@@ -682,8 +677,20 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     )
                     : (
                         <>
-                            <Button data-testid={'save-edited-command-button'} onClick={onSaveEditedCommandClick} disabled={commandParametersError}>Save</Button>
-                            <Button data-testid={'cancel-edited-command-button'} variant="outlined" onClick={onCancelEditingCommandClick}>Cancel</Button>
+                            <Button
+                                data-testid={'save-edited-command-button'}
+                                onClick={onSaveEditedCommandClick}
+                                disabled={commandParametersError}
+                            >
+                                Save
+                            </Button>
+                            <Button
+                                data-testid={'cancel-edited-command-button'}
+                                variant="outlined"
+                                onClick={onCancelEditingCommandClick}
+                            >
+                                Cancel
+                            </Button>
                         </>
                     )
                 }
@@ -694,100 +701,98 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 <>
                     <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center'}}>
                         {createDirectionIcon(preparedCommands[0].command.value.directionType)}
-                        {commandType === commandTypes.MTX ? 'Frame' : 'Message'}
+                        {isMtx(commandType, framingFormat) ? 'Frame' : 'Message'}
                     </Typography>
 
-                    {
-                        (commandType === commandTypes.MTX || commandType === commandTypes.MTX_LORA) && (
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 2
-                            }}>
-                                {commandType === commandTypes.MTX && (
-                                    <>
-                                        <TextField
-                                            type="text"
-                                            label="Source address"
-                                            value={parameters.source}
-                                            error={parameterErrors.source}
-                                            name="source"
-                                            helperText="2-byte in hex format (0000-FFFF)"
-                                            onChange={onControlChange}
-                                            onBlur={onControlBlur}
-                                        />
-
-                                        <TextField
-                                            type="text"
-                                            label="Destination address"
-                                            value={parameters.destination}
-                                            error={parameterErrors.destination}
-                                            name="destination"
-                                            helperText="2-byte in hex format (0000-FFFF)"
-                                            onChange={onControlChange}
-                                            onBlur={onControlBlur}
-                                        />
-                                    </>
-                                )}
-
-                                {(commandType === commandTypes.MTX || commandType === commandTypes.MTX_LORA) && (
-                                    <>
-                                        <FormControl variant="standard" fullWidth={true}>
-                                            <InputLabel id="select-access-level-label">Access level</InputLabel>
-                                            <Select
-                                                labelId="select-access-level-label"
-                                                id="select-access-level"
-                                                value={parameters.accessLevel}
-                                                name="accessLevel"
-                                                onChange={onControlChange}
-                                            >
-                                                {Object.entries(accessLevels).map(([key, value]) => (
-                                                    <MenuItem key={key} value={value}>{accessLevelNames[value]}</MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-
-                                        <TextField
-                                            label="Access key"
-                                            type="text"
-                                            value={parameters.accessKey}
-                                            error={parameterErrors.accessKey}
-                                            name="accessKey"
-                                            helperText="16-byte in hex format"
-                                            onChange={onControlChange}
-                                            onBlur={onControlBlur}
-                                        />
-
-                                        <TextField
-                                            label="Message ID"
-                                            value={parameters.messageId}
-                                            error={parameterErrors.messageId}
-                                            name="messageId"
-                                            helperText="1-byte in decimal format (0-255)"
-                                            onChange={onControlChange}
-                                            onBlur={onControlBlur}
-                                            min={MESSAGE_ID_MIN_VALUE}
-                                            max={MESSAGE_ID_MAX_VALUE}
-                                        />
-                                    </>
-                                )}
-
-                                {commandType === commandTypes.MTX_LORA && (
+                    {commandType === commandTypes.MTX && (
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2
+                        }}>
+                            {isMtx(commandType, framingFormat) && (
+                                <>
                                     <TextField
-                                        label="Segmentation session ID"
-                                        value={parameters.segmentationSessionId}
-                                        error={parameterErrors.segmentationSessionId}
-                                        name="segmentationSessionId"
+                                        type="text"
+                                        label="Source address"
+                                        value={parameters.source}
+                                        error={parameterErrors.source}
+                                        name="source"
+                                        helperText="2-byte in hex format (0000-FFFF)"
+                                        onChange={onControlChange}
+                                        onBlur={onControlBlur}
+                                    />
+
+                                    <TextField
+                                        type="text"
+                                        label="Destination address"
+                                        value={parameters.destination}
+                                        error={parameterErrors.destination}
+                                        name="destination"
+                                        helperText="2-byte in hex format (0000-FFFF)"
+                                        onChange={onControlChange}
+                                        onBlur={onControlBlur}
+                                    />
+                                </>
+                            )}
+
+                            {commandType === commandTypes.MTX && (
+                                <>
+                                    <FormControl variant="standard" fullWidth={true}>
+                                        <InputLabel id="select-access-level-label">Access level</InputLabel>
+                                        <Select
+                                            labelId="select-access-level-label"
+                                            id="select-access-level"
+                                            value={parameters.accessLevel}
+                                            name="accessLevel"
+                                            onChange={onControlChange}
+                                        >
+                                            {Object.entries(accessLevels).map(([key, value]) => (
+                                                <MenuItem key={key} value={value}>{accessLevelNames[value]}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+
+                                    <TextField
+                                        label="Access key"
+                                        type="text"
+                                        value={parameters.accessKey}
+                                        error={parameterErrors.accessKey}
+                                        name="accessKey"
+                                        helperText="16-byte in hex format"
+                                        onChange={onControlChange}
+                                        onBlur={onControlBlur}
+                                    />
+
+                                    <TextField
+                                        label="Message ID"
+                                        value={parameters.messageId}
+                                        error={parameterErrors.messageId}
+                                        name="messageId"
                                         helperText="1-byte in decimal format (0-255)"
                                         onChange={onControlChange}
                                         onBlur={onControlBlur}
                                         min={MESSAGE_ID_MIN_VALUE}
                                         max={MESSAGE_ID_MAX_VALUE}
                                     />
-                                )}
-                            </Box>
-                        )
-                    }
+                                </>
+                            )}
+
+                            {isMtxLora(commandType, framingFormat) && (
+                                <TextField
+                                    label="Segmentation session ID"
+                                    value={parameters.segmentationSessionId}
+                                    error={parameterErrors.segmentationSessionId}
+                                    name="segmentationSessionId"
+                                    helperText="1-byte in decimal format (0-255)"
+                                    onChange={onControlChange}
+                                    onBlur={onControlBlur}
+                                    min={MESSAGE_ID_MIN_VALUE}
+                                    max={MESSAGE_ID_MAX_VALUE}
+                                />
+                            )}
+                        </Box>
+                    )}
 
                     <Box sx={{
                         flex: '1 1 auto',
@@ -821,11 +826,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                     || Object.values(parameterErrors).some(error => error)
                                 }
                             >
-                                {
-                                    commandType === commandTypes.MTX
-                                        ? 'Build frame'
-                                        : 'Build message'
-                                }
+                                {isMtx(commandType, framingFormat) ? 'Build frame' : 'Build message'}
                             </Button>
 
                             <Button onClick={onClearCommandListClick} disabled={editingCommandId !== null}>Clear commands</Button>

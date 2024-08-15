@@ -21,10 +21,17 @@ import {
     Clear as ClearIcon
 } from '@mui/icons-material';
 
-import removeComments from '../utils/removeComments.js';
-
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
 import {useCommandType} from '../contexts/CommandTypeContext.jsx';
+import {useCodecStore} from '../store/codec.js';
+
+import removeComments from '../utils/removeComments.js';
+import createCtrlEnterSubmitHandler from '../utils/createCtrlEnterSubmitHandler.js';
+import isValidHex from '../utils/isValidHex.js';
+import getLogType from '../utils/getLogType.js';
+import isByteArray from '../utils/isByteArray.js';
+import isMtx from '../utils/isMtx.js';
+import isMtxLora from '../utils/isMtxLora.js';
 
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 import TextField from './TextField.jsx';
@@ -38,13 +45,9 @@ import {
     severityTypes,
     accessKey,
     unknownCommand,
-    logTypes
+    logTypes,
+    framingFormats
 } from '../constants/index.js';
-
-import createCtrlEnterSubmitHandler from '../utils/createCtrlEnterSubmitHandler.js';
-import isValidHex from '../utils/isValidHex.js';
-import getLogType from '../utils/getLogType.js';
-import isByteArray from '../utils/isByteArray.js';
 
 
 const base64ToHex = base64 => Array.from(atob(base64), char => char.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
@@ -75,7 +78,7 @@ const processDataAndCreateLog = ({
     hardwareType,
     parseError,
     logType,
-    isMtxLora
+    isMtxLoraCheck
 }) => {
     const preparedData = {};
     let logErrorMessage = parseError?.message;
@@ -121,7 +124,7 @@ const processDataAndCreateLog = ({
         commandType,
         hex,
         hardwareType,
-        isMtxLora,
+        isMtxLora: isMtxLoraCheck,
         directionName: directionNames[direction],
         data: logErrorMessage ? undefined : preparedData,
         date: new Date().toLocaleString(),
@@ -175,6 +178,7 @@ const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.com
 
 const CodecParseSection = ( {setLogs, hardwareType} ) => {
     const {commandType} = useCommandType();
+    const [framingFormat] = useCodecStore(state => [state.framingFormat]);
 
     const [dump, setDump] = useState('');
     const [format, setFormat] = useState(formats.HEX);
@@ -213,7 +217,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
         const hexLines = removeComments(dump).split('\n').map(line => line.trim()).filter(line => line);
         const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
         const collector = new DataSegmentsCollector();
-        const isMtxLora = commandType === commandTypes.MTX_LORA;
+        const isMtxLoraCheck = isMtxLora(commandType, framingFormat);
         const newLogs = [];
         let mtxBuffer = [];
         let direction;
@@ -238,46 +242,47 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 switch ( commandType ) {
                     case commandTypes.MTX: {
                         try {
-                            const parsedFrame = frame.fromBytes(bytes);
+                            switch ( framingFormat ) {
+                                case framingFormats.HDLC: {
+                                    const parsedFrame = frame.fromBytes(bytes);
 
-                            if ( parsedFrame.error ) {
-                                throw new Error(parsedFrame.error);
-                            }
-
-                            direction = getDirectionFromFrame(parsedFrame);
-
-                            if ( !direction ) {
-                                throw new Error(`Unknown frame type: ${parsedFrame.type}`);
-                            }
-
-                            data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
-                            data.frame = parsedFrame;
-                        } catch ( error ) {
-                            parseError = error;
-                            console.error(error);
-                        }
-
-                        break;
-                    }
-
-                    case commandTypes.MTX_LORA: {
-                        try {
-                            direction = Number(parameters.direction);
-                            data = joobyCodec.analog.message[directionNames[direction]].fromBytes(
-                                bytes,
-                                {hardwareType: hardwareTypes.MTXLORA}
-                            );
-
-                            if ( !data.error ) {
-                                data.commands.forEach(command => {
-                                    if ( command.error ) {
-                                        return;
+                                    if ( parsedFrame.error ) {
+                                        throw new Error(parsedFrame.error);
                                     }
 
-                                    if ( command.id === commands.analog[directionNames[direction]].dataSegment.id ) {
-                                        mtxBuffer = mtxBuffer.concat(collector.push(command.parameters));
+                                    direction = getDirectionFromFrame(parsedFrame);
+
+                                    if ( !direction ) {
+                                        throw new Error(`Unknown frame type: ${parsedFrame.type}`);
                                     }
-                                });
+
+                                    data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
+                                    data.frame = parsedFrame;
+
+                                    break;
+                                }
+
+                                case framingFormats.NONE: {
+                                    direction = Number(parameters.direction);
+                                    data = joobyCodec.analog.message[directionNames[direction]].fromBytes(
+                                        bytes,
+                                        {hardwareType: hardwareTypes.MTXLORA}
+                                    );
+
+                                    if ( !data.error ) {
+                                        data.commands.forEach(command => {
+                                            if ( command.error ) {
+                                                return;
+                                            }
+
+                                            if ( command.id === commands.analog[directionNames[direction]].dataSegment.id ) {
+                                                mtxBuffer = mtxBuffer.concat(collector.push(command.parameters));
+                                            }
+                                        });
+                                    }
+
+                                    break;
+                                }
                             }
                         } catch ( error ) {
                             parseError = error;
@@ -334,15 +339,15 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     hex,
                     direction,
                     parseError,
-                    isMtxLora,
+                    isMtxLoraCheck,
                     hardwareType: hardwareType?.value,
-                    commandType: commandType === commandTypes.MTX_LORA ? commandTypes.ANALOG : commandType,
-                    logType: getLogType(commandType, parseError)
+                    commandType: isMtxLoraCheck ? commandTypes.ANALOG : commandType,
+                    logType: getLogType(commandType, parseError, framingFormat)
                 })
             );
         });
 
-        if ( commandType === commandTypes.MTX_LORA ) {
+        if ( isMtxLoraCheck ) {
             const isByteArrayValid = isByteArray(mtxBuffer);
             let data;
             let parseError;
@@ -358,7 +363,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     data,
                     direction,
                     parseError,
-                    isMtxLora,
+                    isMtxLoraCheck,
                     hardwareType: hardwareType?.value,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(mtxBuffer) : undefined,
                     commandType: commandTypes.MTX,
@@ -412,11 +417,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
     return (
         <>
             <Typography variant="h5">
-                {
-                    commandType === commandTypes.MTX
-                        ? 'Parse frames'
-                        : 'Parse messages'
-                }
+                {isMtx(commandType, framingFormat) ? 'Parse frames' : 'Parse messages'}
             </Typography>
 
             <div>
@@ -436,7 +437,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                         </RadioGroup>
                     </FormControl>
 
-                    {(commandType === commandTypes.ANALOG || commandType === commandTypes.MTX_LORA) && (
+                    {(commandType === commandTypes.ANALOG || isMtxLora(commandType, framingFormat)) && (
                         <FormControl sx={{display: 'contents'}}>
                             <FormLabel id="dump-input-direction" sx={{pr: 2}}>Direction</FormLabel>
                             <RadioGroup
@@ -455,7 +456,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 </Box>
             </div>
 
-            {(commandType === commandTypes.MTX || commandType === commandTypes.MTX_LORA) && (
+            {commandType === commandTypes.MTX && (
                 <div>
                     <TextField
                         type="text"

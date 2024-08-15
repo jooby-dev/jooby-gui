@@ -73,12 +73,5 @@ export const commandTypeConfigMap = {
         hasHardwareType: false,
         preparedCommandList: prepareCommandList(commands.mtx),
         hardwareTypeList: null
-    },
-
-    [commandTypes.MTX_LORA]: {
-        hasLrc: false,
-        hasHardwareType: false,
-        preparedCommandList: null,
-        hardwareTypeList: null
     }
 };
