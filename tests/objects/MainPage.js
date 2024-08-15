@@ -59,6 +59,7 @@ export class MainPage {
 
         if ( command.parameters ) {
             const textarea = this.page.locator('textarea.ace_text-input');
+            await this.page.getByLabel('Clear parameters').click();
             await textarea.fill(JSON.stringify(command.parameters));
         }
 
@@ -123,5 +124,9 @@ export class MainPage {
 
     formatDump ( dump ) {
         return dump.replace(/(.{2})/g, '$1 ').trim();
+    }
+
+    getDumpInLogs ( dump ) {
+        return this.page.locator('[data-test="hex"]', {hasText: dump}).first();
     }
 }

@@ -17,7 +17,7 @@ test.describe('analog downlink commands - parse hex dumps', () => {
 
             await mainPage.parseDump(command.hex.dump);
             await mainPage.expandLogs();
-            await expect(page.locator('p', {hasText: command.hex.dump}).first()).toBeVisible();
+            await expect(mainPage.getDumpInLogs(command.hex.dump)).toBeVisible();
             await expect(page.getByText(command.hex.lrc)).toBeVisible();
         });
     }
@@ -44,7 +44,7 @@ test.describe('analog downlink commands - create messages', () => {
 
             await mainPage.buildMessage();
             await mainPage.expandLogs();
-            await expect(page.locator('p', {hasText: command.hex.dump}).first()).toBeVisible();
+            await expect(mainPage.getDumpInLogs(command.hex.dump)).toBeVisible();
             await expect(page.getByText(command.hex.lrc)).toBeVisible();
         });
     }
