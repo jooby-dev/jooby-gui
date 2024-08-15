@@ -67,8 +67,10 @@ const renderLrc = lrc => {
         return renderLrcValue(calculated);
     }
 
-    return <>calculated: {renderLrcValue(calculated)}, received: {renderLrcValue(received)}</>;
+    return <>received: {renderLrcValue(received)}, calculated: {renderLrcValue(calculated)}</>;
 };
+
+const getToggleLogAndNestedTitle = baseTitle => <Box sx={{textAlign: 'center'}}>{baseTitle}<br/>(Ctrl+Click on title)</Box>;
 
 
 const Log = ({
@@ -151,11 +153,11 @@ const Log = ({
                         </Box>
                     </Box>
 
-                    <IconButtonWithTooltip title="Expand log" onClick={event => toggleLogAndNested(event, id)}>
+                    <IconButtonWithTooltip title={getToggleLogAndNestedTitle('Expand log')} onClick={event => toggleLogAndNested(event, id)}>
                         <UnfoldMoreIcon/>
                     </IconButtonWithTooltip>
 
-                    <IconButtonWithTooltip title="Collapse log" onClick={event => toggleLogAndNested(event, id, false)}>
+                    <IconButtonWithTooltip title={getToggleLogAndNestedTitle('Collapse log')} onClick={event => toggleLogAndNested(event, id, false)}>
                         <UnfoldLessIcon/>
                     </IconButtonWithTooltip>
 
