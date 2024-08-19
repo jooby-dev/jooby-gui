@@ -6,7 +6,7 @@ import isUndefined from '../utils/isUndefined.js';
 import getHexFromNumber from '../utils/getHexFromNumber.js';
 
 import {commandTypeConfigMap} from '../joobyCodec.js';
-import {codecBuildDefaults, commandTypes} from '../constants/index.js';
+import {codecBuildDefaults} from '../constants/index.js';
 
 
 const CodecBuildPrefillDataContext = createContext();
@@ -28,8 +28,6 @@ export const CodecBuildPrefillDataProvider = ( {children} ) => {
             const {accessLevel, accessKey, messageId} = log.messageParameters;
             const {source, destination, segmentationSessionId} = log.frameParameters;
             const {preparedCommandList} = commandTypeConfigMap[log.commandType];
-
-            const commandType = log.isMtxLora && log.commandType === commandTypes.MTX ? commandTypes.MTX_LORA : log.commandType;
 
             const logCommands = log.data.commands.map(command => ({
                 command: preparedCommandList.find(({value, direction}) => value.id === command.command.id && direction === log.directionName),
@@ -53,7 +51,7 @@ export const CodecBuildPrefillDataProvider = ( {children} ) => {
             setPrefillData({
                 hardwareType,
                 parameters,
-                commandType,
+                commandType: log.commandType,
                 preparedCommands: logCommands
             });
         },

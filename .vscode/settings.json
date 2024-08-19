@@ -1,12 +1,15 @@
 {
     "cSpell.words": [
-        "uuidv4",
         "clickaway",
-        "jooby",
         "fontsource",
-        "roboto",
+        "HDLC",
+        "jooby",
+        "MTXLORA",
         "noconflict",
-        "MTXLORA"
+        "roboto",
+        "testid",
+        "uuidv4",
+        "zustand",
     ],
 
     "javascript.preferences.importModuleSpecifierEnding": "js",
