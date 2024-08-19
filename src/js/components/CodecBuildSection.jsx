@@ -200,6 +200,9 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
     const showSnackbar = useSnackbar();
 
+    const isMtxLoraCheck = isMtxLora(commandType, framingFormat);
+    const isMtxCheck = isMtx(commandType, framingFormat);
+
     // reset state when command type changes
     useEffect(
         () => {
@@ -341,7 +344,6 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     };
 
     const onBuildClick = () => {
-        const isMtxLoraCheck = isMtxLora(commandType, framingFormat);
         const newLogs = [];
         let data;
         let messageBytes;
@@ -392,7 +394,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
 
             );
 
-            if ( isMtx(commandType, framingFormat) ) {
+            if ( isMtxCheck ) {
                 frameType = direction === directions.DOWNLINK ? frameTypes.DATA_REQUEST : frameTypes.DATA_RESPONSE;
                 frameBytes = frame.toBytes(
                     messageBytes,
@@ -408,7 +410,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             console.error(error);
         }
 
-        const bytes = isMtx(commandType, framingFormat) ? frameBytes : messageBytes;
+        const bytes = isMtxCheck ? frameBytes : messageBytes;
 
         newLogs.push(
             processDataAndCreateLog({
@@ -596,7 +598,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     return (
         <>
             <Typography variant="h5">
-                {isMtx(commandType, framingFormat) ? 'Create frame' : 'Create message'}
+                {isMtxCheck ? 'Create frame' : 'Create message'}
             </Typography>
 
             <Autocomplete
@@ -701,7 +703,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                 <>
                     <Typography variant="h6" sx={{fontWeight: 400, display: 'flex', alignItems: 'center'}}>
                         {createDirectionIcon(preparedCommands[0].command.value.directionType)}
-                        {isMtx(commandType, framingFormat) ? 'Frame' : 'Message'}
+                        {isMtxCheck ? 'Frame' : 'Message'}
                     </Typography>
 
                     {commandType === commandTypes.MTX && (
@@ -710,7 +712,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                             flexDirection: 'column',
                             gap: 2
                         }}>
-                            {isMtx(commandType, framingFormat) && (
+                            {isMtxCheck && (
                                 <>
                                     <TextField
                                         type="text"
@@ -778,7 +780,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                 </>
                             )}
 
-                            {isMtxLora(commandType, framingFormat) && (
+                            {isMtxLoraCheck && (
                                 <TextField
                                     label="Segmentation session ID"
                                     value={parameters.segmentationSessionId}
@@ -826,7 +828,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                     || Object.values(parameterErrors).some(error => error)
                                 }
                             >
-                                {isMtx(commandType, framingFormat) ? 'Build frame' : 'Build message'}
+                                {isMtxCheck ? 'Build frame' : 'Build message'}
                             </Button>
 
                             <Button onClick={onClearCommandListClick} disabled={editingCommandId !== null}>Clear commands</Button>

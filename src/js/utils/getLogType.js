@@ -1,5 +1,5 @@
 import isMtx from './isMtx.js';
-import {logTypes, commandTypes, framingFormats} from '../constants/index.js';
+import {logTypes} from '../constants/index.js';
 
 
 export default ( commandType, error, framingFormat ) => {

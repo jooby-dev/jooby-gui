@@ -187,6 +187,8 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
 
     const showSnackbar = useSnackbar();
 
+    const isMtxLoraCheck = isMtxLora(commandType, framingFormat);
+
     // reset state when command type changes
     useEffect(
         () => {
@@ -217,7 +219,6 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
         const hexLines = removeComments(dump).split('\n').map(line => line.trim()).filter(line => line);
         const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
         const collector = new DataSegmentsCollector();
-        const isMtxLoraCheck = isMtxLora(commandType, framingFormat);
         const newLogs = [];
         let mtxBuffer = [];
         let direction;
@@ -437,7 +438,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                         </RadioGroup>
                     </FormControl>
 
-                    {(commandType === commandTypes.ANALOG || isMtxLora(commandType, framingFormat)) && (
+                    {(commandType === commandTypes.ANALOG || isMtxLoraCheck) && (
                         <FormControl sx={{display: 'contents'}}>
                             <FormLabel id="dump-input-direction" sx={{pr: 2}}>Direction</FormLabel>
                             <RadioGroup
