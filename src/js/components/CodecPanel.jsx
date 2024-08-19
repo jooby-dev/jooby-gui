@@ -21,6 +21,8 @@ import {useCodecStore} from '../store/codec.js';
 
 import CodecBuildSection from './CodecBuildSection.jsx';
 import CodecParseSection from './CodecParseSection.jsx';
+import DateToTime2000Converter from './DateToTime2000Converter.jsx';
+import Button from './Button.jsx';
 
 import {commandTypeConfigMap} from '../joobyCodec.js';
 import {commandTypes, framingFormats} from '../constants/index.js';
@@ -32,7 +34,9 @@ const CodecPanel = ( {setLogs} ) => {
     const {prefillData} = useCodecBuildPrefillData();
     const [framingFormat, setFramingFormat] = useCodecStore(state => [state.framingFormat, state.setFramingFormat]);
     const {commandType, setCommandType} = useCommandType();
+
     const [hardwareType, setHardwareType] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const onCommandTypeChange = event => {
         setCommandType(event.target.value);
@@ -126,12 +130,11 @@ const CodecPanel = ( {setLogs} ) => {
                 <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     position: 'sticky',
                     bottom: 0,
                     mt: 'auto',
-                    px: 0,
-                    py: 2,
+                    p: 2,
                     backgroundColor: 'background.default',
                     borderTopColor: 'divider',
                     borderTopWidth: 1,
@@ -139,8 +142,10 @@ const CodecPanel = ( {setLogs} ) => {
                     zIndex: 1000
                 }}>
                     <Link href="https://github.com/jooby-dev/jooby-gui" target="_blank" rel="noopener noreferrer">GitHub</Link>
+                    <Button variant="text" onClick={() => setIsModalOpen(true)}>Date to time2000 converter</Button>
                 </Box>
             </Box>
+            <DateToTime2000Converter isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
         </Box>
     );
 };

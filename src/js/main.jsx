@@ -2,6 +2,9 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import CssBaseline from '@mui/material/CssBaseline';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
+import {LocalizationProvider} from '@mui/x-date-pickers';
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/en-gb';
 
 import {SnackbarProvider} from './contexts/SnackbarContext.jsx';
 import {CommandTypeProvider} from './contexts/CommandTypeContext.jsx';
@@ -34,15 +37,17 @@ const theme = createTheme({
 
 createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <ThemeProvider theme={theme}>
-            <CssBaseline/>
-            <SnackbarProvider>
-                <CommandTypeProvider>
-                    <CodecBuildPrefillDataProvider>
-                        <App/>
-                    </CodecBuildPrefillDataProvider>
-                </CommandTypeProvider>
-            </SnackbarProvider>
-        </ThemeProvider>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+            <ThemeProvider theme={theme}>
+                <CssBaseline/>
+                <SnackbarProvider>
+                    <CommandTypeProvider>
+                        <CodecBuildPrefillDataProvider>
+                            <App/>
+                        </CodecBuildPrefillDataProvider>
+                    </CommandTypeProvider>
+                </SnackbarProvider>
+            </ThemeProvider>
+        </LocalizationProvider>
     </React.StrictMode>
 );
