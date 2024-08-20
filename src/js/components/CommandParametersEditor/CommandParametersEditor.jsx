@@ -201,10 +201,7 @@ const CommandParameterEditor = ({
                 <>
                     {'JSON with command parameters (see '}
                     <Link
-                        href={createCommandDocLink(
-                            command.value,
-                            commandType === commandTypes.MTX_LORA ? commandTypes.MTX : commandType
-                        )}
+                        href={createCommandDocLink(command.value, commandType)}
                         target="_blank"
                         rel="noreferrer"
                         onClick={event => event.stopPropagation()}

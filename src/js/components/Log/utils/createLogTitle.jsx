@@ -4,7 +4,6 @@ import {Close as CloseIcon} from '@mui/icons-material';
 
 import createDirectionIcon from '../../../utils/createDirectionIcon.jsx';
 import removeQuotes from '../../../utils/removeQuotes.js';
-import resolveCommandType from '../../../utils/resolveCommandType.js';
 
 import HighlightedText from '../../HighlightedText.jsx';
 
@@ -17,7 +16,7 @@ const renderHardwareType = ( hardwareType, commandType ) => {
         return null;
     }
 
-    const {hardwareTypeList} = commandTypeConfigMap[resolveCommandType(commandType)];
+    const {hardwareTypeList} = commandTypeConfigMap[commandType];
     const hardwareTypeName = hardwareTypeList.find(({value}) => value === hardwareType).label;
 
     return (

@@ -129,6 +129,7 @@ const LogsPanel = ( {logs, setLogs} ) => {
             };
 
             reader.readAsText(file);
+            event.target.value = null;
         }
     };
 

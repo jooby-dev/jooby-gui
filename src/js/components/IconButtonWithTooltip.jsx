@@ -18,7 +18,7 @@ const IconButtonWithTooltip = ({
 };
 
 IconButtonWithTooltip.propTypes = {
-    title: PropTypes.string.isRequired,
+    title: PropTypes.node.isRequired,
     disabled: PropTypes.bool,
     size: PropTypes.oneOf(['small', 'medium', 'large'])
 };

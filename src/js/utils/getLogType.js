@@ -1,12 +1,13 @@
-import {logTypes, commandTypes} from '../constants/index.js';
+import isMtx from './isMtx.js';
+import {logTypes} from '../constants/index.js';
 
 
-export default ( commandType, error ) => {
+export default ( commandType, error, framingFormat ) => {
     if ( error ) {
         return logTypes.ERROR;
     }
 
-    if ( commandType === commandTypes.MTX ) {
+    if ( isMtx(commandType, framingFormat) ) {
         return logTypes.FRAME;
     }
 
