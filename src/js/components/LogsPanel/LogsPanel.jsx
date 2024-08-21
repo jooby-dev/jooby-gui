@@ -1,5 +1,6 @@
 import {useEffect, useCallback} from 'react';
 import PropTypes from 'prop-types';
+import {v4 as uuidv4} from 'uuid';
 
 import {
     Box,
@@ -122,7 +123,16 @@ const LogsPanel = ( {logs, setLogs} ) => {
                 try {
                     const importedLogs = JSON.parse(readerEvent.target.result);
 
-                    setLogs(importedLogs);
+                    // generate new IDs to avoid potential conflicts with existing logs
+                    importedLogs.forEach(log => {
+                        log.id = uuidv4();
+
+                        log.data?.commands?.forEach(command => {
+                            command.id = uuidv4();
+                        });
+                    });
+
+                    setLogs(prevLogs => [...prevLogs, ...importedLogs]);
                 } catch ( error ) {
                     console.error('Error importing logs:', error);
                 }
