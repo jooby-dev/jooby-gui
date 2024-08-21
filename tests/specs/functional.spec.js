@@ -1,38 +1,46 @@
 import {test, expect} from '@playwright/test';
 import {MainPage} from '../objects/MainPage.js';
-import fixture from '../fixtures/main.js';
+import {commandTypes} from '../../src/js/constants/index.js';
+import {commandTypeConfigMap} from '../../src/js/joobyCodec.js';
+
+
+const expectedTexts = {
+    titles: ['Parse messages', 'Create message', 'Logs'],
+    descriptions: [
+        'May be required for parsing and creating a message',
+        '',
+        'Batch processing supported, each dump on a new line',
+        'Commands in the message must be of the same direction'
+    ],
+    analog: {
+        options: commandTypeConfigMap.analog.hardwareTypeList,
+        commands: commandTypeConfigMap.analog.preparedCommandList.map(command => command.value.name.toString())
+    }
+
+};
 
 
 test.describe('functional test', () => {
     test('check visibility of elements', async ( {page, baseURL} ) => {
         await page.goto(baseURL);
 
-        const $titles = await page.locator('h5').allInnerTexts();
-        const $descriptions = await page.locator('p').allInnerTexts();
-        const $codecOptions = await new MainPage(page).getAllSelectOption(fixture.codecType.label, true);
-        const $hardwareOptions = await new MainPage(page).getAllSelectOption(fixture.hardwareType.label);
-        const $commandsOptions = await new MainPage(page).getAllSelectOption(fixture.createMessages.select.label);
-        const $parseButton = page.getByTestId(fixture.parseMessages.parseButton);
-        const $addCommandButton = page.getByTestId(fixture.createMessages.addCommandButton);
+        const mainPage = new MainPage(page);
+        const $codecOptions = await mainPage.getAllSelectOption(MainPage.codec, true);
+        const $hardwareOptions = await mainPage.getAllSelectOption(MainPage.hardwareType);
+        const $commandsOptions = await mainPage.getAllSelectOption(MainPage.command);
 
-        expect($titles).toEqual([fixture.parseMessages.title.text, fixture.createMessages.title.text, fixture.logs.title.text]);
-        expect($descriptions).toEqual([
-            fixture.hardwareType.description.text,
-            '',
-            fixture.parseMessages.description.text,
-            fixture.createMessages.description.text
-        ]);
+        expect(await mainPage.getAllTitleTexts()).toEqual(expectedTexts.titles);
+        expect(await mainPage.getAllDescriptionTexts()).toEqual(expectedTexts.descriptions);
+        expect($codecOptions).toEqual(Object.values(commandTypes));
+        expect($commandsOptions.length).toEqual(expectedTexts.analog.commands.length);
 
-        expect($codecOptions).toEqual(Object.values(fixture.codecType.options));
-        expect($commandsOptions.length).toEqual(fixture.hardwareType.analog.commands.length);
+        await expect(await mainPage.getParseButtonAndClick(false)).toBeVisible();
+        await expect(await mainPage.getAddCommandButtonAndClick(false)).toBeVisible();
+        await expect(mainPage.redirectToGithub()).toBeVisible();
 
-        $commandsOptions.forEach(command => expect(fixture.hardwareType.analog.commands).toContain(command));
+        $commandsOptions.forEach(command => expect(expectedTexts.analog.commands).toContain(command));
 
-        await expect($parseButton).toBeVisible();
-        await expect($addCommandButton).toBeVisible();
-        await expect(page.getByRole('link', {name: 'GitHub'})).toBeVisible();
-
-        fixture.hardwareType.analog.options.forEach((option, index) => {
+        expectedTexts.analog.options.forEach((option, index) => {
             expect($hardwareOptions[index]).toEqual(option.label);
         });
     });

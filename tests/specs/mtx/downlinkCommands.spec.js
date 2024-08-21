@@ -1,17 +1,16 @@
 import {test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 import {validateMtxFrames} from './utils.js';
-import fixture from '../../fixtures/main.js';
 import {downlinkCommands} from '../../fixtures/mtx/commands.js';
 
 
 test.describe('mtx downlink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectCodec(fixture.codecType.options.MTX);
+        await new MainPage(page).selectMtxCodec();
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -27,10 +26,10 @@ test.describe('mtx downlink commands - parse hex dumps', () => {
 test.describe('mtx downlink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectCodec(fixture.codecType.options.MTX);
+        await new MainPage(page).selectMtxCodec();
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {

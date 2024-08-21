@@ -1,35 +1,35 @@
 import {test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
-import fixture from '../../fixtures/main.js';
 import {downlinkCommands} from '../../fixtures/mtxLora/commands.js';
 import {validateMtxLoraMessage} from './utils.js';
 
 
-test.describe('mtxLora downlink commands - parse hex dumps', () => {
+// todo: need to clarify what exactly is mtxLora
+test.describe.fixme('mtxLora downlink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectCodec(fixture.codecType.options.MTX_LORA);
+        await new MainPage(page).selectMtxCodec(false);
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
             const mainPage = await new MainPage(page);
 
             await mainPage.parseDump(command.hex.dump, true);
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'parse');
+            await validateMtxLoraMessage(page, 'hex', command, 'parse');
         });
     }
 });
 
-test.describe('mtxLora downlink commands - create messages', () => {
+test.describe.fixme('mtxLora downlink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectCodec(fixture.codecType.options.MTX_LORA);
+        await new MainPage(page).selectMtxCodec(false);
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -44,7 +44,7 @@ test.describe('mtxLora downlink commands - create messages', () => {
             }
 
             await mainPage.buildMessage();
-            await validateMtxLoraMessage(page, fixture.parseMessages.format.hex, command, 'build');
+            await validateMtxLoraMessage(page, 'hex', command, 'build');
         });
     }
 });

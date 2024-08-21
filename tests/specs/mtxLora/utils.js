@@ -1,7 +1,9 @@
 import {expect} from '@playwright/test';
+import {MainPage} from '../../objects/MainPage.js';
+
 
 const checkMtxMessage = async ( page, command, mtxCommands ) => {
-    await expect(page.locator('p').filter({hasText: command.mtx.dump})).toBeVisible();
+    await expect(new MainPage(page).getDumpInLogs(command.mtx.dump)).toBeVisible();
     await expect(page.getByText(command.mtx.accessLevel)).toBeVisible();
     await expect(page.getByText(command.mtx.lrc)).toBeVisible();
 
@@ -15,9 +17,9 @@ const checkAnalogMessage = async ( page, analogCommands ) => {
     const buttons = await page.locator('text="json"').elementHandles();
 
     for ( let counter = 0; counter < buttons.length; counter++ ) {
-        await expect(page.locator(`p.MuiTypography-root:has-text('${analogCommands[counter].dump}')`).nth(1)).toBeVisible();
+        await expect(new MainPage(page).getDumpInLogs(analogCommands[counter].dump)).toBeVisible();
         await expect(page.getByRole('link', {name: analogCommands[counter].name, exact: true}).nth(0)).toBeVisible();
-        await buttons[counter].click();
+        await buttons[counter].click({force: true});
         expect(JSON.parse(await page.getByLabel('json', {exact: true}).innerText()))
             .toStrictEqual(analogCommands[counter].parameters);
     }
@@ -31,7 +33,7 @@ export const validateMtxLoraMessage = async ( page, format, command, type ) => {
     const mtxCommands = Object.values(command.mtx.commands);
 
     for ( let index = 1; index < messages.length; index++ ) {
-        await messages[index].click();
+        await messages[index].click({force: true});
 
         if ( type === 'parse' ) {
             if ( index === 1 ) {
@@ -49,6 +51,7 @@ export const validateMtxLoraMessage = async ( page, format, command, type ) => {
             }
         }
 
-        await closeMessages[index].click();
+        // force click for webkit
+        await closeMessages[index].click({force: true});
     }
 };
