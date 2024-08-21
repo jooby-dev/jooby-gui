@@ -682,8 +682,20 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     )
                     : (
                         <>
-                            <Button data-testid={'save-edited-command-button'} onClick={onSaveEditedCommandClick} disabled={commandParametersError}>Save</Button>
-                            <Button data-testid={'cancel-edited-command-button'} variant="outlined" onClick={onCancelEditingCommandClick}>Cancel</Button>
+                            <Button
+                                data-testid={'save-edited-command-button'}
+                                onClick={onSaveEditedCommandClick}
+                                disabled={commandParametersError}
+                            >
+                                Save
+                            </Button>
+                            <Button
+                                data-testid={'cancel-edited-command-button'}
+                                variant="outlined"
+                                onClick={onCancelEditingCommandClick}
+                            >
+                                Cancel
+                            </Button>
                         </>
                     )
                 }
