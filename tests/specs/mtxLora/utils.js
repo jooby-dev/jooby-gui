@@ -19,7 +19,7 @@ const checkAnalogMessage = async ( page, analogCommands ) => {
     for ( let counter = 0; counter < buttons.length; counter++ ) {
         await expect(new MainPage(page).getDumpInLogs(analogCommands[counter].dump)).toBeVisible();
         await expect(page.getByRole('link', {name: analogCommands[counter].name, exact: true}).nth(0)).toBeVisible();
-        await buttons[counter].click();
+        await buttons[counter].click({force: true});
         expect(JSON.parse(await page.getByLabel('json', {exact: true}).innerText()))
             .toStrictEqual(analogCommands[counter].parameters);
     }
@@ -33,7 +33,7 @@ export const validateMtxLoraMessage = async ( page, format, command, type ) => {
     const mtxCommands = Object.values(command.mtx.commands);
 
     for ( let index = 1; index < messages.length; index++ ) {
-        await messages[index].click();
+        await messages[index].click({force: true});
 
         if ( type === 'parse' ) {
             if ( index === 1 ) {

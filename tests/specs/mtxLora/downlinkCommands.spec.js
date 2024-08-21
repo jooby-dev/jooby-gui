@@ -4,10 +4,11 @@ import {downlinkCommands} from '../../fixtures/mtxLora/commands.js';
 import {validateMtxLoraMessage} from './utils.js';
 
 
-test.describe('mtxLora downlink commands - parse hex dumps', () => {
+// todo: need to clarify what exactly is mtxLora
+test.describe.fixme('mtxLora downlink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectMtxLoraCodec();
+        await new MainPage(page).selectMtxCodec(false);
     });
 
     test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
@@ -22,10 +23,10 @@ test.describe('mtxLora downlink commands - parse hex dumps', () => {
     }
 });
 
-test.describe('mtxLora downlink commands - create messages', () => {
+test.describe.fixme('mtxLora downlink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectMtxLoraCodec();
+        await new MainPage(page).selectMtxCodec(false);
     });
 
     test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());

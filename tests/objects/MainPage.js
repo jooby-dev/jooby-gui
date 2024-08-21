@@ -70,12 +70,12 @@ export class MainPage {
         await this.page.getByText(type, {exact: true}).click();
     }
 
-    async selectMtxCodec () {
+    async selectMtxCodec ( frame = true ) {
         await this.selectCodec(commandTypes.MTX);
-    }
 
-    async selectMtxLoraCodec () {
-        await this.selectCodec(commandTypes.MTX_LORA);
+        if ( !frame ) {
+            await this.page.getByLabel('NONE').click();
+        }
     }
 
     async selectObisObserverCodec () {
