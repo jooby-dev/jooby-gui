@@ -45,6 +45,8 @@ export class MainPage {
 
     async expandLogs () {
         await this.page.getByLabel(fixture.logs.buttons.expandLogs).click();
+        //todo: might try to remove timeout in next PR's
+        // eslint-disable-next-line playwright/no-wait-for-timeout
         await this.page.waitForTimeout(2000);
     }
 

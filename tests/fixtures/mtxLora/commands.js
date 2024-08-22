@@ -302,7 +302,8 @@ export const uplinkCommands = {
     },
     getCurrentValues: {
         hex: {
-            dump: '1e 29 f6 91 09 10 10 0d 20 00 00 00 00 00 00 00 00 00 03 5c 41 00 00 00 00 03 e8 00 00 00 00 00 00 00 00 00 00 00 00 03 e8 00 76 49',
+            dump: '1e 29 f6 91 09 10 10 0d 20 00 00 00 00 00 00 00 00 00 03 5c 41 00 00 00 00'
+                + ' 03 e8 00 00 00 00 00 00 00 00 00 00 00 00 03 e8 00 76 49',
             lrc: '0x49'
         },
         base64: 'Hin2kQkQEA0gAAAAAAAAAAAAA1xBAAAAAAPoAAAAAAAAAAAAAAAAA+gAdkk=',

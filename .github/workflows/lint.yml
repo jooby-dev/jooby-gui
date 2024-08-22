@@ -1,0 +1,35 @@
+name: lint
+
+on:
+    # any branch
+    push:
+        branches:
+            - '**'
+        # don't run on release tag creation
+        tags-ignore:
+            - '**'
+    pull_request:
+    # manually
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+# allow only one concurrent run
+concurrency: "lint"
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: checkout
+              uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '18.x'
+                  cache: npm
+
+            - run: npm ci
+            - run: npm run lint

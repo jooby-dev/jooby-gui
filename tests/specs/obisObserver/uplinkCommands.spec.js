@@ -18,6 +18,7 @@ test.describe('obisObserver uplink commands - parse hex dumps', () => {
             const mainPage = await new MainPage(page);
 
             await mainPage.parseDump(command.hex.dump);
+            // eslint-disable-next-line playwright/no-wait-for-timeout
             await page.waitForTimeout(5000);
             await validateObisObserverMessages(page, command);
         });
