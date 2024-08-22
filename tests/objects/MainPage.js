@@ -22,28 +22,20 @@ export class MainPage {
         return this.page.getByRole('link', {name: 'GitHub'})
     }
 
+    getParseButton () {
+        return  this.page.getByTestId('parse-button');
+    }
+
+    getAddCommandButton () {
+        return  this.page.getByTestId('add-command-button');
+    }
+
+    getTime2000Converter () {
+        return this.page.getByRole('button', { name: 'Date to time2000 converter' })
+    }
+
     async deleteLogs () {
         await this.page.getByLabel('Delete logs').click();
-    }
-
-    async getParseButtonAndClick ( click = true ) {
-        const $button = await this.page.getByTestId('parse-button');
-
-        if ( click ) {
-            $button.click();
-        } else {
-            return $button;
-        }
-    }
-
-    async getAddCommandButtonAndClick ( click = true ) {
-        const $button = this.page.getByTestId('add-command-button');
-
-        if ( click ) {
-            await $button.click();
-        } else {
-            return $button;
-        }
     }
 
     async getAllSelectOption ( label, codecSelect = false ) {
@@ -60,7 +52,12 @@ export class MainPage {
         // missile click for closing select list
         codecSelect
             ? await this.page.getByRole('option', {name: 'analog'}).click()
-            : await this.page.locator('#root').click();
+            : await this.page.click('body', {
+                position: {
+                    x: 100,
+                    y: 100
+                }
+            });
 
         return options;
     }
@@ -92,7 +89,7 @@ export class MainPage {
             ? await this.page.getByLabel('Dump', {exact: true}).fill(dump)
             : await this.page.getByLabel('Dump').fill(dump);
 
-        await this.getParseButtonAndClick();
+        await this.getParseButton().click();
     }
 
     async expandLogs () {
@@ -115,7 +112,7 @@ export class MainPage {
             await textarea.fill(JSON.stringify(command.parameters));
         }
 
-        await this.getAddCommandButtonAndClick();
+        await this.getAddCommandButton().click();
     }
 
     async buildMessage () {
