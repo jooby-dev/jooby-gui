@@ -35,7 +35,7 @@ import HighlightedText from '../HighlightedText.jsx';
 import TypographyBold from '../TypographyBold.jsx';
 import TypographyMono from '../TypographyMono.jsx';
 
-import {parametersTabViewTypes} from '../../constants/index.js';
+import {parametersTabViewTypes, commandTypes} from '../../constants/index.js';
 
 import useLogActions from './hooks/useLogActions.js';
 import {useCodecBuildPrefillData} from '../../contexts/CodecBuildPrefillDataContext.jsx';
@@ -54,6 +54,23 @@ import {JSONTreeTheme} from './constants.js';
 
 const frameNamesByType = invertObject(frameTypes);
 const accessLevelNames = invertObject(accessLevels);
+
+const shouldRenderLrc = log => {
+    // if the mtx message is unencrypted, the device sets the LRC to 0
+    if (
+        log.commandType === commandTypes.MTX
+        && log.data?.lrc?.received === 0
+        && log.messageParameters?.accessLevel === accessLevels.UNENCRYPTED
+    ) {
+        return false;
+    }
+
+    if ( !hasLrc(log.commandType) ) {
+        return false;
+    }
+
+    return true;
+};
 
 const renderLrcValue = value => (value === 'n/a' ? value : <HexViewer hex={value}/>);
 
@@ -236,7 +253,7 @@ const Log = ({
                             </>
                         )}
 
-                        {hasLrc(log.commandType) && (
+                        {shouldRenderLrc(log) && (
                             <>
                                 <TypographyBold>lrc</TypographyBold>
                                 <Box>{renderLrc(data.lrc)}</Box>
