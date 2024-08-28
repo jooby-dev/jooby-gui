@@ -132,7 +132,7 @@ const LogsPanel = ( {logs, setLogs} ) => {
                         });
                     });
 
-                    setLogs(prevLogs => [...prevLogs, ...importedLogs]);
+                    setLogs(prevLogs => [...importedLogs, ...prevLogs]);
                 } catch ( error ) {
                     console.error('Error importing logs:', error);
                 }
