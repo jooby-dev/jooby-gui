@@ -10,7 +10,8 @@ import {
     DialogContent,
     DialogTitle,
     TextField,
-    InputAdornment
+    InputAdornment,
+    Popper
 } from '@mui/material';
 
 import {ContentCopy as ContentCopyIcon} from '@mui/icons-material';
@@ -22,9 +23,16 @@ import useCopyToClipboard from '../hooks/useCopyToClipboard.js';
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 
 
-const MIN_DATE = dayjs('1900-01-01');
+const MIN_DATE = dayjs('2000-01-01');
 const MAX_DATE = dayjs('2099-12-31');
 
+const CustomPopper = props => (
+    <Popper
+        {...props}
+        modifiers={[{name: 'preventOverflow', options: {altAxis: true}}]}
+        style={{zIndex: 1300}}
+    />
+);
 
 const getDateErrorMessage = error => {
     switch ( error ) {
@@ -149,10 +157,9 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
                         onChange={handleDateChange}
                         onError={error => setDateError(error)}
                         slotProps={{
-                            textField: {
-                                helperText: getDateErrorMessage(dateError)
-                            }
+                            textField: {helperText: getDateErrorMessage(dateError)}
                         }}
+                        slots={{popper: CustomPopper}}
                     />
                     <IconButtonWithTooltip
                         title="Copy ISO date"
