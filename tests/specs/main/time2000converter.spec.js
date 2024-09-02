@@ -16,8 +16,8 @@ test.describe('time2000 converter - positive cases', () => {
             mainPage.getDateInTime2000Converter(),
             '01/01/2024 01:10:59'
         );
-        await expect(page.getByLabel('Time2000', {exact: true})).toHaveValue('757379459');
-        await expect(page.getByLabel('Timestamp', {exact: true})).toHaveValue('1704064259');
+        await expect(page.getByLabel('Time2000', {exact: true})).toHaveValue('757386659');
+        await expect(page.getByLabel('Timestamp', {exact: true})).toHaveValue('1704071459');
     });
 
     test('set time2000 timestamp and check date', async () => {

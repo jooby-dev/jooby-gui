@@ -134,7 +134,7 @@ module.exports = {
         'playwright/expect-expect': [
             'error',
             {
-                'assertFunctionNames': [
+                assertFunctionNames: [
                     'validateMtxLoraMessage',
                     'validateUplinkCommand',
                     'validateMtxFrames',
