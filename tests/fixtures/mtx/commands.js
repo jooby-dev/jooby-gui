@@ -1,7 +1,8 @@
 export const uplinkCommands = {
     getCurrentStatusMeter: {
         hex: {
-            dump: '7e 51 ff fe 15 75 07 7d 33 b7 34 87 63 dc ee b2 54 4b 59 89 6a c9 f6 db 6a b1 40 46 75 d0 3a 79 74 58 4d 22 27 4d 19 79 0b 44 02 cf 0d 24 56 57 64 c8 73 5b 9e 5b 76 c0 c4 9e ce 7e',
+            dump: '7e 51 ff fe 15 75 07 7d 33 b7 34 87 63 dc ee b2 54 4b 59 89 6a c9 f6 db 6a b1 40 46 75 d0 3a 79 74 '
+                + '58 4d 22 27 4d 19 79 0b 44 02 cf 0d 24 56 57 64 c8 73 5b 9e 5b 76 c0 c4 9e ce 7e',
             frameType: 'DATA_RESPONSE (0x51)',
             accessLevel: 'READ_ONLY (0x03)',
             dstAddress: '0xfffe',
