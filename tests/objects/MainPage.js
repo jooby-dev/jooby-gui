@@ -3,13 +3,16 @@ import {commandTypes} from '../../src/js/constants/index.js';
 
 export class MainPage {
     static codec = 'Codec';
+
     static hardwareType = 'Hardware type';
+
     static command = 'Command';
 
     constructor ( page ) {
         this.page = page;
     }
 
+    // general
     formatDump ( dump ) {
         return dump.replace(/(.{2})/g, '$1 ').trim();
     }
@@ -19,23 +22,23 @@ export class MainPage {
     }
 
     redirectToGithub () {
-        return this.page.getByRole('link', {name: 'GitHub'})
+        return this.page.getByRole('link', {name: 'GitHub'});
     }
 
     getParseButton () {
-        return  this.page.getByTestId('parse-button');
+        return this.page.getByTestId('parse-button');
     }
 
     getAddCommandButton () {
-        return  this.page.getByTestId('add-command-button');
+        return this.page.getByTestId('add-command-button');
     }
 
-    getTime2000Converter () {
-        return this.page.getByRole('button', { name: 'Date to time2000 converter' })
+    buildMessage () {
+        return this.page.getByRole('button', {name: 'Build message'});
     }
 
-    async deleteLogs () {
-        await this.page.getByLabel('Delete logs').click();
+    clearCommands () {
+        return this.page.getByRole('button', {name: 'Clear commands'});
     }
 
     async getAllSelectOption ( label, codecSelect = false ) {
@@ -67,34 +70,12 @@ export class MainPage {
         await this.page.getByText(type, {exact: true}).click();
     }
 
-    async selectMtxCodec ( frame = true ) {
-        await this.selectCodec(commandTypes.MTX);
-
-        if ( !frame ) {
-            await this.page.getByLabel('NONE').click();
-        }
-    }
-
-    async selectObisObserverCodec () {
-        await this.selectCodec(commandTypes.OBIS_OBSERVER);
-    }
-
-    async selectHardwareType ( type ) {
-        await this.page.getByLabel('Hardware type').click();
-        await this.page.getByText(type).click();
-    }
-
     async parseDump ( dump, exact = true ) {
         exact
             ? await this.page.getByLabel('Dump', {exact: true}).fill(dump)
             : await this.page.getByLabel('Dump').fill(dump);
 
         await this.getParseButton().click();
-    }
-
-    async expandLogs () {
-        await this.page.getByLabel('Expand logs').click();
-        await this.page.waitForTimeout(2000);
     }
 
     async createMessage ( command, direction ) {
@@ -115,8 +96,59 @@ export class MainPage {
         await this.getAddCommandButton().click();
     }
 
-    async buildMessage () {
-        await this.page.getByRole('button', {name: 'Build message'}).click();
+    async chooseUplinkDirection () {
+        await this.page.getByLabel('uplink').click();
+    }
+
+    async chooseBase64 () {
+        await this.page.getByLabel('base64').click();
+    }
+
+    async getAllTitleTexts () {
+        return this.page.locator('h5').allInnerTexts();
+    }
+
+    async getAllDescriptionTexts () {
+        return this.page.locator('p').allInnerTexts();
+    }
+
+    // analog
+    async selectHardwareType ( type ) {
+        await this.page.getByLabel('Hardware type').click();
+        await this.page.getByText(type).click();
+    }
+
+    // mtx
+    buildFrame () {
+        return this.page.getByRole('button', {name: 'Build frame'});
+    }
+
+    getSourceAddress () {
+        return this.page.locator('[name="source"]');
+    }
+
+    getDestinationAddress () {
+        return this.page.locator('[name="destination"]');
+    }
+
+    getAccessKey () {
+        return this.page.locator('[name="accessKey"]').nth(1);
+    }
+
+    getMessageId () {
+        return this.page.locator('[name="messageId"]');
+    }
+
+    getSegmentationSessionId () {
+        return this.page.locator('[name="segmentationSessionId"]');
+    }
+
+    async selectMtxCodec ( frame = true ) {
+        await this.selectCodec(commandTypes.MTX);
+
+        if ( !frame ) {
+            await this.page.getByLabel('NONE').click();
+        }
     }
 
     async createMtxLoraMessage ( message ) {
@@ -167,23 +199,48 @@ export class MainPage {
         }
     }
 
-    async buildFrame () {
-        await this.page.getByRole('button', {name: 'Build frame'}).click();
+    // obis
+    async selectObisObserverCodec () {
+        await this.selectCodec(commandTypes.OBIS_OBSERVER);
     }
 
-    async chooseUplinkDirection () {
-        await this.page.getByLabel('uplink').click();
+    // logs
+    collapseLogs () {
+        return this.page.getByLabel('Collapse logs');
     }
 
-    async chooseBase64 () {
-        await this.page.getByLabel('base64').click();
+    shareLogs () {
+        return this.page.getByLabel('Share logs');
     }
 
-    async getAllTitleTexts () {
-        return await this.page.locator('h5').allInnerTexts();
+    async deleteLogs () {
+        await this.page.getByLabel('Delete logs').click();
     }
 
-    async getAllDescriptionTexts () {
-        return await this.page.locator('p').allInnerTexts();
+    async expandLogs () {
+        await this.page.getByLabel('Expand logs').click();
+        await this.page.waitForTimeout(2000);
+    }
+
+    // time2000 converter
+    getTime2000Converter () {
+        return this.page.getByRole('button', {name: 'Date to time2000 converter'});
+    }
+
+    getDateInTime2000Converter () {
+        return this.page.getByPlaceholder('DD/MM/YYYY hh:mm:ss');
+    }
+
+    getTime2000Input () {
+        return this.page.getByLabel('Time2000', {exact: true});
+    }
+
+    getTimestampInput () {
+        return this.page.getByLabel('Timestamp', {exact: true});
+    }
+
+    async fillInputInTime2000Converter ( input, value ) {
+        await input.clear();
+        await input.fill(value);
     }
 }

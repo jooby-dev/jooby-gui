@@ -8,7 +8,7 @@ test.describe('analog downlink commands - parse hex dumps', () => {
         await page.goto(baseURL);
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -27,7 +27,7 @@ test.describe('analog downlink commands - create messages', () => {
         await page.goto(baseURL);
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -41,7 +41,7 @@ test.describe('analog downlink commands - create messages', () => {
                 await mainPage.createMessage(subCommand, 'downlink');
             }
 
-            await mainPage.buildMessage();
+            await mainPage.buildMessage().click();
             await mainPage.expandLogs();
             await expect(mainPage.getDumpInLogs(command.hex.dump)).toBeVisible();
             await expect(page.getByText(command.hex.lrc)).toBeVisible();

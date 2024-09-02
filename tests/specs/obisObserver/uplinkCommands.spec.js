@@ -10,7 +10,7 @@ test.describe('obisObserver uplink commands - parse hex dumps', () => {
         await new MainPage(page).selectObisObserverCodec();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -29,7 +29,7 @@ test.describe('obisObserver uplink commands - create messages', () => {
         await new MainPage(page).selectObisObserverCodec();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -39,7 +39,7 @@ test.describe('obisObserver uplink commands - create messages', () => {
                 await mainPage.createMessage(subCommand, 'uplink');
             }
 
-            await mainPage.buildMessage();
+            await mainPage.buildMessage().click();
             await validateObisObserverMessages(page, command);
         });
     }

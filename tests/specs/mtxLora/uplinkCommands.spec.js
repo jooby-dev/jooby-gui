@@ -11,7 +11,7 @@ test.describe.fixme('mtxLora uplink commands - parse hex dumps', () => {
         await new MainPage(page).chooseUplinkDirection();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -31,7 +31,7 @@ test.describe.fixme('mtxLora uplink commands - parse base64 dumps', () => {
         await new MainPage(page).chooseUplinkDirection();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -49,7 +49,7 @@ test.describe.fixme('mtxLora uplink commands - create messages', () => {
         await new MainPage(page).selectMtxCodec(false);
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {

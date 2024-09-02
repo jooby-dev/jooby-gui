@@ -10,7 +10,7 @@ test.describe('mtx uplink commands - parse hex dumps', () => {
         await new MainPage(page).selectMtxCodec();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -30,7 +30,7 @@ test.describe.fixme('mtx uplink commands - create messages', () => {
         await new MainPage(page).selectMtxCodec();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(uplinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -44,7 +44,7 @@ test.describe.fixme('mtx uplink commands - create messages', () => {
                 await mainPage.createFrame(command.frame);
             }
 
-            await mainPage.buildFrame();
+            await mainPage.buildFrame().click();
             await validateMtxFrames(page, command);
         });
     }

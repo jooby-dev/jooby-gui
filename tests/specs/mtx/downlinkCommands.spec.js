@@ -10,7 +10,7 @@ test.describe('mtx downlink commands - parse hex dumps', () => {
         await new MainPage(page).selectMtxCodec();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -29,7 +29,7 @@ test.describe('mtx downlink commands - create messages', () => {
         await new MainPage(page).selectMtxCodec();
     });
 
-    test.afterEach(async ( {page} ) => await new MainPage(page).deleteLogs());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -39,7 +39,7 @@ test.describe('mtx downlink commands - create messages', () => {
                 await mainPage.createMessage(subCommand, 'downlink');
             }
 
-            await mainPage.buildFrame();
+            await mainPage.buildFrame().click();
             await validateMtxFrames(page, command);
         });
     }
