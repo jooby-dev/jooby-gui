@@ -3,6 +3,8 @@ import {MainPage} from '../../objects/MainPage.js';
 import {commandTypeConfigMap} from '../../../src/js/joobyCodec.js';
 
 
+const accessKey = '00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f';
+
 const commands = {
     analog: {
         options: commandTypeConfigMap.analog.hardwareTypeList,
@@ -69,7 +71,7 @@ test.describe('validate commands in all codecs', () => {
         test('validate commands for mtx codec', async ( {page} ) => {
             const $commandsOptions = await mainPage.getAllSelectOption(MainPage.command);
 
-            await await expect(page.locator('[name="accessKey"]')).toHaveValue('00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f');
+            await expect(page.locator('[name="accessKey"]')).toHaveValue(accessKey);
             expect($commandsOptions.length).toEqual(commands.mtx.commands.length);
 
             validateMtxCommands($commandsOptions);
@@ -82,10 +84,10 @@ test.describe('validate commands in all codecs', () => {
 
             // missile click
             await page.locator('#menu-accessLevel div').first().click();
-            await await expect(mainPage.getSourceAddress()).toHaveValue('ff fe');
-            await await expect(mainPage.getDestinationAddress()).toHaveValue('ff ff');
-            await await expect(mainPage.getAccessKey()).toHaveValue('00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f');
-            await await expect(mainPage.getMessageId()).toHaveValue('0');
+            await expect(mainPage.getSourceAddress()).toHaveValue('ff fe');
+            await expect(mainPage.getDestinationAddress()).toHaveValue('ff ff');
+            await expect(mainPage.getAccessKey()).toHaveValue(accessKey);
+            await expect(mainPage.getMessageId()).toHaveValue('0');
 
             $accessLevels.forEach(level => {
                 expect(['Read only', 'Read and write', 'Root', 'Unencrypted']).toContain(level);
@@ -108,7 +110,7 @@ test.describe('validate commands in all codecs', () => {
         test('validate commands for mtxLora codec', async ( {page} ) => {
             const $commandsOptions = await mainPage.getAllSelectOption(MainPage.command);
 
-            await await expect(page.locator('[name="accessKey"]')).toHaveValue('00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f');
+            await expect(page.locator('[name="accessKey"]')).toHaveValue(accessKey);
             expect($commandsOptions.length).toEqual(commands.mtx.commands.length);
 
             validateMtxCommands($commandsOptions);
@@ -121,9 +123,9 @@ test.describe('validate commands in all codecs', () => {
 
             // missile click
             await page.locator('#menu-accessLevel div').first().click();
-            await await expect(mainPage.getAccessKey()).toHaveValue('00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f');
-            await await expect(mainPage.getMessageId()).toHaveValue('0');
-            await await expect(mainPage.getSegmentationSessionId()).toHaveValue('0');
+            await expect(mainPage.getAccessKey()).toHaveValue(accessKey);
+            await expect(mainPage.getMessageId()).toHaveValue('0');
+            await expect(mainPage.getSegmentationSessionId()).toHaveValue('0');
 
             $accessLevels.forEach(level => {
                 expect(['Read only', 'Read and write', 'Root', 'Unencrypted']).toContain(level);

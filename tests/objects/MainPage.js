@@ -56,10 +56,7 @@ export class MainPage {
         codecSelect
             ? await this.page.getByRole('option', {name: 'analog'}).click()
             : await this.page.click('body', {
-                position: {
-                    x: 100,
-                    y: 100
-                }
+                position: {x: 100, y: 100}
             });
 
         return options;
