@@ -1,6 +1,6 @@
 import {test, expect} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
-import {uplinkCommands} from '../../fixtures/analog/commands.js';
+import {uplinkCommands} from '../../data/analog/commands.js';
 
 
 const validateUplinkCommand = async ( page, format, command ) => {

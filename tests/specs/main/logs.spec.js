@@ -1,3 +1,5 @@
+import fs from 'fs';
+import * as path from 'path';
 import {expect, test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 
@@ -64,5 +66,35 @@ test.describe('Logs actions', () => {
         for ( const element of ['UnfoldMoreIcon', 'UnfoldLessIcon', 'ShareIcon', 'DeleteIcon'] ) {
             await await expect(root.locator(`[data-testid="${element}"]`)).toBeDisabled();
         }
+    });
+});
+
+test.describe('file import/export', () => {
+    test('import logs from file', async ({page, baseURL}) => {
+        await page.goto(baseURL);
+        const directory = 'tests/data/main';
+        const fileName = 'import.json';
+        const fileWithPath = path.join(directory, fileName);
+        const [fileChooser] = await Promise.all([
+            page.waitForEvent('filechooser'),
+            page.getByLabel('Import logs').click()
+        ]);
+
+        await fileChooser.setFiles([fileWithPath]);
+        await expect(page.getByRole('heading', {name: 'Logs:'})).toHaveText('Logs: 2');
+    });
+
+    test('export logs to file', async ({page, baseURL}) => {
+        await page.goto(`${baseURL}${link}`);
+
+        const [download] = await Promise.all([
+            page.waitForEvent('download'),
+            page.getByLabel('Export logs').click()
+        ]);
+        const filePath = `tests/data/main/${download.suggestedFilename()}`;
+
+        await download.saveAs(filePath);
+        expect(fs.existsSync(filePath)).toBeTruthy();
+        fs.unlinkSync(filePath);
     });
 });

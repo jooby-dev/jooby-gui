@@ -1,6 +1,6 @@
 import {test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
-import {uplinkCommands} from '../../fixtures/mtxLora/commands.js';
+import {uplinkCommands} from '../../data/mtxLora/commands.js';
 import {validateMtxLoraMessage} from './utils.js';
 
 

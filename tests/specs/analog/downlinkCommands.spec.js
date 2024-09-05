@@ -1,6 +1,6 @@
 import {test, expect} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
-import {downlinkCommands} from '../../fixtures/analog/commands.js';
+import {downlinkCommands} from '../../data/analog/commands.js';
 
 
 test.describe('analog downlink commands - parse hex dumps', () => {
