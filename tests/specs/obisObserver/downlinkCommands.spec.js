@@ -1,17 +1,16 @@
 import {test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 import {validateObisObserverMessages} from './utils.js';
-import fixture from '../../fixtures/main.js';
 import {downlinkCommands} from '../../fixtures/obisObserver/commands.js';
 
 
 test.describe('obisObserver downlink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectCodec(fixture.codecType.options.OBIS_OBSERVER);
+        await new MainPage(page).selectObisObserverCodec();
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -28,10 +27,10 @@ test.describe('obisObserver downlink commands - parse hex dumps', () => {
 test.describe('obisObserver downlink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
-        await new MainPage(page).selectCodec(fixture.codecType.options.OBIS_OBSERVER);
+        await new MainPage(page).selectObisObserverCodec();
     });
 
-    test.afterEach(({page}) => page.getByLabel(fixture.logs.buttons.deleteLogs).click());
+    test.afterEach(async ( {page} ) => new MainPage(page).deleteLogs());
 
     for ( const [commandKey, command] of Object.entries(downlinkCommands) ) {
         test(`check ${commandKey}`, async ( {page} ) => {
@@ -41,7 +40,7 @@ test.describe('obisObserver downlink commands - create messages', () => {
                 await mainPage.createMessage(subCommand, 'downlink');
             }
 
-            await mainPage.buildMessage();
+            await mainPage.buildMessage().click();
             await validateObisObserverMessages(page, command);
         });
     }
