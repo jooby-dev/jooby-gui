@@ -1,0 +1,149 @@
+[
+    {
+        "commandType": "analog",
+        "hardwareType": 12,
+        "directionName": "uplink",
+        "isMtxLora": false,
+        "hex": "1f 07 05 04 04 22 35 28 77",
+        "data": {
+            "commands": [
+                {
+                    "command": {
+                        "id": 1823,
+                        "name": "usWaterMeterCommand",
+                        "directionType": 2,
+                        "hasParameters": true,
+                        "length": 8,
+                        "parameters": {
+                            "length": 4,
+                            "data": [
+                                4,
+                                34,
+                                53,
+                                40
+                            ]
+                        },
+                        "hex": "1f 07 05 04 04 22 35 28"
+                    },
+                    "id": "7ca8b389-c63d-4c71-860a-6da2344c26e2",
+                    "isExpanded": false
+                }
+            ],
+            "bytes": [
+                31,
+                7,
+                5,
+                4,
+                4,
+                34,
+                53,
+                40,
+                119
+            ],
+            "lrc": {
+                "received": 119,
+                "calculated": 119
+            }
+        },
+        "date": "8/30/2024, 10:59:59 AM",
+        "type": "message",
+        "id": "0a2f0588-c5eb-4075-be57-7647126aabfb",
+        "isExpanded": false,
+        "tags": [
+            "build",
+            "analog",
+            "message"
+        ],
+        "frameParameters": {},
+        "messageParameters": {}
+    },
+    {
+        "commandType": "mtx",
+        "directionName": "uplink",
+        "isMtxLora": false,
+        "hex": "7e 51 ff ff ff fe 00 10 10 6f 0d 2a 43 7d 31 01 02 10 00 20 00 30 00 40 00 00 1c 49 8e 7e",
+        "data": {
+            "messageId": 0,
+            "accessLevel": 0,
+            "commands": [
+                {
+                    "command": {
+                        "id": 111,
+                        "name": "getHalfhoursEnergies",
+                        "directionType": 2,
+                        "hasParameters": true,
+                        "length": 15,
+                        "parameters": {
+                            "date": {
+                                "year": 21,
+                                "month": 2,
+                                "date": 3
+                            },
+                            "firstHalfhour": 1,
+                            "halfhoursNumber": 2,
+                            "energies": {
+                                "A+": [
+                                    4096,
+                                    8192
+                                ],
+                                "A-R+": [
+                                    12288,
+                                    16384
+                                ]
+                            }
+                        },
+                        "hex": "6f 0d 2a 43 11 01 02 10 00 20 00 30 00 40 00"
+                    },
+                    "id": "f8f09b61-affe-4f1a-9b87-db06ff72aa04",
+                    "isExpanded": false
+                }
+            ],
+            "bytes": [
+                0,
+                16,
+                16,
+                111,
+                13,
+                42,
+                67,
+                17,
+                1,
+                2,
+                16,
+                0,
+                32,
+                0,
+                48,
+                0,
+                64,
+                0,
+                0,
+                28
+            ],
+            "lrc": {
+                "received": 28,
+                "calculated": 28
+            }
+        },
+        "date": "8/30/2024, 10:59:42 AM",
+        "type": "frame",
+        "id": "e6780d6f-c870-4bfb-a08e-3e0da0f71e12",
+        "isExpanded": false,
+        "tags": [
+            "build",
+            "mtx",
+            "frame"
+        ],
+        "frameParameters": {
+            "type": 81,
+            "destination": 65535,
+            "source": 65534
+        },
+        "messageParameters": {
+            "accessLevel": 0,
+            "accessKey": "00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f",
+            "segmentationSessionId": 0,
+            "messageId": 0
+        }
+    }
+]

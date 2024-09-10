@@ -1,7 +1,7 @@
 import {test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 import {validateObisObserverMessages} from './utils.js';
-import {uplinkCommands} from '../../fixtures/obisObserver/commands.js';
+import {uplinkCommands} from '../../data/obisObserver/commands.js';
 
 
 test.describe('obisObserver uplink commands - parse hex dumps', () => {

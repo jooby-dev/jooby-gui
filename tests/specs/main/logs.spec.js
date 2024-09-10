@@ -1,3 +1,5 @@
+import fs from 'fs';
+import * as path from 'path';
 import {expect, test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 
@@ -17,6 +19,13 @@ const link = `
     KCgkM8D8EIIyjGNHEXO9tscbBociBC4IxW63DxRsCzemi0VCbAELe57OGwHgPrZL6uSsZY+wHIcRzHMALwcagBcUhdV13A592k6MODwJq+CMsQqhvfB
     MW8B4vK0HLdS9n27k3IzZx3Oy-Ok+BuLDviBKE8dY-jABpbB0DTYiFvcNCgT+dxMR+dxojcUMyXcBF3EohD3HA8wNGsMhZEQJIbwAZTD8z2MT02w+3bu8Dce1niAA
 `.replace(/\s+/g, '');
+
+const normalize = content => content.replace(/\r\n/g, '\n').trim();
+
+const expectedData = {
+    analogDump: '1f 07 05 04 04 22 35 28 77',
+    mtxDump: '7e 51 ff ff ff fe 00 10 10 6f 0d 2a 43 7d 31 01 02 10 00 20 00 30 00 40 00 00 1c 49 8e 7e'
+};
 
 
 test.describe('Logs actions', () => {
@@ -62,7 +71,49 @@ test.describe('Logs actions', () => {
         await mainPage.deleteLogs();
 
         for ( const element of ['UnfoldMoreIcon', 'UnfoldLessIcon', 'ShareIcon', 'DeleteIcon'] ) {
-            await await expect(root.locator(`[data-testid="${element}"]`)).toBeDisabled();
+            await expect(root.locator(`[data-testid="${element}"]`)).toBeDisabled();
         }
+    });
+});
+
+test.describe('file import/export', () => {
+    const directory = 'tests/data/main';
+    const fileName = 'import.json';
+    const fullPath = `${directory}/${fileName}`;
+
+    test('import logs from file', async ( {page, baseURL} ) => {
+        await page.goto(baseURL);
+
+        const fileWithPath = path.join(directory, fileName);
+        const [fileChooser] = await Promise.all([
+            page.waitForEvent('filechooser'),
+            page.getByLabel('Import logs').click()
+        ]);
+
+        await fileChooser.setFiles([fileWithPath]);
+        await new MainPage(page).expandLogs();
+
+        await expect(page.getByRole('heading', {name: 'Logs:'})).toHaveText('Logs: 2');
+        await expect(page.getByText(expectedData.analogDump)).toBeVisible();
+        await expect(page.getByText(expectedData.mtxDump)).toBeVisible();
+    });
+
+    test('export logs to file', async ( {page, baseURL} ) => {
+        await page.goto(`${baseURL}${link}`);
+
+        const [download] = await Promise.all([
+            page.waitForEvent('download'),
+            page.getByLabel('Export logs').click()
+        ]);
+        const filePath = `tests/data/main/${download.suggestedFilename()}`;
+
+        await download.saveAs(filePath);
+
+        const downloadedFile = fs.readFileSync(filePath, 'utf8');
+        const originalFile = fs.readFileSync(fullPath, 'utf8');
+
+        expect(normalize(downloadedFile)).toBe(normalize(originalFile));
+        expect(fs.existsSync(filePath)).toBeTruthy();
+        fs.unlinkSync(filePath);
     });
 });
