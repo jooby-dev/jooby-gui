@@ -24,6 +24,7 @@ test.describe('mtx downlink commands - parse hex dumps', () => {
     }
 });
 
+
 test.describe('mtx downlink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
@@ -38,6 +39,10 @@ test.describe('mtx downlink commands - create messages', () => {
 
             for ( const [, subCommand] of Object.entries(command.commands) ) {
                 await mainPage.createMessage(subCommand, 'downlink');
+            }
+
+            if ( 'frame' in command ) {
+                await mainPage.createFrame(command.frame);
             }
 
             await mainPage.buildFrame().click();

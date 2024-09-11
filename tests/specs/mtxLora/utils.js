@@ -1,6 +1,12 @@
 import {expect} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 
+const removeTooltip = async page => {
+    await page.evaluate(() => {
+        const tooltip = document.querySelector('.MuiTooltip-tooltip');
+        if ( tooltip ) tooltip.remove();
+    });
+};
 
 const checkMtxMessage = async ( page, command, mtxCommands ) => {
     await expect(new MainPage(page).getDumpInLogs(command.mtx.dump)).toBeVisible();
@@ -17,23 +23,30 @@ const checkAnalogMessage = async ( page, analogCommands ) => {
     const buttons = await page.locator('text="json"').elementHandles();
 
     for ( let counter = 0; counter < buttons.length; counter++ ) {
+        const updatedButtons = await page.locator('text="json"').elementHandles();
         await expect(new MainPage(page).getDumpInLogs(analogCommands[counter].dump)).toBeVisible();
         await expect(page.getByRole('link', {name: analogCommands[counter].name, exact: true}).nth(0)).toBeVisible();
-        await buttons[counter].click();
-        expect(JSON.parse(await page.getByLabel('json', {exact: true}).innerText()))
+        await page.evaluate(button => button.click(), updatedButtons[counter]);
+
+        expect(JSON.parse(await page.getByLabel('json', {exact: true}).nth(counter).innerText()))
             .toStrictEqual(analogCommands[counter].parameters);
     }
 };
 
 
 export const validateMtxLoraMessage = async ( page, format, command, type ) => {
-    const messages = await page.getByTestId('UnfoldMoreIcon').all();
-    const closeMessages = await page.getByTestId('UnfoldLessIcon').all();
     const analogCommands = Object.values(command.analog.commands);
     const mtxCommands = Object.values(command.mtx.commands);
 
-    for ( let index = 1; index < messages.length; index++ ) {
-        await messages[index].click();
+    for ( let index = 1; ; index++ ) {
+        const updatedMessages = await page.getByTestId('UnfoldMoreIcon').all();
+        const updatedCloseMessages = await page.getByTestId('UnfoldLessIcon').all();
+
+        if ( index >= updatedMessages.length ) break;
+
+        await updatedMessages[index].focus();
+        await removeTooltip(page);
+        await updatedMessages[index].click();
 
         if ( type === 'parse' ) {
             if ( index === 1 ) {
@@ -51,6 +64,10 @@ export const validateMtxLoraMessage = async ( page, format, command, type ) => {
             }
         }
 
-        await closeMessages[index].click();
+        if ( index >= updatedCloseMessages.length ) break;
+
+        await updatedCloseMessages[index].focus();
+        await removeTooltip(page);
+        await updatedCloseMessages[index].click();
     }
 };
