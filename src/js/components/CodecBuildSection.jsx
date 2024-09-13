@@ -1,9 +1,9 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
-import * as frame from 'jooby-codec/mtx/utils/frame.js';
+import * as frame from 'jooby-codec/mtx1/utils/frame.js';
 import {splitBytesToDataSegments} from 'jooby-codec/analog/utils/splitBytesToDataSegments.js';
-import {frameTypes, accessLevels} from 'jooby-codec/mtx/constants/index.js';
+import {frameTypes, accessLevels} from 'jooby-codec/mtx1/constants/index.js';
 import {hardwareTypes} from 'jooby-codec/analog/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {
@@ -59,7 +59,7 @@ const resolveParameters = ( parameters, commandType, framingFormat ) => {
         segmentationSessionId: parameters.segmentationSessionId
     };
 
-    if ( commandType === commandTypes.MTX ) {
+    if ( commandType === commandTypes.MTX1 ) {
         return framingFormat === framingFormats.NONE
             ? resolvedParameters
             : {
@@ -136,7 +136,7 @@ const processDataAndCreateLog = ({
         messageParameters: {}
     };
 
-    if ( commandType === commandTypes.MTX && !buildError ) {
+    if ( commandType === commandTypes.MTX1 && !buildError ) {
         log.frameParameters = {
             type: frameType,
             destination: parameters.destination ? parseInt(cleanHexString(parameters.destination), 16) : undefined,
@@ -706,7 +706,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         {isMtxCheck ? 'Frame' : 'Message'}
                     </Typography>
 
-                    {commandType === commandTypes.MTX && (
+                    {commandType === commandTypes.MTX1 && (
                         <Box sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -738,7 +738,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                 </>
                             )}
 
-                            {commandType === commandTypes.MTX && (
+                            {commandType === commandTypes.MTX1 && (
                                 <>
                                     <FormControl variant="standard" fullWidth={true}>
                                         <InputLabel id="select-access-level-label">Access level</InputLabel>

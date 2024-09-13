@@ -1,7 +1,7 @@
 import {test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 import {validateMtxFrames} from './utils.js';
-import {downlinkCommands} from '../../data/mtx/commands.js';
+import {downlinkCommands} from '../../data/mtx1/commands.js';
 
 
 test.describe('mtx downlink commands - parse hex dumps', () => {

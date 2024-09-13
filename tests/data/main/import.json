@@ -25,7 +25,7 @@
                         },
                         "hex": "1f 07 05 04 04 22 35 28"
                     },
-                    "id": "7ca8b389-c63d-4c71-860a-6da2344c26e2",
+                    "id": "88d27f92-3735-4f6b-b07a-101fbb218652",
                     "isExpanded": false
                 }
             ],
@@ -47,7 +47,7 @@
         },
         "date": "8/30/2024, 10:59:59 AM",
         "type": "message",
-        "id": "0a2f0588-c5eb-4075-be57-7647126aabfb",
+        "id": "c4c63e6c-202a-4ace-ac87-5ef8e7b9bb29",
         "isExpanded": false,
         "tags": [
             "build",
@@ -58,7 +58,7 @@
         "messageParameters": {}
     },
     {
-        "commandType": "mtx",
+        "commandType": "mtx1",
         "directionName": "uplink",
         "isMtxLora": false,
         "hex": "7e 51 ff ff ff fe 00 10 10 6f 0d 2a 43 7d 31 01 02 10 00 20 00 30 00 40 00 00 1c 49 8e 7e",
@@ -94,7 +94,7 @@
                         },
                         "hex": "6f 0d 2a 43 11 01 02 10 00 20 00 30 00 40 00"
                     },
-                    "id": "f8f09b61-affe-4f1a-9b87-db06ff72aa04",
+                    "id": "914fe6f3-26bc-4e98-9279-042282bcc732",
                     "isExpanded": false
                 }
             ],
@@ -127,11 +127,11 @@
         },
         "date": "8/30/2024, 10:59:42 AM",
         "type": "frame",
-        "id": "e6780d6f-c870-4bfb-a08e-3e0da0f71e12",
+        "id": "7bc86713-4de8-4ad3-94a2-1508f2c00429",
         "isExpanded": false,
         "tags": [
             "build",
-            "mtx",
+            "mtx1",
             "frame"
         ],
         "frameParameters": {

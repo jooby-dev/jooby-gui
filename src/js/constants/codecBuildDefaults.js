@@ -1,4 +1,4 @@
-import {accessLevels} from 'jooby-codec/mtx/constants/index.js';
+import {accessLevels} from 'jooby-codec/mtx1/constants/index.js';
 import {accessKey} from './index.js';
 
 

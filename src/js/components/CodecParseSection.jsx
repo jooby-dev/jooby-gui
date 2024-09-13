@@ -1,9 +1,9 @@
 import {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
-import * as frame from 'jooby-codec/mtx/utils/frame.js';
+import * as frame from 'jooby-codec/mtx1/utils/frame.js';
 import DataSegmentsCollector from 'jooby-codec/analog/utils/DataSegmentsCollector.js';
-import {frameTypes} from 'jooby-codec/mtx/constants/index.js';
+import {frameTypes} from 'jooby-codec/mtx1/constants/index.js';
 import {hardwareTypes} from 'jooby-codec/analog/constants/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {
@@ -137,7 +137,7 @@ const processDataAndCreateLog = ({
         messageParameters: {}
     };
 
-    if ( commandType === commandTypes.MTX && data && !logErrorMessage ) {
+    if ( commandType === commandTypes.MTX1 && data && !logErrorMessage ) {
         const frameData = data.frame?.header;
 
         log.frameParameters = {
@@ -241,7 +241,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 const codec = joobyCodec[commandType];
 
                 switch ( commandType ) {
-                    case commandTypes.MTX: {
+                    case commandTypes.MTX1: {
                         try {
                             switch ( framingFormat ) {
                                 case framingFormats.HDLC: {
@@ -354,7 +354,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
             let parseError;
 
             try {
-                data = joobyCodec.mtx.message[directionNames[direction]].fromBytes(mtxBuffer, {aesKey});
+                data = joobyCodec.mtx1.message[directionNames[direction]].fromBytes(mtxBuffer, {aesKey});
             } catch ( error ) {
                 parseError = error;
             }
@@ -367,7 +367,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     isMtxLoraCheck,
                     hardwareType: hardwareType?.value,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(mtxBuffer) : undefined,
-                    commandType: commandTypes.MTX,
+                    commandType: commandTypes.MTX1,
                     logType: getLogType(commandType, parseError)
                 })
             );
@@ -457,7 +457,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 </Box>
             </div>
 
-            {commandType === commandTypes.MTX && (
+            {commandType === commandTypes.MTX1 && (
                 <div>
                     <TextField
                         type="text"

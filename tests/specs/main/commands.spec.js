@@ -10,8 +10,8 @@ const commands = {
         options: commandTypeConfigMap.analog.hardwareTypeList,
         commands: commandTypeConfigMap.analog.preparedCommandList.map(command => command.value.name.toString())
     },
-    mtx: {
-        commands: commandTypeConfigMap.mtx.preparedCommandList.map(command => command.value.name.toString())
+    mtx1: {
+        commands: commandTypeConfigMap.mtx1.preparedCommandList.map(command => command.value.name.toString())
     },
     obisObserver: {
         commands: commandTypeConfigMap.obisObserver.preparedCommandList.map(command => command.value.name.toString())
@@ -27,7 +27,7 @@ const validateMtxCommands = $commandsOptions => {
             expect(['getHalfhoursEnergies', 'getDayEnergies', 'getDayMaxPower']).toContain(command);
         }
 
-        expect(commands.mtx.commands).toContain(command);
+        expect(commands.mtx1.commands).toContain(command);
     });
 };
 
@@ -72,7 +72,7 @@ test.describe('validate commands in all codecs', () => {
             const $commandsOptions = await mainPage.getAllSelectOption(MainPage.command);
 
             await expect(page.locator('[name="accessKey"]')).toHaveValue(accessKey);
-            expect($commandsOptions.length).toEqual(commands.mtx.commands.length);
+            expect($commandsOptions.length).toEqual(commands.mtx1.commands.length);
 
             validateMtxCommands($commandsOptions);
         });
@@ -111,7 +111,7 @@ test.describe('validate commands in all codecs', () => {
             const $commandsOptions = await mainPage.getAllSelectOption(MainPage.command);
 
             await expect(page.locator('[name="accessKey"]')).toHaveValue(accessKey);
-            expect($commandsOptions.length).toEqual(commands.mtx.commands.length);
+            expect($commandsOptions.length).toEqual(commands.mtx1.commands.length);
 
             validateMtxCommands($commandsOptions);
         });
