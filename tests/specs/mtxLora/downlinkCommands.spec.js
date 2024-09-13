@@ -4,8 +4,7 @@ import {downlinkCommands} from '../../data/mtxLora/commands.js';
 import {validateMtxLoraMessage} from './utils.js';
 
 
-// todo: rework in next PR's
-test.describe.fixme('mtxLora downlink commands - parse hex dumps', () => {
+test.describe('mtxLora downlink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
         await new MainPage(page).selectMtxCodec(false);
@@ -23,7 +22,7 @@ test.describe.fixme('mtxLora downlink commands - parse hex dumps', () => {
     }
 });
 
-test.describe.fixme('mtxLora downlink commands - create messages', () => {
+test.describe('mtxLora downlink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
         await new MainPage(page).selectMtxCodec(false);
@@ -43,7 +42,7 @@ test.describe.fixme('mtxLora downlink commands - create messages', () => {
                 await mainPage.createMessage(subCommand, 'downlink');
             }
 
-            await mainPage.buildMessage();
+            await mainPage.buildMessage().click();
             await validateMtxLoraMessage(page, 'hex', command, 'build');
         });
     }

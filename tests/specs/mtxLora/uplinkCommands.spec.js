@@ -4,7 +4,7 @@ import {uplinkCommands} from '../../data/mtxLora/commands.js';
 import {validateMtxLoraMessage} from './utils.js';
 
 
-test.describe.fixme('mtxLora uplink commands - parse hex dumps', () => {
+test.describe('mtxLora uplink commands - parse hex dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
         await new MainPage(page).selectMtxCodec(false);
@@ -23,7 +23,7 @@ test.describe.fixme('mtxLora uplink commands - parse hex dumps', () => {
     }
 });
 
-test.describe.fixme('mtxLora uplink commands - parse base64 dumps', () => {
+test.describe('mtxLora uplink commands - parse base64 dumps', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
         await new MainPage(page).selectMtxCodec(false);
@@ -43,7 +43,7 @@ test.describe.fixme('mtxLora uplink commands - parse base64 dumps', () => {
     }
 });
 
-test.describe.fixme('mtxLora uplink commands - create messages', () => {
+test.describe('mtxLora uplink commands - create messages', () => {
     test.beforeEach(async ( {page, baseURL} ) => {
         await page.goto(baseURL);
         await new MainPage(page).selectMtxCodec(false);
@@ -64,7 +64,7 @@ test.describe.fixme('mtxLora uplink commands - create messages', () => {
             }
 
             await mainPage.createMtxLoraMessage(command.mtx.message);
-            await mainPage.buildMessage();
+            await mainPage.buildMessage().click();
             await validateMtxLoraMessage(page, 'hex', command, 'build');
         });
     }
