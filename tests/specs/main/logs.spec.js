@@ -2,6 +2,7 @@ import fs from 'fs';
 import * as path from 'path';
 import {expect, test} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
+import {validateMtxFrames} from '../mtx/utils.js';
 
 
 const link = `
@@ -24,11 +25,47 @@ const normalize = content => content.replace(/\r\n/g, '\n').trim();
 
 const expectedData = {
     analogDump: '1f 07 05 04 04 22 35 28 77',
-    mtxDump: '7e 51 ff ff ff fe 00 10 10 6f 0d 2a 43 7d 31 01 02 10 00 20 00 30 00 40 00 00 1c 49 8e 7e'
+    mtxDump: '7e 51 ff ff ff fe 00 10 10 6f 0d 2a 43 7d 31 01 02 10 00 20 00 30 00 40 00 00 1c 49 8e 7e',
+    command: {
+        hex: {
+            dump: '7e 50 15 75 ff fe 7d 31 7d 33 49 4d 4c 74 cd 8d 29 d5 36 a8 76 f6 72 ac 36 5f f9 ae 7e',
+            frameType: 'DATA_RESPONSE (0x51)',
+            accessLevel: 'UNENCRYPTED',
+            dstAddress: '0xffff',
+            srcAddress: '0xfffe',
+            messageId: '0',
+            lrc: '0xb5'
+        },
+        commands: {
+            getHalfhoursEnergies: {
+                name: 'getHalfhoursEnergies',
+                dump: '6f 0d 31 2d 11 01 02 0b b8 1b 58 2e e0 3a 98',
+                parameters: {
+                    date: {
+                        year: 24,
+                        month: 9,
+                        date: 13
+                    },
+                    firstHalfhour: 1,
+                    halfhoursNumber: 2,
+                    energies: {
+                        'A+': [
+                            3000,
+                            7000
+                        ],
+                        'A-R+': [
+                            12000,
+                            15000
+                        ]
+                    }
+                }
+            }
+        }
+    }
 };
 
 
-test.describe('Logs actions', () => {
+test.describe('logs actions', () => {
     let mainPage;
 
     test.beforeEach(async ( {page, baseURL} ) => {
@@ -63,6 +100,14 @@ test.describe('Logs actions', () => {
 
         expect(page.url()).toEqual(`${baseURL}jooby-gui`);
         await expect(page.getByRole('heading', {name: 'Logs:'})).toHaveText('Logs: 2');
+    });
+
+    test('edit as new', async ({page}) => {
+        await mainPage.editAsNew('mtx (commands: 1)', expectedData.command.commands.getHalfhoursEnergies.parameters);
+        await mainPage.deleteLogs();
+        await mainPage.buildFrame().click();
+        await mainPage.clearCommands().click();
+        await validateMtxFrames(page, expectedData.command);
     });
 
     test('delete logs', async ({page}) => {

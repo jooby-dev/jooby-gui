@@ -1,12 +1,6 @@
 import {expect} from '@playwright/test';
 import {MainPage} from '../../objects/MainPage.js';
 
-const removeTooltip = async page => {
-    await page.evaluate(() => {
-        const tooltip = document.querySelector('.MuiTooltip-tooltip');
-        if ( tooltip ) tooltip.remove();
-    });
-};
 
 const checkMtxMessage = async ( page, command, mtxCommands ) => {
     await expect(new MainPage(page).getDumpInLogs(command.mtx.dump)).toBeVisible();
@@ -44,9 +38,7 @@ export const validateMtxLoraMessage = async ( page, format, command, type ) => {
 
         if ( index >= updatedMessages.length ) break;
 
-        await updatedMessages[index].focus();
-        await removeTooltip(page);
-        await updatedMessages[index].click();
+        await updatedMessages[index].dispatchEvent('click');
 
         if ( type === 'parse' ) {
             if ( index === 1 ) {
@@ -66,8 +58,6 @@ export const validateMtxLoraMessage = async ( page, format, command, type ) => {
 
         if ( index >= updatedCloseMessages.length ) break;
 
-        await updatedCloseMessages[index].focus();
-        await removeTooltip(page);
-        await updatedCloseMessages[index].click();
+        await updatedCloseMessages[index].dispatchEvent('click');
     }
 };
