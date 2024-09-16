@@ -42,9 +42,9 @@ export const commands = {
         uplink: prepareCommandMap(joobyCodec.obisObserver.commands.uplink, directions.UPLINK),
         downlink: prepareCommandMap(joobyCodec.obisObserver.commands.downlink, directions.DOWNLINK)
     },
-    mtx: {
-        uplink: prepareCommandMap(joobyCodec.mtx.commands.uplink, directions.UPLINK),
-        downlink: prepareCommandMap(joobyCodec.mtx.commands.downlink, directions.DOWNLINK)
+    mtx1: {
+        uplink: prepareCommandMap(joobyCodec.mtx1.commands.uplink, directions.UPLINK),
+        downlink: prepareCommandMap(joobyCodec.mtx1.commands.downlink, directions.DOWNLINK)
     }
 };
 
@@ -68,10 +68,10 @@ export const commandTypeConfigMap = {
         hardwareTypeList: null
     },
 
-    [commandTypes.MTX]: {
+    [commandTypes.MTX1]: {
         hasLrc: true,
         hasHardwareType: false,
-        preparedCommandList: prepareCommandList(commands.mtx),
+        preparedCommandList: prepareCommandList(commands.mtx1),
         hardwareTypeList: null
     }
 };

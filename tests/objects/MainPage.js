@@ -141,7 +141,7 @@ export class MainPage {
     }
 
     async selectMtxCodec ( frame = true ) {
-        await this.selectCodec(commandTypes.MTX);
+        await this.selectCodec(commandTypes.MTX1);
 
         if ( !frame ) {
             await this.page.getByLabel('NONE').click();

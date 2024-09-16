@@ -1,7 +1,7 @@
 import {memo} from 'react';
 import PropTypes from 'prop-types';
 import {JSONTree} from 'react-json-tree';
-import {frameTypes, accessLevels} from 'jooby-codec/mtx/constants/index.js';
+import {frameTypes, accessLevels} from 'jooby-codec/mtx1/constants/index.js';
 import invertObject from 'jooby-codec/utils/invertObject.js';
 
 import {
@@ -58,7 +58,7 @@ const accessLevelNames = invertObject(accessLevels);
 const shouldRenderLrc = log => {
     // if the mtx message is unencrypted, the device sets the LRC to 0
     if (
-        log.commandType === commandTypes.MTX
+        log.commandType === commandTypes.MTX1
         && log.data?.lrc?.received === 0
         && log.messageParameters?.accessLevel === accessLevels.UNENCRYPTED
     ) {

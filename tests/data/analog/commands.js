@@ -108,9 +108,9 @@ export const uplinkCommands = {
                 name: 'getBatteryStatus',
                 dump: '1f 05 0b 0d e2 0b 9b 72 fa 17 fd 00 00 00',
                 parameters: {
-                    voltageUnderLowLoad: 57869,
-                    voltageUnderHighLoad: 39691,
-                    internalResistance: 64114,
+                    voltageUnderLowLoad: 3554,
+                    voltageUnderHighLoad: 2971,
+                    internalResistance: 29434,
                     temperature: 23,
                     remainingCapacity: 253,
                     isLastDayOverconsumption: false,
