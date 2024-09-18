@@ -214,9 +214,24 @@ export class MainPage {
         await this.page.getByLabel('Delete logs').click();
     }
 
+    async waitForLogVisible () {
+        await this.page.locator('[data-testid="UnfoldMoreIcon"]').first().waitFor({state: 'visible'});
+    }
+
     async expandLogs () {
         await this.page.getByLabel('Expand logs').click();
-        await this.page.waitForTimeout(2000);
+        await this.waitForLogVisible();
+    }
+
+    async editAsNew ( buttonName, params ) {
+        await this.page.getByRole('button', {name: buttonName}).getByLabel('Edit as new').click();
+        await this.page.getByLabel('Edit parameters').click();
+
+        const textarea = this.page.locator('textarea.ace_text-input');
+
+        await this.page.getByLabel('Clear parameters').click();
+        await textarea.fill(JSON.stringify(params));
+        await this.page.getByTestId('save-edited-command-button').click();
     }
 
     // time2000 converter
