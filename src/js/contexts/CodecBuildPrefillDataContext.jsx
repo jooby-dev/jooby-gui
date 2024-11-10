@@ -25,8 +25,8 @@ export const CodecBuildPrefillDataProvider = ( {children} ) => {
                 return;
             }
 
-            const {accessLevel, accessKey, messageId} = log.messageParameters;
-            const {source, destination, segmentationSessionId} = log.frameParameters;
+            const {accessLevel, accessKey, messageId, segmentationSessionId, maxSegmentSize} = log.messageParameters;
+            const {source, destination} = log.frameParameters;
             const {preparedCommandList} = commandTypeConfigMap[log.commandType];
 
             const logCommands = log.data.commands.map(command => ({
@@ -45,7 +45,8 @@ export const CodecBuildPrefillDataProvider = ( {children} ) => {
                 messageId: isUndefined(messageId) ? codecBuildDefaults.messageId : messageId,
                 source: isUndefined(source) ? codecBuildDefaults.source : getHexFromNumber(source, false, true),
                 destination: isUndefined(destination) ? codecBuildDefaults.destination : getHexFromNumber(destination, false, true),
-                segmentationSessionId: isUndefined(segmentationSessionId) ? codecBuildDefaults.segmentationSessionId : segmentationSessionId
+                segmentationSessionId: isUndefined(segmentationSessionId) ? codecBuildDefaults.segmentationSessionId : segmentationSessionId,
+                maxSegmentSize: isUndefined(maxSegmentSize) ? codecBuildDefaults.maxSegmentSize : maxSegmentSize
             };
 
             setPrefillData({

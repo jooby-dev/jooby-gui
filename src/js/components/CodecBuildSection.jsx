@@ -56,7 +56,8 @@ const resolveParameters = ( parameters, commandType, framingFormat ) => {
         accessLevel: parameters.accessLevel,
         messageId: parameters.messageId,
         accessKey: parameters.accessKey,
-        segmentationSessionId: parameters.segmentationSessionId
+        segmentationSessionId: parameters.segmentationSessionId,
+        maxSegmentSize: parameters.maxSegmentSize
     };
 
     if ( commandType === commandTypes.MTX1 ) {
@@ -83,7 +84,8 @@ const validators = {
     destination: hex => isValidNumber(parseInt(cleanHexString(hex), 16), DESTINATION_ADDRESS_MIN_VALUE, DESTINATION_ADDRESS_MAX_VALUE),
     accessKey: hex => isValidHex(hex, accessKey.LENGTH_BYTES),
     messageId: validateMessageId,
-    segmentationSessionId: validateMessageId
+    segmentationSessionId: validateMessageId,
+    maxSegmentSize: value => isValidNumber(value, SEGMENT_MIN_VALUE, SEGMENT_MAX_VALUE)
 };
 
 const processDataAndCreateLog = ({
@@ -147,6 +149,7 @@ const processDataAndCreateLog = ({
             accessLevel: Number(parameters.accessLevel),
             accessKey: parameters.accessKey,
             segmentationSessionId: Number(parameters.segmentationSessionId),
+            maxSegmentSize: Number(parameters.maxSegmentSize),
             messageId: Number(parameters.messageId)
         };
     }
@@ -168,14 +171,16 @@ const SOURCE_ADDRESS_MAX_VALUE = 0xffff;
 const DESTINATION_ADDRESS_MIN_VALUE = 0;
 const DESTINATION_ADDRESS_MAX_VALUE = 0xffff;
 const BYTE_RANGE_LIMIT = 256;
-const MAX_SEGMENT_SIZE = 40;
+const SEGMENT_MIN_VALUE = 16;
+const SEGMENT_MAX_VALUE = 64;
 
 const parameterErrorsState = {
     source: false,
     destination: false,
     accessKey: false,
     messageId: false,
-    segmentationSessionId: false
+    segmentationSessionId: false,
+    maxSegmentSize: false
 };
 
 
@@ -435,7 +440,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     bytes,
                     {
                         segmentationSessionId: Number(parameters.segmentationSessionId),
-                        maxSegmentSize: MAX_SEGMENT_SIZE
+                        maxSegmentSize: parameters.maxSegmentSize
                     }
                 );
             } catch ( error ) {
@@ -781,17 +786,32 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                             )}
 
                             {isMtxLoraCheck && (
-                                <TextField
-                                    label="Segmentation session ID"
-                                    value={parameters.segmentationSessionId}
-                                    error={parameterErrors.segmentationSessionId}
-                                    name="segmentationSessionId"
-                                    helperText="1-byte in decimal format (0-255)"
-                                    onChange={onControlChange}
-                                    onBlur={onControlBlur}
-                                    min={MESSAGE_ID_MIN_VALUE}
-                                    max={MESSAGE_ID_MAX_VALUE}
-                                />
+                                <>
+                                    <TextField
+                                        label="Segmentation session ID"
+                                        value={parameters.segmentationSessionId}
+                                        error={parameterErrors.segmentationSessionId}
+                                        name="segmentationSessionId"
+                                        helperText="1-byte in decimal format (0-255)"
+                                        onChange={onControlChange}
+                                        onBlur={onControlBlur}
+                                        min={MESSAGE_ID_MIN_VALUE}
+                                        max={MESSAGE_ID_MAX_VALUE}
+                                    />
+
+                                    <TextField
+                                        label="Max segment size"
+                                        value={parameters.maxSegmentSize}
+                                        error={parameterErrors.maxSegmentSize}
+                                        name="maxSegmentSize"
+                                        helperText={`in decimal format (${SEGMENT_MIN_VALUE}-${SEGMENT_MAX_VALUE})`}
+                                        onChange={onControlChange}
+                                        onBlur={onControlBlur}
+                                        suffix="bytes"
+                                        min={SEGMENT_MIN_VALUE}
+                                        max={SEGMENT_MAX_VALUE}
+                                    />
+                                </>
                             )}
                         </Box>
                     )}
