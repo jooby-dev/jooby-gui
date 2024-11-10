@@ -8,5 +8,6 @@ export default {
     accessLevel: accessLevels.UNENCRYPTED,
     accessKey: accessKey.DEFAULT_HEX,
     messageId: 0,
-    segmentationSessionId: 0
+    segmentationSessionId: 0,
+    maxSegmentSize: 40
 };
