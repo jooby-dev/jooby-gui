@@ -6,6 +6,9 @@ import {
 } from './constants/index.js';
 
 
+globalThis.joobyCodec = joobyCodec;
+
+
 const prepareCommandMap = ( commandMap, direction ) => {
     const result = {};
 
