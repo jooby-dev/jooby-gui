@@ -42,7 +42,7 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
             onChange={() => toggleLog(id)}
         >
             <AccordionSummary
-                content="div"
+                component="div"
                 expandIcon={<ExpandMoreIcon/>}
                 aria-controls={`panel${id}bh-content`}
                 sx={{

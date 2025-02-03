@@ -11,6 +11,7 @@ export const uplinkCommands = {
                 dump: '15 06 08 1e 00 09 73 cb',
                 parameters: {
                     id: 8,
+                    name: 'REMOVE',
                     sequenceNumber: 30,
                     data: {
                         time2000: 619467
@@ -56,6 +57,7 @@ export const uplinkCommands = {
                 dump: '04 02 0d 03',
                 parameters: {
                     id: 13,
+                    name: 'CHANNELS_CONFIG',
                     data: {
                         value: 3
                     }

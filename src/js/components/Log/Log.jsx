@@ -129,7 +129,7 @@ const Log = ({
             onChange={onLogToggle}
         >
             <AccordionSummary
-                content="div"
+                component="div"
                 expandIcon={<ExpandMoreIcon/>}
                 aria-controls={`panel${id}bh-content`}
                 sx={{
@@ -283,7 +283,7 @@ const Log = ({
                                         onChange={() => toggleNestedLog(id, commandData.id)}
                                     >
                                         <AccordionSummary
-                                            content="div"
+                                            component="div"
                                             expandIcon={<ExpandMoreIcon/>}
                                             aria-controls={`panel${commandData.id}bh-content`}
                                             sx={{
