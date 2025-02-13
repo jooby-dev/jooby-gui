@@ -75,9 +75,9 @@ test.describe('logs actions', () => {
 
     test('expand/collapse logs', async ({page}) => {
         await mainPage.expandLogs();
-        await expect(await page.locator('[data-test="hex"]').all()).toHaveLength(12);
+        expect(await page.locator('[data-test="hex"]').all()).toHaveLength(12);
         await mainPage.collapseLogs().click();
-        await expect(await page.locator('[data-test="hex"]').all()).toHaveLength(0);
+        expect(await page.locator('[data-test="hex"]').all()).toHaveLength(0);
     });
 
     test('share logs - create link', async ( {page, context} ) => {
