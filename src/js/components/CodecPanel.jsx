@@ -87,7 +87,7 @@ const CodecPanel = ( {setLogs} ) => {
                             </Select>
                         </FormControl>
 
-                        {commandType === commandTypes.MTX1 && (
+                        {(commandType === commandTypes.MTX1 || commandType === commandTypes.MTX3) && (
                             <FormControl sx={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                                 <FormLabel id="framing-format-label" sx={{pr: 2}}>Framing format</FormLabel>
                                 <RadioGroup

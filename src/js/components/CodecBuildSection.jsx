@@ -60,7 +60,7 @@ const resolveParameters = ( parameters, commandType, framingFormat ) => {
         maxSegmentSize: parameters.maxSegmentSize
     };
 
-    if ( commandType === commandTypes.MTX1 ) {
+    if ( commandType === commandTypes.MTX1 || commandType === commandTypes.MTX3 ) {
         return framingFormat === framingFormats.NONE
             ? resolvedParameters
             : {
@@ -138,7 +138,10 @@ const processDataAndCreateLog = ({
         messageParameters: {}
     };
 
-    if ( commandType === commandTypes.MTX1 && !buildError ) {
+    if (
+        ( commandType === commandTypes.MTX1 || commandType === commandTypes.MTX3 )
+        && !buildError
+    ) {
         log.frameParameters = {
             type: frameType,
             destination: parameters.destination ? parseInt(cleanHexString(parameters.destination), 16) : undefined,
@@ -711,7 +714,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                         {isMtxCheck ? 'Frame' : 'Message'}
                     </Typography>
 
-                    {commandType === commandTypes.MTX1 && (
+                    {(commandType === commandTypes.MTX1 || commandType === commandTypes.MTX3) && (
                         <Box sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -743,7 +746,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                                 </>
                             )}
 
-                            {commandType === commandTypes.MTX1 && (
+                            {(commandType === commandTypes.MTX1 || commandType === commandTypes.MTX3) && (
                                 <>
                                     <FormControl variant="standard" fullWidth={true}>
                                         <InputLabel id="select-access-level-label">Access level</InputLabel>
