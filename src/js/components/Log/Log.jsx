@@ -58,7 +58,7 @@ const accessLevelNames = invertObject(accessLevels);
 const shouldRenderLrc = log => {
     // if the mtx message is unencrypted, the device sets the LRC to 0
     if (
-        log.commandType === commandTypes.MTX1
+        (log.commandType === commandTypes.MTX1 || log.commandType === commandTypes.MTX3)
         && log.data?.lrc?.received === 0
         && log.messageParameters?.accessLevel === accessLevels.UNENCRYPTED
     ) {

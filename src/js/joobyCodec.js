@@ -48,6 +48,10 @@ export const commands = {
     mtx1: {
         uplink: prepareCommandMap(joobyCodec.mtx1.commands.uplink, directions.UPLINK),
         downlink: prepareCommandMap(joobyCodec.mtx1.commands.downlink, directions.DOWNLINK)
+    },
+    mtx3: {
+        uplink: prepareCommandMap(joobyCodec.mtx3.commands.uplink, directions.UPLINK),
+        downlink: prepareCommandMap(joobyCodec.mtx3.commands.downlink, directions.DOWNLINK)
     }
 };
 
@@ -75,6 +79,13 @@ export const commandTypeConfigMap = {
         hasLrc: true,
         hasHardwareType: false,
         preparedCommandList: prepareCommandList(commands.mtx1),
+        hardwareTypeList: null
+    },
+
+    [commandTypes.MTX3]: {
+        hasLrc: true,
+        hasHardwareType: false,
+        preparedCommandList: prepareCommandList(commands.mtx3),
         hardwareTypeList: null
     }
 };

@@ -137,7 +137,11 @@ const processDataAndCreateLog = ({
         messageParameters: {}
     };
 
-    if ( commandType === commandTypes.MTX1 && data && !logErrorMessage ) {
+    if (
+        (commandType === commandTypes.MTX1 || commandType === commandTypes.MTX3)
+        && data
+        && !logErrorMessage
+    ) {
         const frameData = data.frame?.header;
 
         log.frameParameters = {
@@ -216,6 +220,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
             return;
         }
 
+        const codec = joobyCodec[commandType];
         const hexLines = removeComments(dump).split('\n').map(line => line.trim()).filter(line => line);
         const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
         const collector = new DataSegmentsCollector();
@@ -238,10 +243,10 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
 
             if ( !parseError ) {
                 const bytes = joobyCodec.utils.getBytesFromHex(hex);
-                const codec = joobyCodec[commandType];
 
                 switch ( commandType ) {
-                    case commandTypes.MTX1: {
+                    case commandTypes.MTX1:
+                    case commandTypes.MTX3: {
                         try {
                             switch ( framingFormat ) {
                                 case framingFormats.HDLC: {
@@ -354,7 +359,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
             let parseError;
 
             try {
-                data = joobyCodec.mtx1.message[directionNames[direction]].fromBytes(mtxBuffer, {aesKey});
+                data = codec.message[directionNames[direction]].fromBytes(mtxBuffer, {aesKey});
             } catch ( error ) {
                 parseError = error;
             }
@@ -365,9 +370,9 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     direction,
                     parseError,
                     isMtxLoraCheck,
+                    commandType,
                     hardwareType: hardwareType?.value,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(mtxBuffer) : undefined,
-                    commandType: commandTypes.MTX1,
                     logType: getLogType(commandType, parseError)
                 })
             );
@@ -457,7 +462,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                 </Box>
             </div>
 
-            {commandType === commandTypes.MTX1 && (
+            {(commandType === commandTypes.MTX1 || commandType === commandTypes.MTX3) && (
                 <div>
                     <TextField
                         type="text"
