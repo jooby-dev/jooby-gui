@@ -6,7 +6,7 @@ import isUndefined from '../utils/isUndefined.js';
 import getHexFromNumber from '../utils/getHexFromNumber.js';
 
 import {commandTypeConfigMap} from '../joobyCodec.js';
-import {codecBuildDefaults} from '../constants/index.js';
+import {directionNames, codecBuildDefaults} from '../constants/index.js';
 
 
 const CodecBuildPrefillDataContext = createContext();
@@ -30,7 +30,9 @@ export const CodecBuildPrefillDataProvider = ( {children} ) => {
             const {preparedCommandList} = commandTypeConfigMap[log.commandType];
 
             const logCommands = log.data.commands.map(command => ({
-                command: preparedCommandList.find(({value, direction}) => value.id === command.command.id && direction === log.directionName),
+                command: preparedCommandList.find(
+                    ({value, direction}) => value.id === command.command.id && direction === directionNames[log.directionType]
+                ),
                 parameters: JSON.stringify(command.command.parameters, null, 4),
                 id: uuidv4()
             }));

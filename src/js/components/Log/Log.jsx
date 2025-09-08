@@ -56,6 +56,10 @@ const frameNamesByType = invertObject(frameTypes);
 const accessLevelNames = invertObject(accessLevels);
 
 const shouldRenderLrc = log => {
+    if ( log.isMtx && !log.isDataFrame ) {
+        return false;
+    }
+
     // if the mtx message is unencrypted, the device sets the LRC to 0
     if (
         (log.commandType === commandTypes.MTX1 || log.commandType === commandTypes.MTX3)
@@ -267,10 +271,17 @@ const Log = ({
                             </>
                         )}
 
-                        {data.commands.length > 0 && <TypographyBold>commands</TypographyBold>}
+                        {data.payloadHex && (
+                            <>
+                                <TypographyBold>content</TypographyBold>
+                                <Box>{<HexViewer hex={data.payloadHex}/>}</Box>
+                            </>
+                        )}
+
+                        {data.commands?.length && <TypographyBold>commands</TypographyBold>}
                     </Box>
 
-                    {data.commands.length > 0 && (
+                    {data.commands?.length && (
                         <>
                             {data.commands.map(commandData => {
                                 const {command} = commandData;

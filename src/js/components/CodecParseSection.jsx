@@ -59,15 +59,26 @@ const validators = {
 const getDirectionFromFrame = parsedFrame => {
     const {type} = parsedFrame.header;
 
-    if ( type === frameTypes.DATA_REQUEST ) {
-        return directions.DOWNLINK;
-    }
+    switch ( type ) {
+        case frameTypes.DATA_REQUEST:
+        case frameTypes.IDENT_REQUEST:
+        case frameTypes.L2_SET_ADDRESS_REQUEST:
+        case frameTypes.L2_CHECK_ADDRESS_REQUEST:
+        case frameTypes.L2_RM_ADDRESS_REQUEST:
+        case frameTypes.FRAGMENT_REQUEST:
+            return directions.DOWNLINK;
 
-    if ( type === frameTypes.DATA_RESPONSE ) {
-        return directions.UPLINK;
-    }
+        case frameTypes.DATA_RESPONSE:
+        case frameTypes.IDENT_RESPONSE:
+        case frameTypes.L2_SET_ADDRESS_RESPONSE:
+        case frameTypes.L2_CHECK_ADDRESS_RESPONSE:
+        case frameTypes.L2_RM_ADDRESS_RESPONSE:
+        case frameTypes.FRAGMENT_RESPONSE:
+            return directions.UPLINK;
 
-    return null;
+        default:
+            return null;
+    }
 };
 
 const processDataAndCreateLog = ({
@@ -78,54 +89,62 @@ const processDataAndCreateLog = ({
     hardwareType,
     parseError,
     logType,
-    isMtxLoraCheck
+    isMtxLoraCheck,
+    isMtxCheck,
+    isDataFrame
 }) => {
     const preparedData = {};
     let logErrorMessage = parseError?.message;
     let message;
 
     if ( data && !logErrorMessage ) {
-        const messageError = data.error;
+        if ( isMtxCheck && !isDataFrame ) {
+            preparedData.payloadHex = data.payloadHex;
+        } else {
+            const messageError = data.error;
 
-        message = messageError ? data.message : data;
+            message = messageError ? data.message : data;
 
-        if ( !message.commands.length ) {
-            logErrorMessage = 'No commands found.';
-            logType = logTypes.ERROR;
+            if ( !message.commands.length ) {
+                logErrorMessage = 'No commands found.';
+                logType = logTypes.ERROR;
+            } else {
+                preparedData.commands = message.commands.map(commandData => {
+                    const {error} = commandData;
+                    const command = error ? commandData.command : commandData;
+                    const commandDetails = error ? null : commands[commandType][directionNames[direction]][command.name];
+                    const isByteArrayValid = isByteArray(command.bytes);
+
+                    return {
+                        command: {
+                            error,
+                            id: command.id,
+                            name: command.name || unknownCommand.NAME,
+                            hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(command.bytes) : undefined,
+                            length: isByteArrayValid ? command.bytes.length : undefined,
+                            directionType: direction,
+                            hasParameters: error ? undefined : commandDetails.hasParameters,
+                            parameters: command.parameters || undefined
+                        },
+                        id: uuidv4(),
+                        isExpanded: false
+                    };
+                });
+
+                preparedData.lrc = message.lrc;
+                preparedData.error = messageError;
+            }
         }
-
-        preparedData.commands = message.commands.map(commandData => {
-            const {error} = commandData;
-            const command = error ? commandData.command : commandData;
-            const commandDetails = error ? null : commands[commandType][directionNames[direction]][command.name];
-            const isByteArrayValid = isByteArray(command.bytes);
-
-            return {
-                command: {
-                    error,
-                    id: command.id,
-                    name: command.name || unknownCommand.NAME,
-                    hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(command.bytes) : undefined,
-                    length: isByteArrayValid ? command.bytes.length : undefined,
-                    directionType: direction,
-                    hasParameters: error ? undefined : commandDetails.hasParameters,
-                    parameters: command.parameters || undefined
-                },
-                id: uuidv4(),
-                isExpanded: false
-            };
-        });
-
-        preparedData.lrc = message.lrc;
-        preparedData.error = messageError;
     }
 
     const log = {
         commandType,
         hex,
         hardwareType,
+        isDataFrame,
         isMtxLora: isMtxLoraCheck,
-        directionName: directionNames[direction],
+        isMtx: isMtxCheck,
+        directionType: direction,
         data: logErrorMessage ? undefined : preparedData,
         date: new Date().toLocaleString(),
         error: logErrorMessage,
@@ -151,8 +170,8 @@ const processDataAndCreateLog = ({
         };
 
         log.messageParameters = {
-            accessLevel: message.accessLevel,
-            messageId: message.messageId
+            accessLevel: message?.accessLevel,
+            messageId: message?.messageId
         };
     }
 
@@ -192,6 +211,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
     const showSnackbar = useSnackbar();
 
     const isMtxLoraCheck = isMtxLora(commandType, framingFormat);
+    const isMtxCheck = isMtx(commandType, framingFormat);
 
     // reset state when command type changes
     useEffect(
@@ -230,6 +250,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
 
         hexLines.forEach(hexLine => {
             let hex = hexLine;
+            let isDataFrame = false;
             let data;
             let parseError;
 
@@ -251,6 +272,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                             switch ( framingFormat ) {
                                 case framingFormats.HDLC: {
                                     const parsedFrame = frame.fromBytes(bytes);
+                                    const frameHeaderType = parsedFrame.header?.type;
 
                                     if ( parsedFrame.error ) {
                                         throw new Error(parsedFrame.error);
@@ -259,11 +281,22 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                                     direction = getDirectionFromFrame(parsedFrame);
 
                                     if ( !direction ) {
-                                        throw new Error(`Unknown frame type: ${parsedFrame.type}`);
+                                        throw new Error(`Unknown frame type: ${frameHeaderType}`);
                                     }
 
-                                    data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
-                                    data.frame = parsedFrame;
+                                    isDataFrame = frameHeaderType === frameTypes.DATA_REQUEST || frameHeaderType === frameTypes.DATA_RESPONSE;
+
+                                    if ( isDataFrame ) {
+                                        data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
+                                        data.frame = parsedFrame;
+                                    } else {
+                                        data = {
+                                            frame: parsedFrame,
+                                            payloadHex: parsedFrame.payload?.length
+                                                ? joobyCodec.utils.getHexFromBytes(parsedFrame.payload)
+                                                : null
+                                        };
+                                    }
 
                                     break;
                                 }
@@ -346,6 +379,8 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     direction,
                     parseError,
                     isMtxLoraCheck,
+                    isMtxCheck,
+                    isDataFrame,
                     hardwareType: hardwareType?.value,
                     commandType: isMtxLoraCheck ? commandTypes.ANALOG : commandType,
                     logType: getLogType(commandType, parseError, framingFormat)
@@ -370,7 +405,9 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     direction,
                     parseError,
                     isMtxLoraCheck,
+                    isMtxCheck,
                     commandType,
+                    isDataFrame: false,
                     hardwareType: hardwareType?.value,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(mtxBuffer) : undefined,
                     logType: getLogType(commandType, parseError)
