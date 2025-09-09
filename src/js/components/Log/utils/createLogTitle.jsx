@@ -36,15 +36,21 @@ const createLogTitle = log => {
         case logTypes.MESSAGE:
         case logTypes.FRAME: {
             const hardwareTypeContent = renderHardwareType(log.hardwareType, log.commandType);
+            const {commands} = log.data;
 
             return (
                 <>
-                    {createDirectionIcon(log.data.commands[0].command.directionType)}
+                    {createDirectionIcon(log.directionType)}
                     <Box>
                         <Box sx={{minWidth: 0}}>
                             <HighlightedText>{log.commandType}</HighlightedText>
-                            {' (commands: '}
-                            <HighlightedText fontWeight="normal">{log.data.commands.length}</HighlightedText>
+                            {(commands?.length || hardwareTypeContent) && <>{' ('}</>}
+                            {commands?.length && (
+                                <>
+                                    {'commands: '}
+                                    <HighlightedText fontWeight="normal">{commands.length}</HighlightedText>
+                                </>
+                            )}
                             {hardwareTypeContent
                                 ? (
                                     <>
@@ -54,39 +60,41 @@ const createLogTitle = log => {
                                 )
                                 : ''
                             }
-                            {')'}
+                            {(commands?.length || hardwareTypeContent) && <>{')'}</>}
                         </Box>
 
-                        <Box sx={{
-                            fontWeight: 'fontWeightRegular',
-                            fontSize: '0.75rem',
-                            color: 'grey.500',
-                            fontFamily: 'Roboto Mono, monospace',
-                            minWidth: 0
-                        }}>
-                            <Collapse
-                                sx={{
-                                    '& .MuiCollapse-wrapperInner': {
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis'
-                                    }
-                                }}
-                                in={!log.isExpanded}
-                            >
-                                {log.data.commands.map((commandData, index) => (
-                                    <Fragment key={index}>
-                                        <Box component="span" sx={{color: 'grey.700'}}>{commandData.command.name}</Box>
-                                        {
-                                            commandData.command.id && commandData.command.hasParameters
-                                                ? `: ${removeQuotes(JSON.stringify(commandData.command.parameters))}`
-                                                : ''
+                        {commands?.length && (
+                            <Box sx={{
+                                fontWeight: 'fontWeightRegular',
+                                fontSize: '0.75rem',
+                                color: 'grey.500',
+                                fontFamily: 'Roboto Mono, monospace',
+                                minWidth: 0
+                            }}>
+                                <Collapse
+                                    sx={{
+                                        '& .MuiCollapse-wrapperInner': {
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis'
                                         }
-                                        {'; '}
-                                    </Fragment>
-                                ))}
-                            </Collapse>
-                        </Box>
+                                    }}
+                                    in={!log.isExpanded}
+                                >
+                                    {commands.map(({command}, index) => (
+                                        <Fragment key={index}>
+                                            <Box component="span" sx={{color: 'grey.700'}}>{command.name}</Box>
+                                            {
+                                                command.id && command.hasParameters
+                                                    ? `: ${removeQuotes(JSON.stringify(command.parameters))}`
+                                                    : ''
+                                            }
+                                            {'; '}
+                                        </Fragment>
+                                    ))}
+                                </Collapse>
+                            </Box>
+                        )}
                     </Box>
                 </>
             );

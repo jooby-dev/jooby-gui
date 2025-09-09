@@ -2,7 +2,8 @@
     {
         "commandType": "analog",
         "hardwareType": 12,
-        "directionName": "uplink",
+        "directionType": 2,
+        "isDataFrame": false,
         "isMtxLora": false,
         "hex": "1f 07 05 04 04 22 35 28 77",
         "data": {
@@ -59,7 +60,8 @@
     },
     {
         "commandType": "mtx1",
-        "directionName": "uplink",
+        "directionType": 2,
+        "isDataFrame": true,
         "isMtxLora": false,
         "hex": "7e 51 ff ff ff fe 00 10 10 6f 0d 2a 43 7d 31 01 02 10 00 20 00 30 00 40 00 00 1c 49 8e 7e",
         "data": {

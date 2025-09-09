@@ -93,12 +93,15 @@ const processDataAndCreateLog = ({
     bytes,
     parameters,
     directionName,
+    direction,
     commandType,
     hardwareType,
     frameType,
     buildError,
     logType,
-    isMtxLoraCheck
+    isMtxLoraCheck,
+    isMtxCheck,
+    isDataFrame
 }) => {
     if ( data ) {
         data.commands = data.commands.map(commandData => {
@@ -124,8 +127,10 @@ const processDataAndCreateLog = ({
     const log = {
         commandType,
         hardwareType,
-        directionName,
+        isDataFrame,
+        directionType: direction,
         isMtxLora: isMtxLoraCheck,
+        isMtx: isMtxCheck,
         hex: !buildError && isByteArray(bytes) ? joobyCodec.utils.getHexFromBytes(bytes) : undefined,
         data: buildError ? undefined : data,
         date: new Date().toLocaleString(),
@@ -360,6 +365,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         let currentCommandParameters;
         let buildError;
         let directionName;
+        let direction;
 
         try {
             const messageCommands = preparedCommands.map(preparedCommand => {
@@ -380,7 +386,7 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
             });
 
             // all commands in the message must be of the same direction
-            const direction = preparedCommands[0].command.value.directionType;
+            direction = preparedCommands[0].command.value.directionType;
 
             directionName = directionNames[direction];
 
@@ -419,15 +425,19 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
         }
 
         const bytes = isMtxCheck ? frameBytes : messageBytes;
+        const isDataFrame = isMtxCheck && (frameType === frameTypes.DATA_REQUEST || frameType === frameTypes.DATA_RESPONSE);
 
         newLogs.push(
             processDataAndCreateLog({
                 data,
                 bytes,
                 directionName,
+                direction,
                 frameType,
                 buildError,
                 isMtxLoraCheck,
+                isMtxCheck,
+                isDataFrame,
                 commandType,
                 hardwareType: hardwareType?.value,
                 parameters: resolveParameters(parameters, commandType, framingFormat),
@@ -454,10 +464,13 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                     processDataAndCreateLog({
                         parameters,
                         directionName,
+                        direction,
                         frameType,
                         buildError,
                         bytes,
                         isMtxLoraCheck,
+                        isMtxCheck,
+                        isDataFrame,
                         data: undefined,
                         commandType: commandTypes.ANALOG,
                         hardwareType: hardwareTypes.MTXLORA,
@@ -489,9 +502,12 @@ const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
                             data,
                             parameters,
                             directionName,
+                            direction,
                             frameType,
                             buildError,
                             isMtxLoraCheck,
+                            isMtxCheck,
+                            isDataFrame,
                             bytes: messageBytes,
                             commandType: commandTypes.ANALOG,
                             hardwareType: hardwareTypes.MTXLORA,
