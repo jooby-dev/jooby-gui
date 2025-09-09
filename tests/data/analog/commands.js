@@ -368,7 +368,7 @@ export const downlinkCommands = {
             },
             getParameter: {
                 name: 'getParameter',
-                dump: '04 01 17',
+                dump: '04 01 18',
                 parameters: {
                     id: 24,
                     data: null
@@ -380,7 +380,10 @@ export const downlinkCommands = {
                 parameters: {
                     id: 1,
                     data: {
-                        value: 3600
+                        specialSchedulePeriod: 0,
+                        firstDaysSpecialSchedule: 0,
+                        lastDaysSpecialSchedule: 0,
+                        period: 3600
                     }
                 }
             }
