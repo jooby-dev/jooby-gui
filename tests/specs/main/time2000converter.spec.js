@@ -1,4 +1,5 @@
 import {expect, test} from '@playwright/test';
+import {time} from 'jooby-codec/analog/utils/index.js';
 import {MainPage} from '../../objects/MainPage.js';
 
 
@@ -12,12 +13,17 @@ test.describe('time2000 converter - positive cases', () => {
     });
 
     test('set date and check timestamps', async ( {page} ) => {
+        // compute expected values instead of hardcoding to avoid timezone issues
+        const localDate = new Date(2024, 0, 1, 1, 10, 59);
+        const expectedTimestamp = Math.floor(localDate.getTime() / 1000);
+        const expectedTime2000 = time.getTime2000FromDate(localDate);
+
         await mainPage.fillInputInTime2000Converter(
             mainPage.getDateInTime2000Converter(),
             '01/01/2024 01:10:59'
         );
-        await expect(page.getByLabel('Time2000', {exact: true})).toHaveValue('757386659');
-        await expect(page.getByLabel('Timestamp', {exact: true})).toHaveValue('1704071459');
+        await expect(page.getByLabel('Timestamp', {exact: true})).toHaveValue(String(expectedTimestamp));
+        await expect(page.getByLabel('Time2000', {exact: true})).toHaveValue(String(expectedTime2000));
     });
 
     test('set time2000 timestamp and check date', async () => {

@@ -24,7 +24,7 @@ const validateMtxCommands = $commandsOptions => {
         if ( command.includes('(LoRa only)') ) {
             [command] = command.split(' ');
 
-            expect(['getHalfhoursEnergies', 'getDayEnergies', 'getDayMaxPower']).toContain(command);
+            expect(['getHalfHourEnergies', 'getDayEnergies', 'getDayMaxPower']).toContain(command);
         }
 
         expect(commands.mtx1.commands).toContain(command);
