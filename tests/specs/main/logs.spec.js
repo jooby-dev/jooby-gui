@@ -104,7 +104,7 @@ test.describe('logs actions', () => {
     });
 
     test('edit as new', async ({page}) => {
-        await mainPage.editAsNew('mtx1 (commands: 1)', expectedData.command.commands.getHalfHourEnergies.parameters);
+        await mainPage.editAsNew('mtx1 (frame type: DATA_RESPONSE; commands: 1)', expectedData.command.commands.getHalfHourEnergies.parameters);
         await mainPage.deleteLogs();
         await mainPage.buildFrame().click();
         await mainPage.clearCommands().click();
