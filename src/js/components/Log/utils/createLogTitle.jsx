@@ -1,6 +1,8 @@
 import {Fragment} from 'react';
 import {Box, Collapse, Tooltip} from '@mui/material';
 import {Close as CloseIcon} from '@mui/icons-material';
+import {frameTypes} from 'jooby-codec/mtx1/constants/index.js';
+import invertObject from 'jooby-codec/utils/invertObject.js';
 
 import createDirectionIcon from '../../../utils/createDirectionIcon.jsx';
 import removeQuotes from '../../../utils/removeQuotes.js';
@@ -10,6 +12,8 @@ import HighlightedText from '../../HighlightedText.jsx';
 import {commandTypeConfigMap} from '../../../joobyCodec.js';
 import {logTypes} from '../../../constants/index.js';
 
+
+const frameNamesByType = invertObject(frameTypes);
 
 const renderHardwareType = ( hardwareType, commandType ) => {
     if ( !hardwareType ) {
@@ -31,12 +35,60 @@ const renderHardwareType = ( hardwareType, commandType ) => {
     );
 };
 
+const renderCommands = commands => {
+    if ( !commands?.length ) {
+        return null;
+    }
+
+    return (
+        <>
+            {'commands: '}
+            <HighlightedText fontWeight="normal">{commands.length}</HighlightedText>
+        </>
+    );
+};
+
+const renderFrameType = frameParameters => {
+    if ( !frameParameters?.type ) {
+        return null;
+    }
+
+    return (
+        <>
+            {'frame type: '}
+            <HighlightedText fontWeight="normal">{frameNamesByType[frameParameters.type]}</HighlightedText>
+        </>
+    );
+};
+
+const buildLogTitleParts = log => {
+    const {data: {commands}, frameParameters} = log;
+    const frameTypePart = renderFrameType(frameParameters);
+    const commandsPart = renderCommands(commands);
+    const hardwareTypePart = renderHardwareType(log.hardwareType, log.commandType);
+    const parts = [];
+
+    if ( frameTypePart ) {
+        parts.push(frameTypePart);
+    }
+
+    if ( commandsPart ) {
+        parts.push(commandsPart);
+    }
+
+    if ( hardwareTypePart ) {
+        parts.push(hardwareTypePart);
+    }
+
+    return parts;
+};
+
 const createLogTitle = log => {
     switch ( log.type ) {
         case logTypes.MESSAGE:
         case logTypes.FRAME: {
-            const hardwareTypeContent = renderHardwareType(log.hardwareType, log.commandType);
             const {commands} = log.data;
+            const parts = buildLogTitleParts(log);
 
             return (
                 <>
@@ -44,23 +96,13 @@ const createLogTitle = log => {
                     <Box>
                         <Box sx={{minWidth: 0}}>
                             <HighlightedText>{log.commandType}</HighlightedText>
-                            {(commands?.length || hardwareTypeContent) && <>{' ('}</>}
-                            {commands?.length && (
+                            {parts.length > 0 && (
                                 <>
-                                    {'commands: '}
-                                    <HighlightedText fontWeight="normal">{commands.length}</HighlightedText>
+                                    {' ('}
+                                    {parts.flatMap((part, index) => (index === 0 ? [part] : ['; ', part]))}
+                                    {')'}
                                 </>
                             )}
-                            {hardwareTypeContent
-                                ? (
-                                    <>
-                                        {'; '}
-                                        {hardwareTypeContent}
-                                    </>
-                                )
-                                : ''
-                            }
-                            {(commands?.length || hardwareTypeContent) && <>{')'}</>}
                         </Box>
 
                         {commands?.length && (
