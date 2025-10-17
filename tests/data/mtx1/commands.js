@@ -116,7 +116,7 @@ export const downlinkCommands = {
                         month: 3,
                         date: 27
                     },
-                    energyType: 160,
+                    demandType: 160,
                     firstIndex: 192,
                     count: 48,
                     period: 1
