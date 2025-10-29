@@ -428,7 +428,7 @@ export const downlinkCommands = {
             }
         }
     },
-    getBuildVersion: {
+    getBv: {
         hex: {
             dump: '1e 09 00 91 00 10 10 70 00 00 35 96'
         },
@@ -439,7 +439,7 @@ export const downlinkCommands = {
             lrc: '0x35',
             commands: {
                 getDateTime: {
-                    name: 'getBuildVersion',
+                    name: 'getBv',
                     dump: '70 00'
                 }
             }
