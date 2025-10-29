@@ -120,7 +120,7 @@ export const uplinkCommands = {
                 messageId: '102'
             },
             commands: {
-                getDateTime: {
+                getEnergyDayPrevious: {
                     name: 'getEnergyDayPrevious',
                     dump: '03 13 18 07 10 00 00 dd d0 00 00 63 f5 00 00 62 da 00 00 d3 92',
                     parameters: {
@@ -197,7 +197,7 @@ export const uplinkCommands = {
                 messageId: '8'
             },
             commands: {
-                getDateTime: {
+                getMonthDemand: {
                     name: 'getMonthDemand',
                     dump: '17 12 18 07 00 00 dd d0 00 00 63 f5 00 00 62 da 00 00 d3 92',
                     parameters: {
@@ -287,7 +287,7 @@ export const uplinkCommands = {
                 messageId: '9'
             },
             commands: {
-                getDateTime: {
+                getCurrentValues: {
                     name: 'getCurrentValues',
                     dump: '0d 20 00 00 00 00 00 00 00 00 00 03 5c 41 00 00 00 00 03 e8 00 00 00 00 00 00 00 00 00 00 00 00 03 e8',
                     parameters: {
@@ -358,7 +358,7 @@ export const downlinkCommands = {
             messageId: 0,
             lrc: '0x5b',
             commands: {
-                getDateTime: {
+                getOperatorParameters: {
                     name: 'getOperatorParameters',
                     dump: '1e 00'
                 }
@@ -398,7 +398,7 @@ export const downlinkCommands = {
             messageId: 0,
             lrc: '0x6b',
             commands: {
-                getDateTime: {
+                getSaldoParameters: {
                     name: 'getSaldoParameters',
                     dump: '2e 00'
                 }
@@ -438,7 +438,7 @@ export const downlinkCommands = {
             messageId: 0,
             lrc: '0x35',
             commands: {
-                getDateTime: {
+                getBv: {
                     name: 'getBv',
                     dump: '70 00'
                 }
@@ -478,7 +478,7 @@ export const downlinkCommands = {
             messageId: 0,
             lrc: '0x44',
             commands: {
-                getDateTime: {
+                getEventStatus: {
                     name: 'getEventStatus',
                     dump: '01 00'
                 }
