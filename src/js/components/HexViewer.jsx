@@ -1,10 +1,8 @@
 import {useState} from 'react';
 import PropTypes from 'prop-types';
-import {Box} from '@mui/material';
+import {Box, Tooltip} from '@mui/material';
 import {CheckCircle as CheckCircleIcon, ContentCopy as ContentCopyIcon} from '@mui/icons-material';
-
 import useCopyToClipboard from '../hooks/useCopyToClipboard.js';
-
 
 const HexViewer = ( {hex, ...props} ) => {
     const [copied, setCopied] = useState(false);
@@ -17,9 +15,13 @@ const HexViewer = ( {hex, ...props} ) => {
             return;
         }
 
+        const withSpaces = event.shiftKey;
         const preparedHex = hex.replace(/\s+/g, '').replace(/0x/gi, '');
+        const hexToCopy = withSpaces
+            ? preparedHex.match(/.{1,2}/g)?.join(' ') || preparedHex
+            : preparedHex;
 
-        copyToClipboard(preparedHex);
+        copyToClipboard(hexToCopy);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -44,10 +46,16 @@ const HexViewer = ( {hex, ...props} ) => {
             }}
         >
             <span data-test="hex">{hex}</span>
-            {copied
-                ? <CheckCircleIcon sx={{ml: 1, color: 'success.main', fontSize: '1rem'}}/>
-                : <ContentCopyIcon sx={{ml: 1, color: 'grey.600', fontSize: '1rem'}}/>
-            }
+            <Tooltip
+                title={copied ? 'Copied!' : 'Shift+Click copy with spaces'}
+                placement="top"
+                arrow
+            >
+                {copied
+                    ? <CheckCircleIcon sx={{ml: 1, color: 'success.main', fontSize: '1rem'}}/>
+                    : <ContentCopyIcon sx={{ml: 1, color: 'grey.600', fontSize: '1rem'}}/>
+                }
+            </Tooltip>
         </Box>
     );
 };
