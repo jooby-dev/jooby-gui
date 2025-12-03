@@ -150,7 +150,7 @@ export const downlinkCommands = {
                     month: 1,
                     date: 5,
                     dayIndex: 5,
-                    isPeriodic: true
+                    year: 0
                 }
             }
         }
