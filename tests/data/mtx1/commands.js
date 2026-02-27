@@ -25,6 +25,7 @@ export const uplinkCommands = {
                     tbadVAVB: 0,
                     tbadImaxAll: 0,
                     tbadPmaxAll: 0,
+                    tbadUnequalCurrAll: 0,
                     tbadFREQ: 0,
                     relayStatus: {
                         RELAY_STATE: true,
