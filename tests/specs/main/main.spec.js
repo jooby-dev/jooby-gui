@@ -7,7 +7,6 @@ const expectedTexts = {
     titles: ['Parse messages', 'Create message', 'Logs'],
     descriptions: [
         'May be required for parsing and creating a message',
-        '',
         'Batch processing supported, each dump on a new line',
         'Commands in the message must be of the same direction'
     ]

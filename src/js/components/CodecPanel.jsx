@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import {useShallow} from 'zustand/react/shallow';
 import PropTypes from 'prop-types';
 import {
     Autocomplete,
@@ -32,7 +33,7 @@ import hasHardwareTypeInCommandType from '../utils/hasHardwareTypeInCommandType.
 
 const CodecPanel = ( {setLogs} ) => {
     const {prefillData} = useCodecBuildPrefillData();
-    const [framingFormat, setFramingFormat] = useCodecStore(state => [state.framingFormat, state.setFramingFormat]);
+    const [framingFormat, setFramingFormat] = useCodecStore(useShallow(state => [state.framingFormat, state.setFramingFormat]));
     const {commandType, setCommandType} = useCommandType();
 
     const [hardwareType, setHardwareType] = useState(null);

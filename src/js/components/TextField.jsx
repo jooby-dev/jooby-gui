@@ -25,15 +25,17 @@ const TextField = ({
         type="number"
         fullWidth={true}
         spellCheck={false}
-        inputProps={{
-            min,
-            max,
-            autoComplete: 'off'
-        }}
-        InputProps={{
-            startAdornment: prefix ? <InputAdornment position="start">{prefix}</InputAdornment> : null,
-            endAdornment: suffix ? <InputAdornment position="end">{suffix}</InputAdornment> : null,
-            readOnly
+        slotProps={{
+            htmlInput: {
+                min,
+                max,
+                autoComplete: 'off'
+            },
+            input: {
+                startAdornment: prefix ? <InputAdornment position="start">{prefix}</InputAdornment> : null,
+                endAdornment: suffix ? <InputAdornment position="end">{suffix}</InputAdornment> : null,
+                readOnly
+            }
         }}
         {...rest}
     />

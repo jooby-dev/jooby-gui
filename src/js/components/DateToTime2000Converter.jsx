@@ -137,7 +137,7 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
                         onChange={handleTime2000Change}
                         error={!!time2000Error}
                         helperText={time2000Error}
-                        InputProps={{endAdornment: <InputAdornment position="end">seconds</InputAdornment>}}
+                        slotProps={{input: {endAdornment: <InputAdornment position="end">seconds</InputAdornment>}}}
                         fullWidth
                     />
                     <IconButtonWithTooltip
@@ -174,7 +174,7 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
                         onChange={handleTimestampChange}
                         error={!!timestampError}
                         helperText={timestampError}
-                        InputProps={{endAdornment: <InputAdornment position="end">seconds</InputAdornment>}}
+                        slotProps={{input: {endAdornment: <InputAdornment position="end">seconds</InputAdornment>}}}
                         fullWidth
                     />
                     <IconButtonWithTooltip
