@@ -48,7 +48,7 @@ test.describe('validate commands in all codecs', () => {
             commands.analog.options.forEach((option, index) => {
                 expect($hardwareOptions[index]).toEqual(option.label);
             });
-            expect($commandsOptions.length).toEqual(commands.analog.commands.length);
+            expect($commandsOptions).toHaveLength(commands.analog.commands.length);
             $commandsOptions.forEach(command => expect(commands.analog.commands).toContain(command));
         });
 
@@ -72,7 +72,7 @@ test.describe('validate commands in all codecs', () => {
             const $commandsOptions = await mainPage.getAllSelectOption(MainPage.command);
 
             await expect(page.locator('[name="accessKey"]')).toHaveValue(accessKey);
-            expect($commandsOptions.length).toEqual(commands.mtx1.commands.length);
+            expect($commandsOptions).toHaveLength(commands.mtx1.commands.length);
 
             validateMtxCommands($commandsOptions);
         });
@@ -111,7 +111,7 @@ test.describe('validate commands in all codecs', () => {
             const $commandsOptions = await mainPage.getAllSelectOption(MainPage.command);
 
             await expect(page.locator('[name="accessKey"]')).toHaveValue(accessKey);
-            expect($commandsOptions.length).toEqual(commands.mtx1.commands.length);
+            expect($commandsOptions).toHaveLength(commands.mtx1.commands.length);
 
             validateMtxCommands($commandsOptions);
         });
@@ -148,7 +148,7 @@ test.describe('validate commands in all codecs', () => {
         test('validate commands for obisObserver codec', async ( {page} ) => {
             const $commandsOptions = await new MainPage(page).getAllSelectOption(MainPage.command);
 
-            expect($commandsOptions.length).toEqual(commands.obisObserver.commands.length);
+            expect($commandsOptions).toHaveLength(commands.obisObserver.commands.length);
             $commandsOptions.forEach(command => expect(commands.obisObserver.commands).toContain(command));
         });
 
