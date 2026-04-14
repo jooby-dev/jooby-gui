@@ -55,7 +55,7 @@ export class MainPage {
         // missile click for closing select list
         codecSelect
             ? await this.page.getByRole('option', {name: 'analog'}).click()
-            : await this.page.click('body', {
+            : await this.page.locator('body').click({
                 position: {x: 100, y: 100}
             });
 

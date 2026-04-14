@@ -76,9 +76,9 @@ test.describe('logs actions', () => {
 
     test('expand/collapse logs', async ({page}) => {
         await mainPage.expandLogs();
-        expect(await page.locator('[data-test="hex"]').all()).toHaveLength(12);
+        await expect(page.locator('[data-test="hex"]')).toHaveCount(12);
         await mainPage.collapseLogs().click();
-        expect(await page.locator('[data-test="hex"]').all()).toHaveLength(0);
+        await expect(page.locator('[data-test="hex"]')).toHaveCount(0);
     });
 
     test('share logs - create link', async ( {page, context} ) => {
@@ -106,6 +106,7 @@ test.describe('logs actions', () => {
     test('edit as new', async ({page}) => {
         await mainPage.editAsNew('mtx1 (frame type: DATA_RESPONSE; commands: 1)', expectedData.command.commands.getHalfHourEnergies.parameters);
         await mainPage.deleteLogs();
+        // eslint-disable-next-line playwright/prefer-locator -- false positive: buildFrame() returns a Locator
         await mainPage.buildFrame().click();
         await mainPage.clearCommands().click();
         await validateMtxFrames(page, expectedData.command);

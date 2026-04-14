@@ -44,6 +44,7 @@ test.describe('mtx downlink commands - create messages', () => {
                 await mainPage.createFrame(command.frame);
             }
 
+            // eslint-disable-next-line playwright/prefer-locator -- false positive: buildFrame() returns a Locator
             await mainPage.buildFrame().click();
             await validateMtxFrames(page, command);
         });
