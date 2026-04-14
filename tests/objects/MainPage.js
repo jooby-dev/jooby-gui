@@ -240,7 +240,7 @@ export class MainPage {
     }
 
     getDateInTime2000Converter () {
-        return this.page.getByPlaceholder('DD/MM/YYYY hh:mm:ss');
+        return this.page.getByRole('group', {name: 'Date and time'}).locator('input');
     }
 
     getTime2000Input () {

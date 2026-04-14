@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import {useShallow} from 'zustand/react/shallow';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
 import * as frame from 'jooby-codec/mtx1/utils/frame.js';
@@ -201,7 +202,7 @@ const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.com
 
 const CodecParseSection = ( {setLogs, hardwareType} ) => {
     const {commandType} = useCommandType();
-    const [framingFormat] = useCodecStore(state => [state.framingFormat]);
+    const [framingFormat] = useCodecStore(useShallow(state => [state.framingFormat]));
 
     const [dump, setDump] = useState('');
     const [format, setFormat] = useState(formats.HEX);
@@ -525,16 +526,18 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     maxRows={12}
                     value={dump}
                     helperText="Batch processing supported, each dump on a new line"
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                {dump && (
-                                    <IconButtonWithTooltip title="Clear dump" onClick={onClearDumpClick}>
-                                        <ClearIcon/>
-                                    </IconButtonWithTooltip>
-                                )}
-                            </InputAdornment>
-                        )
+                    slotProps={{
+                        input: {
+                            endAdornment: dump
+                                ? (
+                                    <InputAdornment position="end">
+                                        <IconButtonWithTooltip title="Clear dump" onClick={onClearDumpClick}>
+                                            <ClearIcon/>
+                                        </IconButtonWithTooltip>
+                                    </InputAdornment>
+                                )
+                                : null
+                        }
                     }}
                 />
             </div>

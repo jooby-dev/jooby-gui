@@ -118,7 +118,7 @@ module.exports = {
         'import/no-relative-packages': 'off',
         'import/order': 'off',
         // https://github.com/import-js/eslint-plugin-import/issues/1868
-        'import/no-unresolved': [2, {ignore: ['^@jooby-dev/jooby-codec', '^jooby-codec']}],
+        'import/no-unresolved': [2, {ignore: ['^jooby-codec', '^uuid', '^vite', '^@vitejs/']}],
         'react/jsx-tag-spacing': ['error', {beforeSelfClosing: 'never'}],
         'custom-rules/space-in-function-parens': 'error',
         'custom-rules/space-in-control-parens': 'error',

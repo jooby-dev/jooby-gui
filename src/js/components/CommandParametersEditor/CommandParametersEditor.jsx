@@ -171,9 +171,9 @@ const CommandParameterEditor = ({
 
     return (
         <FormControl fullWidth>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                 <Box ref={editorRef} sx={{flexGrow: 1, height: '100%'}}></Box>
-                <Box display="flex" flexDirection="column">
+                <Box sx={{display: 'flex', flexDirection: 'column'}}>
                     <IconButtonWithTooltip
                         title="Clear parameters"
                         onClick={handleClearClick}

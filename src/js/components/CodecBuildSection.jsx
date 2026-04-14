@@ -1,4 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
+import {useShallow} from 'zustand/react/shallow';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
 import * as frame from 'jooby-codec/mtx1/utils/frame.js';
@@ -195,7 +196,7 @@ const parameterErrorsState = {
 const CodecBuildSection = ( {setLogs, hardwareType, setHardwareType} ) => {
     const {commandType} = useCommandType();
     const {prefillData} = useCodecBuildPrefillData();
-    const [framingFormat] = useCodecStore(state => [state.framingFormat]);
+    const [framingFormat] = useCodecStore(useShallow(state => [state.framingFormat]));
 
     const [commandList, setCommandList] = useState(commandTypeConfigMap[commandType].preparedCommandList);
     const [preparedCommands, setPreparedCommands] = useState([]);
