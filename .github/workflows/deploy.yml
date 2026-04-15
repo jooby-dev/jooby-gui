@@ -20,11 +20,11 @@ jobs:
 
         steps:
           - name: checkout
-            uses: actions/checkout@v3
+            uses: actions/checkout@v6
 
           - uses: actions/setup-node@v6
             with:
-                node-version: '18.x'
+                node-version: lts/*
                 cache: npm
 
           - run: npm ci
@@ -66,4 +66,4 @@ jobs:
         steps:
           - name: deploy to GitHub Pages
             id: deployment
-            uses: actions/deploy-pages@v4
+            uses: actions/deploy-pages@v5
