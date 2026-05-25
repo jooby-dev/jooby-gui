@@ -202,22 +202,20 @@ const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.com
 
 const normalizeHex = value => value.replace(/[\t ]+/g, '').toLowerCase();
 
-const extractHexFromText = ( text, { minBytes = 1 } = {} ) => {
+const extractHexFromText = ( text, {minBytes = 1} = {} ) => {
     const trimmed = text.trim();
 
     // Entire line is a valid hex string
-    const fullHexPattern =
-        /^(?:[0-9a-fA-F]{2})(?:[\t ]*[0-9a-fA-F]{2})*$/;
+    const fullHexPattern = /^(?:[0-9a-fA-F]{2})(?:[\t ]*[0-9a-fA-F]{2})*$/;
 
     if ( fullHexPattern.test(trimmed) ) {
         return normalizeHex(trimmed);
     }
 
     // Hex string must be separated from surrounding text
-    const hexPattern =
-        /(^|[^0-9a-fA-F])((?:[0-9a-fA-F]{2})(?:[\t ]+[0-9a-fA-F]{2})*)(?=[^0-9a-fA-F]|$)/g;
+    const hexPattern = /(^|[^0-9a-fA-F])((?:[0-9a-fA-F]{2})(?:[\t ]+[0-9a-fA-F]{2})*)(?=[^0-9a-fA-F]|$)/g;
 
-    for (const match of trimmed.matchAll(hexPattern)) {
+    for ( const match of trimmed.matchAll(hexPattern) ) {
         const hex = normalizeHex(match[2]);
         const byteCount = hex.length / 2;
 
@@ -308,7 +306,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                                         return;
                                     }
 
-                                    frames.map(parsedFrame => {
+                                    frames.forEach(parsedFrame => {
                                         const frameHeaderType = parsedFrame.header?.type;
 
                                         if ( parsedFrame.error ) {
