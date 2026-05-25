@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import {useShallow} from 'zustand/react/shallow';
 import PropTypes from 'prop-types';
 import * as joobyCodec from 'jooby-codec';
+import FrameCollector from 'jooby-codec/utils/frameCollector.js';
 import * as frame from 'jooby-codec/mtx1/utils/frame.js';
 import DataSegmentsCollector from 'jooby-codec/analog/utils/DataSegmentsCollector.js';
 import {frameTypes} from 'jooby-codec/mtx1/constants/index.js';
@@ -245,6 +246,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
         const hexLines = removeComments(dump).split('\n').map(line => line.trim()).filter(line => line);
         const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
         const collector = new DataSegmentsCollector();
+        const frameCollector = new FrameCollector();
         const newLogs = [];
         let mtxBuffer = [];
         let direction;
@@ -272,32 +274,39 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                         try {
                             switch ( framingFormat ) {
                                 case framingFormats.HDLC: {
-                                    const parsedFrame = frame.fromBytes(bytes);
-                                    const frameHeaderType = parsedFrame.header?.type;
+                                    const frames = frameCollector.process(bytes).map(frame.fromBytes);
 
-                                    if ( parsedFrame.error ) {
-                                        throw new Error(parsedFrame.error);
+                                    if ( frames.length === 0 ) {
+                                        return;
                                     }
 
-                                    direction = getDirectionFromFrame(parsedFrame);
+                                    frames.map(parsedFrame => {
+                                        const frameHeaderType = parsedFrame.header?.type;
 
-                                    if ( !direction ) {
-                                        throw new Error(`Unknown frame type: ${frameHeaderType}`);
-                                    }
+                                        if ( parsedFrame.error ) {
+                                            throw new Error(parsedFrame.error);
+                                        }
 
-                                    isDataFrame = frameHeaderType === frameTypes.DATA_REQUEST || frameHeaderType === frameTypes.DATA_RESPONSE;
+                                        direction = getDirectionFromFrame(parsedFrame);
 
-                                    if ( isDataFrame ) {
-                                        data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
-                                        data.frame = parsedFrame;
-                                    } else {
-                                        data = {
-                                            frame: parsedFrame,
-                                            payloadHex: parsedFrame.payload?.length
-                                                ? joobyCodec.utils.getHexFromBytes(parsedFrame.payload)
-                                                : null
-                                        };
-                                    }
+                                        if ( !direction ) {
+                                            throw new Error(`Unknown frame type: ${frameHeaderType}`);
+                                        }
+
+                                        isDataFrame = frameHeaderType === frameTypes.DATA_REQUEST || frameHeaderType === frameTypes.DATA_RESPONSE;
+
+                                        if ( isDataFrame ) {
+                                            data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
+                                            data.frame = parsedFrame;
+                                        } else {
+                                            data = {
+                                                frame: parsedFrame,
+                                                payloadHex: parsedFrame.payload?.length
+                                                    ? joobyCodec.utils.getHexFromBytes(parsedFrame.payload)
+                                                    : null
+                                            };
+                                        }
+                                    });
 
                                     break;
                                 }
