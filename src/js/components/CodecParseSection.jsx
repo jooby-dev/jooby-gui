@@ -200,6 +200,34 @@ const parameterErrorsState = {
 
 const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.commands.downlink).map(command => command.id);
 
+const normalizeHex = value => value.replace(/[\t ]+/g, '').toLowerCase();
+
+const extractHexFromText = ( text, { minBytes = 1 } = {} ) => {
+    const trimmed = text.trim();
+
+    // Entire line is a valid hex string
+    const fullHexPattern =
+        /^(?:[0-9a-fA-F]{2})(?:[\t ]*[0-9a-fA-F]{2})*$/;
+
+    if ( fullHexPattern.test(trimmed) ) {
+        return normalizeHex(trimmed);
+    }
+
+    // Hex string must be separated from surrounding text
+    const hexPattern =
+        /(^|[^0-9a-fA-F])((?:[0-9a-fA-F]{2})(?:[\t ]+[0-9a-fA-F]{2})*)(?=[^0-9a-fA-F]|$)/g;
+
+    for (const match of trimmed.matchAll(hexPattern)) {
+        const hex = normalizeHex(match[2]);
+        const byteCount = hex.length / 2;
+
+        if ( byteCount >= minBytes ) {
+            return hex;
+        }
+    }
+
+    return '';
+};
 
 const CodecParseSection = ( {setLogs, hardwareType} ) => {
     const {commandType} = useCommandType();
@@ -266,7 +294,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
             }
 
             if ( !parseError ) {
-                const bytes = joobyCodec.utils.getBytesFromHex(hex);
+                const bytes = joobyCodec.utils.getBytesFromHex(extractHexFromText(hex));
 
                 switch ( commandType ) {
                     case commandTypes.MTX1:
