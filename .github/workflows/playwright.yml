@@ -15,9 +15,11 @@ jobs:
           - uses: actions/setup-node@v6
             with:
                 node-version: lts/*
-          - name: Install dependencies
+          - name: install dependencies
             run: npm ci
-          - name: Run all tests
+          - name: install playwright browsers
+            run: npm run test:setup
+          - name: run all tests
             run: npm test
           - uses: actions/upload-artifact@v7
             if: always()

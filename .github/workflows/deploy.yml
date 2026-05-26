@@ -32,6 +32,9 @@ jobs:
           - name: update jooby-codec to latest version
             run: npm install jooby-codec@latest
 
+          - name: install playwright browsers
+            run: npm run test:setup
+
           - name: run all tests
             run: npm test
 
