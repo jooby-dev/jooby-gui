@@ -127,7 +127,7 @@ export const downlinkCommands = {
     },
     setSpecialDay: {
         hex: {
-            dump: '7e 50 0 0 ff fe 3a 12 fd c8 c5 46 b1 1b be 37 c1 e2 6a 7f 5f ae 69 2e f7 8c 7e',
+            dump: '7e 50 00 00 ff fe 3a 12 fd c8 c5 46 b1 1b be 37 c1 e2 6a 7f 5f ae 69 2e f7 8c 7e',
             frameType: 'DATA_REQUEST (0x50)',
             accessLevel: 'READ_WRITE (0x02)',
             dstAddress: '0x00',
