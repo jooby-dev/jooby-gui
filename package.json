@@ -11,8 +11,8 @@
         "lint": "eslint .",
         "lint-cached": "eslint --cache .",
         "lint-fix": "eslint --fix .",
-        "test": "npx playwright test",
-        "postinstall": "npx playwright install --with-deps"
+        "test:setup": "npx playwright install --with-deps",
+        "test": "npx playwright test"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",
