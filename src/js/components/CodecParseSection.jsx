@@ -11,7 +11,6 @@ import {v4 as uuidv4} from 'uuid';
 import {
     Box,
     Typography,
-    InputAdornment,
     FormControl,
     RadioGroup,
     FormControlLabel,
@@ -20,7 +19,8 @@ import {
 } from '@mui/material';
 
 import {
-    Clear as ClearIcon
+    Clear as ClearIcon,
+    FileUpload as FileUploadIcon
 } from '@mui/icons-material';
 
 import {useSnackbar} from '../contexts/SnackbarContext.jsx';
@@ -34,8 +34,10 @@ import getLogType from '../utils/getLogType.js';
 import isByteArray from '../utils/isByteArray.js';
 import isMtx from '../utils/isMtx.js';
 import isMtxLora from '../utils/isMtxLora.js';
+import readFileAsText from '../utils/readFileAsText.js';
 
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
+import FileUploadButton from './FileUploadButton.jsx';
 import TextField from './TextField.jsx';
 import Button from './Button.jsx';
 
@@ -93,7 +95,8 @@ const processDataAndCreateLog = ({
     logType,
     isMtxLoraCheck,
     isMtxCheck,
-    isDataFrame
+    isDataFrame,
+    fileName
 }) => {
     const preparedData = {};
     let logErrorMessage = parseError?.message;
@@ -139,11 +142,18 @@ const processDataAndCreateLog = ({
         }
     }
 
+    const tags = ['parse', commandType, logType];
+
+    if ( fileName ) {
+        tags.push(fileName);
+    }
+
     const log = {
         commandType,
         hex,
         hardwareType,
         isDataFrame,
+        tags,
         isMtxLora: isMtxLoraCheck,
         isMtx: isMtxCheck,
         directionType: direction,
@@ -153,7 +163,6 @@ const processDataAndCreateLog = ({
         type: logType,
         id: uuidv4(),
         isExpanded: false,
-        tags: ['parse', commandType, logType],
         frameParameters: {},
         messageParameters: {}
     };
@@ -263,13 +272,9 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
         setDump('');
     };
 
-    const onParseClick = () => {
-        if ( !dump || Object.values(parameterErrors).some(error => error) ) {
-            return;
-        }
-
+    const buildLogs = ( text, fileName ) => {
         const codec = joobyCodec[commandType];
-        const hexLines = removeComments(dump).split('\n').map(line => line.trim()).filter(line => line);
+        const hexLines = removeComments(text).split('\n').map(line => line.trim()).filter(line => line);
         const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
         const collector = new DataSegmentsCollector();
         const frameCollector = new FrameCollector();
@@ -417,6 +422,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     isMtxLoraCheck,
                     isMtxCheck,
                     isDataFrame,
+                    fileName,
                     hardwareType: hardwareType?.value,
                     commandType: isMtxLoraCheck ? commandTypes.ANALOG : commandType,
                     logType: getLogType(commandType, parseError, framingFormat)
@@ -443,6 +449,7 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     isMtxLoraCheck,
                     isMtxCheck,
                     commandType,
+                    fileName,
                     isDataFrame: false,
                     hardwareType: hardwareType?.value,
                     hex: isByteArrayValid ? joobyCodec.utils.getHexFromBytes(mtxBuffer) : undefined,
@@ -451,7 +458,43 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
             );
         }
 
-        setLogs(prevLogs => [...newLogs, ...prevLogs]);
+        return newLogs;
+    };
+
+    const onParseClick = () => {
+        if ( !dump || Object.values(parameterErrors).some(error => error) ) {
+            return;
+        }
+
+        setLogs(prevLogs => [...buildLogs(dump), ...prevLogs]);
+    };
+
+    const onImportFilesClick = async files => {
+        if ( Object.values(parameterErrors).some(error => error) ) {
+            return;
+        }
+
+        const newLogs = [];
+
+        for ( const file of files ) {
+            try {
+                // eslint-disable-next-line no-await-in-loop
+                const text = await readFileAsText(file);
+
+                if ( text ) {
+                    newLogs.push(...buildLogs(text, file.name));
+                }
+            } catch {
+                showSnackbar({
+                    message: `Failed to read file "${file.name}".`,
+                    severity: severityTypes.ERROR
+                });
+            }
+        }
+
+        if ( newLogs.length ) {
+            setLogs(prevLogs => [...newLogs, ...prevLogs]);
+        }
     };
 
     const onControlBlur = event => {
@@ -551,30 +594,35 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
             )}
 
             <div>
-                <TextField
-                    type="text"
-                    label="Dump"
-                    onChange={onDumpChange}
-                    onKeyDown={createCtrlEnterSubmitHandler(onParseClick)}
-                    multiline
-                    minRows={1}
-                    maxRows={12}
-                    value={dump}
-                    helperText="Batch processing supported, each dump on a new line"
-                    slotProps={{
-                        input: {
-                            endAdornment: dump
-                                ? (
-                                    <InputAdornment position="end">
-                                        <IconButtonWithTooltip title="Clear dump" onClick={onClearDumpClick}>
-                                            <ClearIcon/>
-                                        </IconButtonWithTooltip>
-                                    </InputAdornment>
-                                )
-                                : null
-                        }
-                    }}
-                />
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <TextField
+                        type="text"
+                        label="Dump"
+                        onChange={onDumpChange}
+                        onKeyDown={createCtrlEnterSubmitHandler(onParseClick)}
+                        multiline
+                        minRows={3}
+                        maxRows={12}
+                        value={dump}
+                        helperText="Batch processing supported, each dump on a new line"
+                    />
+                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                        <IconButtonWithTooltip
+                            title="Clear dump"
+                            onClick={onClearDumpClick}
+                            disabled={!dump}
+                        >
+                            <ClearIcon/>
+                        </IconButtonWithTooltip>
+                        <FileUploadButton
+                            title="Import dump from file"
+                            multiple
+                            onSelect={onImportFilesClick}
+                        >
+                            <FileUploadIcon/>
+                        </FileUploadButton>
+                    </Box>
+                </Box>
             </div>
 
             <div>
