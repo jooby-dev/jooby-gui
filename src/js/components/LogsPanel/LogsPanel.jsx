@@ -7,8 +7,6 @@ import {
     Typography
 } from '@mui/material';
 
-import {styled} from '@mui/material/styles';
-
 import {
     UnfoldMore as UnfoldMoreIcon,
     UnfoldLess as UnfoldLessIcon,
@@ -20,24 +18,14 @@ import {
 
 import useCopyToClipboard from '../../hooks/useCopyToClipboard.js';
 
+import readFileAsText from '../../utils/readFileAsText.js';
+
 import LogList from '../LogList.jsx';
 import IconButtonWithTooltip from '../IconButtonWithTooltip.jsx';
+import FileUploadButton from '../FileUploadButton.jsx';
 
 import createShareableLogsLink from './utils/createShareableLogsLink.js';
 import extractLogsFromUrl from './utils/extractLogsFromUrl.js';
-
-
-const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1
-});
 
 
 const LogsPanel = ( {logs, setLogs} ) => {
@@ -113,34 +101,25 @@ const LogsPanel = ( {logs, setLogs} ) => {
         URL.revokeObjectURL(url);
     };
 
-    const handleImportLogs = event => {
-        const file = event.target.files[0];
+    const handleImportLogs = files => {
+        readFileAsText(files[0])
+            .then(content => {
+                const importedLogs = JSON.parse(content);
 
-        if ( file ) {
-            const reader = new FileReader();
+                // generate new IDs to avoid potential conflicts with existing logs
+                importedLogs.forEach(log => {
+                    log.id = uuidv4();
 
-            reader.onload = readerEvent => {
-                try {
-                    const importedLogs = JSON.parse(readerEvent.target.result);
-
-                    // generate new IDs to avoid potential conflicts with existing logs
-                    importedLogs.forEach(log => {
-                        log.id = uuidv4();
-
-                        log.data?.commands?.forEach(command => {
-                            command.id = uuidv4();
-                        });
+                    log.data?.commands?.forEach(command => {
+                        command.id = uuidv4();
                     });
+                });
 
-                    setLogs(prevLogs => [...importedLogs, ...prevLogs]);
-                } catch ( error ) {
-                    console.error('Error importing logs:', error);
-                }
-            };
-
-            reader.readAsText(file);
-            event.target.value = null;
-        }
+                setLogs(prevLogs => [...importedLogs, ...prevLogs]);
+            })
+            .catch(error => {
+                console.error('Error importing logs:', error);
+            });
     };
 
     return (
@@ -210,13 +189,13 @@ const LogsPanel = ( {logs, setLogs} ) => {
                     <FileDownloadIcon/>
                 </IconButtonWithTooltip>
 
-                <IconButtonWithTooltip
+                <FileUploadButton
                     title="Import logs"
-                    component="label"
+                    accept=".json"
+                    onSelect={handleImportLogs}
                 >
                     <FileUploadIcon/>
-                    <VisuallyHiddenInput type="file" accept=".json" onChange={handleImportLogs}/>
-                </IconButtonWithTooltip>
+                </FileUploadButton>
             </Box>
 
             <LogList
