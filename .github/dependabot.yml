@@ -5,11 +5,7 @@ updates:
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-        interval: weekly
-        time: 08:00
-        timezone: Europe/Kyiv
-    # @todo uncomment after creation
-    #target-branch: "develop"
+        interval: monthly
     commit-message:
         prefix: github-actions
     labels:
@@ -21,13 +17,9 @@ updates:
 
 
   - package-ecosystem: npm
-    directory: "/"
+    directory: '/'
     schedule:
-        interval: weekly
-        time: 08:00
-        timezone: Europe/Kyiv
-    # @todo uncomment after creation
-    #target-branch: "develop"
+        interval: monthly
     commit-message:
         prefix: npm
     labels:
