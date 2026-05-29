@@ -35,6 +35,7 @@ import isByteArray from '../utils/isByteArray.js';
 import isMtx from '../utils/isMtx.js';
 import isMtxLora from '../utils/isMtxLora.js';
 import readFileAsText from '../utils/readFileAsText.js';
+import getDumpSegments from '../utils/getDumpSegments.js';
 
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 import FileUploadButton from './FileUploadButton.jsx';
@@ -50,7 +51,8 @@ import {
     accessKey,
     unknownCommand,
     logTypes,
-    framingFormats
+    framingFormats,
+    segmentTypes
 } from '../constants/index.js';
 
 
@@ -189,6 +191,23 @@ const processDataAndCreateLog = ({
     return log;
 };
 
+const createTextLog = ( text, fileName ) => {
+    const tags = ['parse', logTypes.TEXT];
+
+    if ( fileName ) {
+        tags.push(fileName);
+    }
+
+    return {
+        tags,
+        text,
+        type: logTypes.TEXT,
+        date: new Date().toLocaleString(),
+        id: uuidv4(),
+        isExpanded: false
+    };
+};
+
 const formats = {
     HEX: '0',
     BASE64: '1'
@@ -209,32 +228,6 @@ const parameterErrorsState = {
 
 const obisObserverDownlinkCommandIds = Object.values(joobyCodec.obisObserver.commands.downlink).map(command => command.id);
 
-const normalizeHex = value => value.replace(/[\t ]+/g, '').toLowerCase();
-
-const extractHexFromText = ( text, {minBytes = 1} = {} ) => {
-    const trimmed = text.trim();
-
-    // Entire line is a valid hex string
-    const fullHexPattern = /^(?:[0-9a-fA-F]{2})(?:[\t ]*[0-9a-fA-F]{2})*$/;
-
-    if ( fullHexPattern.test(trimmed) ) {
-        return normalizeHex(trimmed);
-    }
-
-    // Hex string must be separated from surrounding text
-    const hexPattern = /(^|[^0-9a-fA-F])((?:[0-9a-fA-F]{2})(?:[\t ]+[0-9a-fA-F]{2})*)(?=[^0-9a-fA-F]|$)/g;
-
-    for ( const match of trimmed.matchAll(hexPattern) ) {
-        const hex = normalizeHex(match[2]);
-        const byteCount = hex.length / 2;
-
-        if ( byteCount >= minBytes ) {
-            return hex;
-        }
-    }
-
-    return '';
-};
 
 const CodecParseSection = ( {setLogs, hardwareType} ) => {
     const {commandType} = useCommandType();
@@ -274,7 +267,6 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
 
     const buildLogs = ( text, fileName ) => {
         const codec = joobyCodec[commandType];
-        const hexLines = removeComments(text).split('\n').map(line => line.trim()).filter(line => line);
         const aesKey = joobyCodec.utils.getBytesFromHex(parameters.accessKey);
         const collector = new DataSegmentsCollector();
         const frameCollector = new FrameCollector();
@@ -282,135 +274,126 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
         let mtxBuffer = [];
         let direction;
 
-        hexLines.forEach(hexLine => {
-            let hex = hexLine;
+        const parseHex = hex => {
+            const bytes = joobyCodec.utils.getBytesFromHex(hex);
             let isDataFrame = false;
             let data;
             let parseError;
 
-            if ( format === formats.BASE64 ) {
-                try {
-                    hex = base64ToHex(hexLine);
-                } catch ( error ) {
-                    parseError = error;
-                }
-            }
+            switch ( commandType ) {
+                case commandTypes.MTX1:
+                case commandTypes.MTX3: {
+                    try {
+                        switch ( framingFormat ) {
+                            case framingFormats.HDLC: {
+                                const frames = frameCollector.process(bytes).map(frame.fromBytes);
 
-            if ( !parseError ) {
-                const bytes = joobyCodec.utils.getBytesFromHex(extractHexFromText(hex));
+                                if ( frames.length === 0 ) {
+                                    return;
+                                }
 
-                switch ( commandType ) {
-                    case commandTypes.MTX1:
-                    case commandTypes.MTX3: {
-                        try {
-                            switch ( framingFormat ) {
-                                case framingFormats.HDLC: {
-                                    const frames = frameCollector.process(bytes).map(frame.fromBytes);
+                                frames.forEach(parsedFrame => {
+                                    const frameHeaderType = parsedFrame.header?.type;
 
-                                    if ( frames.length === 0 ) {
-                                        return;
+                                    // show the full frame (it may span several input lines)
+                                    hex = joobyCodec.utils.getHexFromBytes(parsedFrame.bytes || parsedFrame.frame.bytes);
+
+                                    if ( parsedFrame.error ) {
+                                        throw new Error(parsedFrame.error);
                                     }
 
-                                    frames.forEach(parsedFrame => {
-                                        const frameHeaderType = parsedFrame.header?.type;
+                                    direction = getDirectionFromFrame(parsedFrame);
 
-                                        if ( parsedFrame.error ) {
-                                            throw new Error(parsedFrame.error);
+                                    if ( !direction ) {
+                                        throw new Error(`Unknown frame type: ${frameHeaderType}`);
+                                    }
+
+                                    isDataFrame = frameHeaderType === frameTypes.DATA_REQUEST || frameHeaderType === frameTypes.DATA_RESPONSE;
+
+                                    if ( isDataFrame ) {
+                                        data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
+                                        data.frame = parsedFrame;
+                                    } else {
+                                        data = {
+                                            frame: parsedFrame,
+                                            payloadHex: parsedFrame.payload?.length
+                                                ? joobyCodec.utils.getHexFromBytes(parsedFrame.payload)
+                                                : null
+                                        };
+                                    }
+                                });
+
+                                break;
+                            }
+
+                            case framingFormats.NONE: {
+                                direction = Number(parameters.direction);
+                                data = joobyCodec.analog.message[directionNames[direction]].fromBytes(
+                                    bytes,
+                                    {hardwareType: hardwareTypes.MTXLORA}
+                                );
+
+                                if ( !data.error ) {
+                                    data.commands.forEach(command => {
+                                        if ( command.error ) {
+                                            return;
                                         }
 
-                                        direction = getDirectionFromFrame(parsedFrame);
-
-                                        if ( !direction ) {
-                                            throw new Error(`Unknown frame type: ${frameHeaderType}`);
-                                        }
-
-                                        isDataFrame = frameHeaderType === frameTypes.DATA_REQUEST || frameHeaderType === frameTypes.DATA_RESPONSE;
-
-                                        if ( isDataFrame ) {
-                                            data = codec.message[directionNames[direction]].fromBytes(parsedFrame.payload, {aesKey});
-                                            data.frame = parsedFrame;
-                                        } else {
-                                            data = {
-                                                frame: parsedFrame,
-                                                payloadHex: parsedFrame.payload?.length
-                                                    ? joobyCodec.utils.getHexFromBytes(parsedFrame.payload)
-                                                    : null
-                                            };
+                                        if ( command.id === commands.analog[directionNames[direction]].dataSegment.id ) {
+                                            mtxBuffer = mtxBuffer.concat(collector.push(command.parameters));
                                         }
                                     });
-
-                                    break;
                                 }
 
-                                case framingFormats.NONE: {
-                                    direction = Number(parameters.direction);
-                                    data = joobyCodec.analog.message[directionNames[direction]].fromBytes(
-                                        bytes,
-                                        {hardwareType: hardwareTypes.MTXLORA}
-                                    );
-
-                                    if ( !data.error ) {
-                                        data.commands.forEach(command => {
-                                            if ( command.error ) {
-                                                return;
-                                            }
-
-                                            if ( command.id === commands.analog[directionNames[direction]].dataSegment.id ) {
-                                                mtxBuffer = mtxBuffer.concat(collector.push(command.parameters));
-                                            }
-                                        });
-                                    }
-
-                                    break;
-                                }
+                                break;
                             }
-                        } catch ( error ) {
-                            parseError = error;
                         }
-
-                        break;
+                    } catch ( error ) {
+                        parseError = error;
                     }
 
-                    case commandTypes.ANALOG:
-                        try {
-                            direction = Number(parameters.direction);
-                            data = codec.message[directionNames[direction]].fromBytes(
-                                bytes,
-                                {hardwareType: hardwareType?.value}
-                            );
-                        } catch ( error ) {
-                            parseError = error;
-                        }
+                    break;
+                }
 
-                        break;
+                case commandTypes.ANALOG:
+                    try {
+                        direction = Number(parameters.direction);
+                        data = codec.message[directionNames[direction]].fromBytes(
+                            bytes,
+                            {hardwareType: hardwareType?.value}
+                        );
+                    } catch ( error ) {
+                        parseError = error;
+                    }
 
-                    case commandTypes.OBIS_OBSERVER:
+                    break;
+
+                case commandTypes.OBIS_OBSERVER:
+                    try {
+                        direction = directions.DOWNLINK;
+                        data = codec.message[directionNames[direction]].fromBytes(bytes);
+                    } catch ( error ) {
+                        parseError = error;
+                    }
+
+                    if (
+                        parseError
+                        || !data.commands
+                            .map(({error, command, id}) => (error ? command.id : id))
+                            .some(id => obisObserverDownlinkCommandIds.includes(id))
+                    ) {
+                        parseError = null;
+                        data = null;
+
                         try {
-                            direction = directions.DOWNLINK;
+                            direction = directions.UPLINK;
                             data = codec.message[directionNames[direction]].fromBytes(bytes);
                         } catch ( error ) {
                             parseError = error;
                         }
+                    }
 
-                        if (
-                            parseError
-                            || !data.commands
-                                .map(({error, command, id}) => (error ? command.id : id))
-                                .some(id => obisObserverDownlinkCommandIds.includes(id))
-                        ) {
-                            parseError = null;
-                            data = null;
-
-                            try {
-                                direction = directions.UPLINK;
-                                data = codec.message[directionNames[direction]].fromBytes(bytes);
-                            } catch ( error ) {
-                                parseError = error;
-                            }
-                        }
-
-                        break;
-                }
+                    break;
             }
 
             newLogs.push(
@@ -428,7 +411,51 @@ const CodecParseSection = ( {setLogs, hardwareType} ) => {
                     logType: getLogType(commandType, parseError, framingFormat)
                 })
             );
-        });
+        };
+
+        if ( format === formats.BASE64 ) {
+            const lines = removeComments(text)
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line);
+
+            lines.forEach(line => {
+                let hex;
+
+                try {
+                    hex = base64ToHex(line);
+                } catch ( error ) {
+                    newLogs.push(
+                        processDataAndCreateLog({
+                            direction,
+                            fileName,
+                            isMtxLoraCheck,
+                            isMtxCheck,
+                            data: null,
+                            hex: line,
+                            parseError: error,
+                            isDataFrame: false,
+                            hardwareType: hardwareType?.value,
+                            commandType: isMtxLoraCheck ? commandTypes.ANALOG : commandType,
+                            logType: getLogType(commandType, error, framingFormat)
+                        })
+                    );
+
+                    return;
+                }
+
+                // a decoded base64 line is always pure hex — no text segments possible
+                parseHex(hex);
+            });
+        } else {
+            getDumpSegments(removeComments(text)).forEach(segment => {
+                if ( segment.type === segmentTypes.TEXT ) {
+                    newLogs.push(createTextLog(segment.value, fileName));
+                } else {
+                    parseHex(segment.value);
+                }
+            });
+        }
 
         if ( isMtxLoraCheck ) {
             const isByteArrayValid = isByteArray(mtxBuffer);

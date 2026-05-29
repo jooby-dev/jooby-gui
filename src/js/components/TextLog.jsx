@@ -6,6 +6,7 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    Collapse,
     Chip
 } from '@mui/material';
 
@@ -15,25 +16,21 @@ import {
     Share as ShareIcon,
     UnfoldMore as UnfoldMoreIcon,
     UnfoldLess as UnfoldLessIcon,
-    Edit as EditIcon
+    Edit as EditIcon,
+    Notes as NotesIcon
 } from '@mui/icons-material';
 
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
-import HighlightedText from './HighlightedText.jsx';
-import TypographyBold from './TypographyBold.jsx';
+import TypographyMono from './TypographyMono.jsx';
 
 import useLogActions from './Log/hooks/useLogActions.js';
 
-import HexViewer from './HexViewer.jsx';
 
-import getLogColor from './Log/utils/getLogColor.js';
-import createLogTitle from './Log/utils/createLogTitle.jsx';
+const previewLineCount = 2;
 
 
-const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
-    const {
-        hex, date, error, id, isExpanded, tags
-    } = log;
+const TextLog = ( {log, setLogs, handleShareLogsClick} ) => {
+    const {text, date, id, isExpanded, tags} = log;
 
     const {toggleLog, toggleLogAndNested, handleDeleteLogClick} = useLogActions(setLogs);
 
@@ -49,7 +46,7 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
                 expandIcon={<ExpandMoreIcon/>}
                 aria-controls={`panel${id}bh-content`}
                 sx={{
-                    backgroundColor: `${getLogColor(log)}`,
+                    backgroundColor: 'grey.100',
                     '& > *': {minWidth: 0},
                     '& .MuiAccordionSummary-expandIconWrapper': {flex: '0 0 auto'}
                 }}
@@ -59,9 +56,25 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
                         flexShrink: 1,
                         display: 'flex',
                         alignItems: 'center',
+                        mr: 2,
                         '& > *': {minWidth: 0}
                     }}>
-                        {createLogTitle(log)}
+                        <NotesIcon sx={{color: 'grey.600', mr: 2, flex: '0 0 auto'}}/>
+                        <Collapse in={!isExpanded}>
+                            <TypographyMono
+                                sx={{
+                                    color: 'grey.700',
+                                    fontSize: '0.8rem',
+                                    whiteSpace: 'pre-wrap',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: previewLineCount,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden'
+                                }}
+                            >
+                                {text}
+                            </TypographyMono>
+                        </Collapse>
                     </Box>
 
                     <Box sx={{
@@ -109,36 +122,20 @@ const ErrorLog = ( {log, setLogs, handleShareLogsClick} ) => {
             </AccordionSummary>
             {isExpanded && (
                 <AccordionDetails>
-                    <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'max-content 1fr',
-                        alignItems: 'center',
-                        columnGap: 2,
-                        rowGap: 1,
-                        mb: 1
-                    }}>
-                        {hex && (
-                            <>
-                                <TypographyBold>dump</TypographyBold>
-                                <Box>
-                                    <HexViewer hex={hex}/>
-                                </Box>
-                            </>
-                        )}
-                        <TypographyBold>error</TypographyBold>
-                        <HighlightedText fontWeight="normal" isMonospacedFont={true} color="error.main">{error}</HighlightedText>
-                    </Box>
+                    <TypographyMono component="pre" sx={{whiteSpace: 'pre-wrap', m: 0}}>
+                        {text}
+                    </TypographyMono>
                 </AccordionDetails>
             )}
         </Accordion>
     );
 };
 
-ErrorLog.propTypes = {
+TextLog.propTypes = {
     log: PropTypes.object.isRequired,
     setLogs: PropTypes.func.isRequired,
     handleShareLogsClick: PropTypes.func.isRequired
 };
 
 
-export default memo(ErrorLog);
+export default memo(TextLog);

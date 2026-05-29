@@ -99,7 +99,12 @@ const createLogTitle = log => {
                             {parts.length > 0 && (
                                 <>
                                     {' ('}
-                                    {parts.flatMap((part, index) => (index === 0 ? [part] : ['; ', part]))}
+                                    {parts.map((part, index) => (
+                                        <Fragment key={index}>
+                                            {index > 0 && '; '}
+                                            {part}
+                                        </Fragment>
+                                    ))}
                                     {')'}
                                 </>
                             )}

@@ -4,6 +4,7 @@ import {Box} from '@mui/material';
 
 import Log from './Log/Log.jsx';
 import ErrorLog from './ErrorLog.jsx';
+import TextLog from './TextLog.jsx';
 
 import {parametersTabViewTypes, logTypes} from '../constants/index.js';
 
@@ -13,27 +14,41 @@ const LogList = ( {logs, setLogs, handleShareLogsClick} ) => {
 
     return (
         <Box sx={{mb: 2, px: 2, '& > *': {minWidth: 0}}}>
-            {logs.length > 0 && logs.map(log => (
-                log.type === logTypes.ERROR
-                    ? (
-                        <ErrorLog
-                            key={log.id}
-                            log={log}
-                            setLogs={setLogs}
-                            handleShareLogsClick={handleShareLogsClick}
-                        />
-                    )
-                    : (
-                        <Log
-                            key={log.id}
-                            log={log}
-                            setLogs={setLogs}
-                            parametersTab={parametersTab}
-                            setParametersTab={setParametersTab}
-                            handleShareLogsClick={handleShareLogsClick}
-                        />
-                    )
-            ))}
+            {logs.length > 0 && logs.map(log => {
+                switch ( log.type ) {
+                    case logTypes.ERROR:
+                        return (
+                            <ErrorLog
+                                key={log.id}
+                                log={log}
+                                setLogs={setLogs}
+                                handleShareLogsClick={handleShareLogsClick}
+                            />
+                        );
+
+                    case logTypes.TEXT:
+                        return (
+                            <TextLog
+                                key={log.id}
+                                log={log}
+                                setLogs={setLogs}
+                                handleShareLogsClick={handleShareLogsClick}
+                            />
+                        );
+
+                    default:
+                        return (
+                            <Log
+                                key={log.id}
+                                log={log}
+                                setLogs={setLogs}
+                                parametersTab={parametersTab}
+                                setParametersTab={setParametersTab}
+                                handleShareLogsClick={handleShareLogsClick}
+                            />
+                        );
+                }
+            })}
         </Box>
     );
 };
