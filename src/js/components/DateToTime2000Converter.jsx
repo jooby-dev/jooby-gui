@@ -25,13 +25,13 @@ import useCopyToClipboard from '../hooks/useCopyToClipboard.js';
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 
 
-// Devices keep time in UTC; use the same timezone for the converter and logs.
+// UTC mode preserves device-local clock digits without applying the browser timezone.
 dayjs.extend(utc);
 
 const MIN_DATE = dayjs.utc('2000-01-01');
 const MAX_DATE = dayjs.utc('2099-12-31');
 
-const getCurrentUTCDate = () => dayjs.utc().millisecond(0);
+const getDeviceDateFromLocalNow = () => dayjs().utc(true).millisecond(0);
 
 const isDateInRange = date => date?.isValid()
     && !date.isBefore(MIN_DATE, 'day')
@@ -71,7 +71,7 @@ const sanitizeInputValue = value => value.replace(/(?!^)-|[^\d-]/g, '');
 
 
 const DateToTime2000Converter = ( {isOpen, onClose} ) => {
-    const initialDate = getCurrentUTCDate();
+    const initialDate = getDeviceDateFromLocalNow();
 
     const copyToClipboard = useCopyToClipboard();
 
@@ -152,7 +152,9 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
         <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle>Date to time2000 converter</DialogTitle>
             <DialogContent>
-                <Typography variant="body2">Devices keep time in UTC.</Typography>
+                <Typography variant="body2">
+                    Device local time; timezone is not encoded. Timestamp and ISO date treat these digits as UTC.
+                </Typography>
                 <Box
                     sx={{
                         display: 'grid',
@@ -185,7 +187,7 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
                         timeSteps={{hours: 1, minutes: 1, seconds: 1}}
                         minDate={MIN_DATE}
                         maxDate={MAX_DATE}
-                        label="Date and time (UTC)"
+                        label="Date and time"
                         value={date}
                         onChange={handleDateChange}
                         onError={error => setDateError(error)}
