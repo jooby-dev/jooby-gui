@@ -24,7 +24,7 @@ test.describe('time2000 converter - positive cases', () => {
         );
         await expect(page.getByLabel('Timestamp', {exact: true})).toHaveValue(String(expectedTimestamp));
         await expect(page.getByLabel('Time2000', {exact: true})).toHaveValue(String(expectedTime2000));
-        await expect(page.getByText('Devices keep time in UTC.', {exact: true})).toBeVisible();
+        await expect(page.getByText('Device local time; timezone is not encoded.', {exact: false})).toBeVisible();
     });
 
     test('set time2000 timestamp and check date', async () => {
@@ -42,12 +42,23 @@ test.describe('time2000 converter - positive cases', () => {
 });
 
 for ( const month of [0, 6] ) {
-    test(`initialize from current UTC time in month ${month + 1}`, async ( {page, baseURL} ) => {
+    test(`initialize from local device clock in month ${month + 1}`, async ( {page, baseURL} ) => {
         await page.clock.setFixedTime(new Date(Date.UTC(2024, month, 15, 12, 34, 56)));
         await page.goto(baseURL);
 
         const mainPage = new MainPage(page);
-        const expectedTimestamp = Date.UTC(2024, month, 15, 12, 34, 56) / 1000;
+        const expectedTimestamp = await page.evaluate(() => {
+            const now = new Date();
+
+            return Date.UTC(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                now.getHours(),
+                now.getMinutes(),
+                now.getSeconds()
+            ) / 1000;
+        });
 
         await mainPage.getTime2000Converter().click();
         await expect(mainPage.getTimestampInput()).toHaveValue(String(expectedTimestamp));
