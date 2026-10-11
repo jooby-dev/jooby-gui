@@ -240,7 +240,7 @@ export class MainPage {
     }
 
     getDateInTime2000Converter () {
-        return this.page.getByRole('group', {name: 'Date and time'}).locator('input');
+        return this.page.getByRole('group', {name: 'Date and time (UTC)', exact: true}).locator('input');
     }
 
     getTime2000Input () {

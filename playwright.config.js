@@ -33,7 +33,17 @@ export default defineConfig({
     projects: [
         {
             name: 'chromium',
-            use: {...devices['Desktop Chrome']}
+            use: {...devices['Desktop Chrome'], timezoneId: 'UTC'}
+        },
+        {
+            name: 'chromium-kyiv',
+            testMatch: '**/time2000converter.spec.js',
+            use: {...devices['Desktop Chrome'], timezoneId: 'Europe/Kyiv'}
+        },
+        {
+            name: 'chromium-new-york',
+            testMatch: '**/time2000converter.spec.js',
+            use: {...devices['Desktop Chrome'], timezoneId: 'America/New_York'}
         }
     ],
 
