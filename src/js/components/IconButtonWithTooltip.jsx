@@ -8,7 +8,14 @@ const IconButtonWithTooltip = ({
     size = 'small',
     ...otherProps
 }) => {
-    const button = <IconButton size={size} disabled={disabled} {...otherProps}></IconButton>;
+    const button = (
+        <IconButton
+            aria-label={typeof title === 'string' ? title : undefined}
+            size={size}
+            disabled={disabled}
+            {...otherProps}
+        />
+    );
 
     if ( disabled ) {
         return button;

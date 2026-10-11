@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import PropTypes from 'prop-types';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import {time} from 'jooby-codec/analog/utils/index.js';
 import {
     Box,
@@ -11,7 +12,8 @@ import {
     DialogTitle,
     TextField,
     InputAdornment,
-    Popper
+    Popper,
+    Typography
 } from '@mui/material';
 
 import {ContentCopy as ContentCopyIcon} from '@mui/icons-material';
@@ -23,8 +25,17 @@ import useCopyToClipboard from '../hooks/useCopyToClipboard.js';
 import IconButtonWithTooltip from './IconButtonWithTooltip.jsx';
 
 
-const MIN_DATE = dayjs('2000-01-01');
-const MAX_DATE = dayjs('2099-12-31');
+// Devices keep time in UTC; use the same timezone for the converter and logs.
+dayjs.extend(utc);
+
+const MIN_DATE = dayjs.utc('2000-01-01');
+const MAX_DATE = dayjs.utc('2099-12-31');
+
+const getCurrentUTCDate = () => dayjs.utc().millisecond(0);
+
+const isDateInRange = date => date?.isValid()
+    && !date.isBefore(MIN_DATE, 'day')
+    && !date.isAfter(MAX_DATE, 'day');
 
 const CustomPopper = props => (
     <Popper
@@ -60,7 +71,7 @@ const sanitizeInputValue = value => value.replace(/(?!^)-|[^\d-]/g, '');
 
 
 const DateToTime2000Converter = ( {isOpen, onClose} ) => {
-    const initialDate = dayjs();
+    const initialDate = getCurrentUTCDate();
 
     const copyToClipboard = useCopyToClipboard();
 
@@ -74,21 +85,28 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
     const handleDateChange = newDate => {
         setDate(newDate);
 
-        if ( newDate.isValid() ) {
-            setTime2000(getTime2000FromDayjsDate(newDate));
-            setTimestamp(getTimestampFromDayjsDate(newDate));
+        if ( !isDateInRange(newDate) ) {
+            setTime2000('');
+            setTimestamp('');
             setTime2000Error(null);
             setTimestampError(null);
+
+            return;
         }
+
+        setTime2000(getTime2000FromDayjsDate(newDate));
+        setTimestamp(getTimestampFromDayjsDate(newDate));
+        setTime2000Error(null);
+        setTimestampError(null);
     };
 
     const handleTime2000Change = event => {
         const value = sanitizeInputValue(event.target.value);
-        const newDate = dayjs(time.getDateFromTime2000(parseInt(value, 10)));
+        const newDate = dayjs.utc(time.getDateFromTime2000(parseInt(value, 10)));
 
         setTime2000(value);
 
-        if ( newDate.isValid() ) {
+        if ( isDateInRange(newDate) ) {
             setDate(newDate);
             setTimestamp(getTimestampFromDayjsDate(newDate));
             setTime2000Error(null);
@@ -97,16 +115,21 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
             return;
         }
 
-        setTime2000Error('Invalid time2000');
+        if ( newDate.isValid() ) {
+            setDate(newDate);
+        }
+
+        setTimestamp('');
+        setTime2000Error(newDate.isValid() ? getDateErrorMessage('minDate') : 'Invalid time2000');
     };
 
     const handleTimestampChange = event => {
         const value = sanitizeInputValue(event.target.value);
-        const newDate = dayjs(parseInt(value, 10) * 1000);
+        const newDate = dayjs.utc(parseInt(value, 10) * 1000);
 
         setTimestamp(value);
 
-        if ( newDate.isValid() ) {
+        if ( isDateInRange(newDate) ) {
             setTime2000(getTime2000FromDayjsDate(newDate));
             setDate(newDate);
             setTime2000Error(null);
@@ -115,13 +138,21 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
             return;
         }
 
-        setTimestampError('Invalid timestamp');
+        if ( newDate.isValid() ) {
+            setDate(newDate);
+        }
+
+        setTime2000('');
+        setTimestampError(newDate.isValid() ? getDateErrorMessage('minDate') : 'Invalid timestamp');
     };
+
+    const canCopyDate = isDateInRange(date) && !dateError && !time2000Error && !timestampError;
 
     return (
         <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle>Date to time2000 converter</DialogTitle>
             <DialogContent>
+                <Typography variant="body2">Devices keep time in UTC.</Typography>
                 <Box
                     sx={{
                         display: 'grid',
@@ -142,27 +173,32 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
                     />
                     <IconButtonWithTooltip
                         title="Copy time2000"
+                        disabled={!canCopyDate || time2000 === ''}
                         onClick={() => copyToClipboard(time2000, {message: 'Time2000 copied to clipboard'})}
                     >
                         <ContentCopyIcon/>
                     </IconButtonWithTooltip>
 
                     <DateTimePicker
+                        timezone="UTC"
                         views={['year', 'month', 'day', 'hours', 'minutes', 'seconds']}
                         timeSteps={{hours: 1, minutes: 1, seconds: 1}}
                         minDate={MIN_DATE}
                         maxDate={MAX_DATE}
-                        label="Date and time"
+                        label="Date and time (UTC)"
                         value={date}
                         onChange={handleDateChange}
                         onError={error => setDateError(error)}
                         slotProps={{
-                            textField: {helperText: getDateErrorMessage(dateError)}
+                            textField: {
+                                helperText: getDateErrorMessage(dateError)
+                            }
                         }}
                         slots={{popper: CustomPopper}}
                     />
                     <IconButtonWithTooltip
                         title="Copy ISO date"
+                        disabled={!canCopyDate}
                         onClick={() => copyToClipboard(date.toISOString(), {message: 'ISO date copied to clipboard'})}
                     >
                         <ContentCopyIcon/>
@@ -179,6 +215,7 @@ const DateToTime2000Converter = ( {isOpen, onClose} ) => {
                     />
                     <IconButtonWithTooltip
                         title="Copy timestamp"
+                        disabled={!canCopyDate || timestamp === ''}
                         onClick={() => copyToClipboard(timestamp, {message: 'Timestamp copied to clipboard'})}
                     >
                         <ContentCopyIcon/>
